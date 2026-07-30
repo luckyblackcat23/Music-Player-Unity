@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Kawazu</id>
+    <version>1.1.4</version>
+    <title>Kawazu</title>
+    <authors>Cutano</authors>
+    <owners></owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <icon>Kawazu_icon.png</icon>
+    <projectUrl>https://github.com/Cutano/Kawazu</projectUrl>
+    <description>Kawazu is a C# library for converting Japanese sentence to Hiragana, Katakana or Romaji with furigana and okurigana modes supported. Inspired by project Kuroshiro.</description>
+    <copyright>© Cutano 2020</copyright>
+    <tags>Japanese Kana Kanji Mecab Hiragana Katakana Furigana Okurigana</tags>
+    <dependencies>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="LibNMeCab" version="0.10.1" exclude="Build,Analyzers" />
+        <dependency id="LibNMeCab.IpaDicBin" version="0.10.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net5.0">
+        <dependency id="LibNMeCab" version="0.10.1" exclude="Build,Analyzers" />
+        <dependency id="LibNMeCab.IpaDicBin" version="0.10.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="LibNMeCab" version="0.10.1" exclude="Build,Analyzers" />
+        <dependency id="LibNMeCab.IpaDicBin" version="0.10.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <contentFiles>
+      <files include="any/net5.0/AUTHORS" buildAction="Content" />
+      <files include="any/netcoreapp3.1/AUTHORS" buildAction="Content" />
+      <files include="any/netstandard2.0/AUTHORS" buildAction="Content" />
+      <files include="any/net5.0/char.bin" buildAction="Content" />
+      <files include="any/netcoreapp3.1/char.bin" buildAction="Content" />
+      <files include="any/netstandard2.0/char.bin" buildAction="Content" />
+      <files include="any/net5.0/COPYING" buildAction="Content" />
+      <files include="any/netcoreapp3.1/COPYING" buildAction="Content" />
+      <files include="any/netstandard2.0/COPYING" buildAction="Content" />
+      <files include="any/net5.0/matrix.bin" buildAction="Content" />
+      <files include="any/netcoreapp3.1/matrix.bin" buildAction="Content" />
+      <files include="any/netstandard2.0/matrix.bin" buildAction="Content" />
+      <files include="any/net5.0/sys.dic" buildAction="Content" />
+      <files include="any/netcoreapp3.1/sys.dic" buildAction="Content" />
+      <files include="any/netstandard2.0/sys.dic" buildAction="Content" />
+      <files include="any/net5.0/unk.dic" buildAction="Content" />
+      <files include="any/netcoreapp3.1/unk.dic" buildAction="Content" />
+      <files include="any/netstandard2.0/unk.dic" buildAction="Content" />
+    </contentFiles>
+  </metadata>
+</package>

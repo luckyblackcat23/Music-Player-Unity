@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>LibNMeCab.IpaDicBin</id>
+    <version>0.10.0</version>
+    <title>IPAdic binary for NMeCab liblary</title>
+    <authors>Tsuyoshi Komuta</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="expression">GPL-2.0-or-later OR LGPL-2.1-or-later</license>
+    <licenseUrl>https://licenses.nuget.org/GPL-2.0-or-later%20OR%20LGPL-2.1-or-later</licenseUrl>
+    <icon>NMeCab-icon-512.png</icon>
+    <projectUrl>https://github.com/komutan/NMeCab</projectUrl>
+    <description>This package is binary compiled dictionary data IPAdic for Japanese morphological analysis library NMeCab.</description>
+    <copyright>NMeCab - Tsuyoshi Komuta. MeCab - Taku Kudo, and Nippon Telegraph and Telephone Corporation.</copyright>
+    <tags>morphological-analysis, part-of-speech-tagger, japanese-nlp, mecab</tags>
+    <repository url="https://github.com/komutan/NMeCab" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="LibNMeCab" version="[0.10.0, 0.11.0)" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

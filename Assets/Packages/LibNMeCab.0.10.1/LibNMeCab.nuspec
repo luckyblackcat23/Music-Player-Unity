@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>LibNMeCab</id>
+    <version>0.10.1</version>
+    <title>NMeCab liblary</title>
+    <authors>Tsuyoshi Komuta</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="expression">GPL-2.0-or-later OR LGPL-2.1-or-later</license>
+    <licenseUrl>https://licenses.nuget.org/GPL-2.0-or-later%20OR%20LGPL-2.1-or-later</licenseUrl>
+    <icon>NMeCab-icon-512.png</icon>
+    <projectUrl>https://github.com/komutan/NMeCab</projectUrl>
+    <description>This package is Japanese morphological analysis library NMeCab. It was developed on .NET (C#), with reference to MeCab (developed in C++). This does not include a binary dictionary, so you need preparing it sepalatary.</description>
+    <releaseNotes>累積コストのオーバーフロー対策処理を修正
+
+累積コストがオーバーフローの直前になるまで処理可能にした。
+また、処理できない累積コストになっても例外とはせず、単に不正確な結果を返すだけにした。</releaseNotes>
+    <copyright>NMeCab - Tsuyoshi Komuta. MeCab - Taku Kudo, and Nippon Telegraph and Telephone Corporation.</copyright>
+    <tags>morphological-analysis, part-of-speech-tagger, japanese-nlp, mecab</tags>
+    <repository url="https://github.com/komutan/NMeCab" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>
