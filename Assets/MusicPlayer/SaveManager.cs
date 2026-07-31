@@ -7,18 +7,18 @@ using UnityEngine;
 public static class SaveManager
 {
     //list containing the name of the save files
-    public static List<string> saveFiles()
+    public static List<string> SaveFiles()
     {
         List<string> temp = new();
 
-        foreach (SaveFile file in SaveFiles)
+        foreach (SaveFile file in saveFiles)
             temp.Add(file.SavedName);
 
         return temp;
     }
 
     //save data for each file
-    private static List<SaveFile> SaveFiles = new();
+    private static List<SaveFile> saveFiles = new();
 
     //the main, and default, save file
     private static SaveFile mainFile;
@@ -38,14 +38,14 @@ public static class SaveManager
     //lookup a savefile by name
     public static SaveFile GetFile(string fileName)
     {
-        return SaveFiles.Find(f => f.SavedName == fileName);
+        return saveFiles.Find(f => f.SavedName == fileName);
     }
 
     //register a new savefile
     internal static void RegisterFile(SaveFile file)
     {
-        if (!SaveFiles.Contains(file))
-            SaveFiles.Add(file);
+        if (!saveFiles.Contains(file))
+            saveFiles.Add(file);
     }
 
     //call some other way if used elsewhere
@@ -54,6 +54,15 @@ public static class SaveManager
     {
         if (!Directory.Exists(Globals.SaveFolderPath))
             Directory.CreateDirectory(Globals.SaveFolderPath);
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    public static void WriteAllVariables()
+    {
+        foreach (SaveFile saveFile in saveFiles)
+        {
+            saveFile.WriteVariables();
+        }
     }
 }
 
