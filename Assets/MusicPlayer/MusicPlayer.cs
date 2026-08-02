@@ -112,15 +112,17 @@ public class MusicPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (audioSource.isPlaying)
-        {
+        if (audioSource.clip)
             playbackTime = audioSource.time;
-        }
-        else if (playbackTime >= clipLength)
+
+        if (!audioSource.isPlaying)
         {
-            OnSongEnd.Invoke();
-            Debug.Log("playing next song");
-            PlayNext();
+            if (playbackTime >= clipLength)
+            {
+                OnSongEnd.Invoke();
+                Debug.Log("playing next song");
+                PlayNext();
+            }
         }
     }
 
@@ -369,7 +371,7 @@ public class MusicPlayer : MonoBehaviour
     [ButtonMethod]
     public static string[] Playlists()
     {
-        DirectoryInfo info = new DirectoryInfo(SongsFolderPath);
+        DirectoryInfo info = new DirectoryInfo(Globals.PlaylistsPath);
 
         List<string> temp = new List<string>();
 
@@ -417,19 +419,15 @@ public class MusicPlayer : MonoBehaviour
     //file stuff
     //comment later
 
-    [ReadOnly] //if you need to debug or change this, use the debug mode of the inspector to change this path.
-    [ConditionalField(nameof(useExternalSongs))]
-    public static string SongsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), GameVariables.gameNameChangeLater, "Songs");
 
     public static bool songsCached;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static async void InitializeLoadingFiles()
     {
-        if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), GameVariables.gameNameChangeLater)))
+        if (!Directory.Exists(Globals.PlaylistsPath))
         {
-            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), GameVariables.gameNameChangeLater));
-            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), GameVariables.gameNameChangeLater, "Songs"));
+            Directory.CreateDirectory(Globals.PlaylistsPath);
         }
 
         DirectoryInfo info = new DirectoryInfo(Globals.SongsPath);

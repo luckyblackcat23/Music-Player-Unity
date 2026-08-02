@@ -224,7 +224,11 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songList.makeItem = () =>
         {
-            return songItemTemplate.Instantiate();
+            VisualElement item = songItemTemplate.Instantiate();
+
+            item.RegisterCallback<PointerDownEvent>(OnSongItemRightClick);
+
+            return item;
         };
 
         songList.bindItem = BindSongListItem;
@@ -368,6 +372,8 @@ public class MusicPlayerUIController : MonoBehaviour
         element.Q<Label>("duration").text =
             song.SearchMetaDataLoaded ? song.Duration.ToString() : "--:--";
 
+        element.userData = song;
+
         VisualElement albumArt = element.Q<VisualElement>("albumArt");
         albumArt.style.backgroundImage = song.AlbumCover;
 
@@ -379,16 +385,6 @@ public class MusicPlayerUIController : MonoBehaviour
 
         thumbnailPlayButton.userData = action;
         thumbnailPlayButton.clicked += action;
-
-        element.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            if (evt.button != 1)
-                return;
-
-            ShowSongMenu(evt.position, song);
-
-            evt.StopPropagation();
-        });
     }
 
     void ShowSongMenu(Vector2 position, SongInfo song)
@@ -428,6 +424,18 @@ public class MusicPlayerUIController : MonoBehaviour
                 }
             )
         );
+    }
+
+    void OnSongItemRightClick(PointerDownEvent evt)
+    {
+        if (evt.button != 1)
+            return;
+
+        var song = (SongInfo)((VisualElement)evt.currentTarget).userData;
+
+        ShowSongMenu(evt.position, song);
+
+        evt.StopPropagation();
     }
 
     void OnPlaybackDrag(MouseCaptureEvent e)

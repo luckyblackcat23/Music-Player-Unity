@@ -11,14 +11,13 @@ public static class Globals
     public const string SaveFolderName = "MusicPlayer";
     public static readonly string SaveFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SaveFolderName);
 
-    public static readonly string PlaylistsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SaveFolderName, "Playlists");
-    public static string SongsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), GameVariables.gameNameChangeLater, "Songs"); //CHANGE THIS LATER
+    public static string SongsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+    public static string PlaylistsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "Playlists");
 
-    public const string gameNameChangeLater = "GameNameHereReplaceLater"; //DO NOT FORGET TO CHANGE THIS
-    public readonly static string GamePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), gameNameChangeLater);
+    public const string GameName = "MusicPlayer";
 
     public static void OpenSavePath()
     {
-        Process.Start(Globals.SaveFolderPath);
+        Process.Start(SaveFolderPath);
     }
 }

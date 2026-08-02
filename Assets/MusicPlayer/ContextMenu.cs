@@ -28,15 +28,18 @@ public class ContextMenu
         // Clicking anywhere else closes it.
         root.RegisterCallback<PointerDownEvent>(e =>
         {
-            Hide();
-        }, TrickleDown.TrickleDown);
+            if (!menu.worldBound.Contains(e.position))
+            {
+                Hide();
+            }
+        });
     }
 
     public void Show(Vector2 position, params ContextMenuItem[] items)
     {
         menu.Clear();
 
-        foreach (var item in items)
+        foreach (ContextMenuItem item in items)
         {
             Button button = new Button();
 

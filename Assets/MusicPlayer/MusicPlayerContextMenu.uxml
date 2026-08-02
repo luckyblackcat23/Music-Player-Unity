@@ -1,3 +1,8 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement style="flex-grow: 1; background-color: rgb(84, 84, 84); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;"/>
+    <Style src="project://database/Assets/MusicPlayer/MusicPlayerStyling.uss?fileID=7433441132597879392&amp;guid=e31be3d781b4572418858f823860acfb&amp;type=3#MusicPlayerStyling"/>
+    <ui:VisualElement name="ContextMenu" class="context-menu">
+        <ui:Button name="PlayButton" text="Play"/>
+        <ui:Button name="QueueButton" text="Queue Next"/>
+        <ui:Button name="RemoveButton" text="Remove"/>
+    </ui:VisualElement>
 </ui:UXML>
