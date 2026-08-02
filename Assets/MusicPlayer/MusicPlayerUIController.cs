@@ -387,7 +387,7 @@ public class MusicPlayerUIController : MonoBehaviour
         thumbnailPlayButton.clicked += action;
     }
 
-    void ShowSongMenu(Vector2 position, SongInfo song)
+    void ShowSongContextMenu(Vector2 position, SongInfo song)
     {
         contextMenu.Show(
 
@@ -433,7 +433,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         var song = (SongInfo)((VisualElement)evt.currentTarget).userData;
 
-        ShowSongMenu(evt.position, song);
+        ShowSongContextMenu(evt.position, song);
 
         evt.StopPropagation();
     }
