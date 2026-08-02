@@ -478,7 +478,6 @@ MonoBehaviour:
       m_Calls: []
   useExternalSongs: 0
   playAllOnStart: 0
-  usePlaylists: 0
 --- !u!114 &1767018687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -495,6 +494,7 @@ MonoBehaviour:
   playbackSliderDragged: 0
   document: {fileID: 1767018683}
   songItemTemplate: {fileID: 9197481963319205126, guid: 72e9263e7098df04da918014d2fdeb61, type: 3}
+  PlaylistItemTemplate: {fileID: 9197481963319205126, guid: 37951097c4edb5b4a8c1011633abe5f1, type: 3}
   ShuffleIcon: {fileID: 970811466, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
   DontShuffleIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
   DontLoopIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}

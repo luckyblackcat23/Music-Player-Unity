@@ -35,16 +35,20 @@ public static class SaveManager
         return mainFile;
     }
 
-    //lookup a savefile by name
-    public static SaveFile GetFile(string fileName)
+    /// <summary>
+    /// Lookup savefile by path
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static SaveFile GetFile(string path)
     {
-        return saveFiles.Find(f => f.SavedName == fileName);
+        return saveFiles.Find(file => file.SavedPath == path);
     }
 
     //register a new savefile
     internal static void RegisterFile(SaveFile file)
     {
-        if (!saveFiles.Contains(file))
+        if (saveFiles.Find(saveFile => saveFile.SavedPath == file.SavedPath) == null)
             saveFiles.Add(file);
     }
 
@@ -213,7 +217,12 @@ public abstract class SaveVariable
         // decide which file this variable belongs to
         SaveFile = saveFile ?? SaveManager.MainSave();
 
-        SaveFile.Variables.Add(this);
+        if (!saveFile.Variables.Contains(this))
+            SaveFile.Variables.Add(this);
+        else
+        {
+            Debug.Log("unable to save this variable as it already exists in the save manager");
+        }
     }
 }
 

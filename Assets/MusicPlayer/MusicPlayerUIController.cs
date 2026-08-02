@@ -14,14 +14,20 @@ public class MusicPlayerUIController : MonoBehaviour
     [Header("UI")]
     [SerializeField] UIDocument document;
     [SerializeField] VisualTreeAsset songItemTemplate;
+    [SerializeField] VisualTreeAsset PlaylistItemTemplate;
+
+    ContextMenu contextMenu;
 
     [Header("Data")]
     List<SongInfo> songs = new();
     List<SongInfo> queue = new();
+    string[] playlists;
 
     List<SongInfo> searchTempSongs = new();
 
     ListView songQueue;
+
+    ListView playlistList;
 
     ListView songList;
 
@@ -60,6 +66,9 @@ public class MusicPlayerUIController : MonoBehaviour
         if (songQueue != null)
             songQueue.itemsSource = null;
 
+        if (playlistList != null)
+            playlistList.itemsSource = null;
+
         if (songList != null)
             songList.itemsSource = null;
 
@@ -72,7 +81,11 @@ public class MusicPlayerUIController : MonoBehaviour
         //assign variables
         VisualElement root = document.rootVisualElement;
 
+        contextMenu = new ContextMenu(root);
+
         songQueue = root.Q<ListView>("SongQueue");
+
+        playlistList = root.Q<ListView>("PlaylistList");
 
         songList = root.Q<ListView>("SongList");
 
@@ -128,9 +141,10 @@ public class MusicPlayerUIController : MonoBehaviour
             RefreshSongQueue();
         });
 
+        #region queue
         if (songQueue == null)
         {
-            Debug.LogError("ListView 'songQueue' not found.");
+            Debug.LogError("ListView 'SongQueue' not found.");
             return;
         }
 
@@ -170,10 +184,35 @@ public class MusicPlayerUIController : MonoBehaviour
 
             RefreshSongQueue();
         };
+        #endregion
 
+        #region playlistList
+        if (playlistList == null)
+        {
+            Debug.LogError("ListView 'PlaylistList' not found.");
+            return;
+        }
+
+        playlistList.fixedItemHeight = 100;
+
+        playlists = MusicPlayer.Playlists();
+
+        playlistList.itemsSource = playlists;
+
+        playlistList.makeItem = () =>
+        {
+            return PlaylistItemTemplate.Instantiate();
+        };
+
+        playlistList.bindItem = BindPlaylistListItem;
+
+        playlistList.selectionType = SelectionType.Single;
+        #endregion
+
+        #region songList
         if (songList == null)
         {
-            Debug.LogError("ListView 'songList' not found.");
+            Debug.LogError("ListView 'SongList' not found.");
             return;
         }
 
@@ -188,9 +227,10 @@ public class MusicPlayerUIController : MonoBehaviour
             return songItemTemplate.Instantiate();
         };
 
-        songList.bindItem = BindListItem;
+        songList.bindItem = BindSongListItem;
 
         songList.selectionType = SelectionType.Single;
+        #endregion
 
         searchBar.RegisterCallback<ChangeEvent<string>>((x) =>
         {
@@ -285,7 +325,35 @@ public class MusicPlayerUIController : MonoBehaviour
             element.RemoveFromClassList("CurrentSong");
     }
 
-    void BindListItem(VisualElement element, int index)
+    void BindPlaylistListItem(VisualElement element, int index)
+    {
+        Playlist playlist = Playlist.GetFromPath(playlists[index]);
+
+        element.Q<Label>("title").text = playlist.SavedName;
+
+        VisualElement albumArt = element.Q<VisualElement>("albumArt");
+
+        SongInfo[] songs = playlist.GetSongs();
+
+        if (!songs[0].MetaDataLoaded)
+        {
+            songs[0].GetSongInfo();
+            songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
+        }
+
+        albumArt.style.backgroundImage = songs[0].AlbumCover;
+
+        Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
+
+        thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+
+        System.Action action = () => PlayPlaylist(playlist);
+
+        thumbnailPlayButton.userData = action;
+        thumbnailPlayButton.clicked += action;
+    }
+
+    void BindSongListItem(VisualElement element, int index)
     {
         SongInfo song = ((List<SongInfo>)songList.itemsSource)[index];
 
@@ -311,6 +379,55 @@ public class MusicPlayerUIController : MonoBehaviour
 
         thumbnailPlayButton.userData = action;
         thumbnailPlayButton.clicked += action;
+
+        element.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (evt.button != 1)
+                return;
+
+            ShowSongMenu(evt.position, song);
+
+            evt.StopPropagation();
+        });
+    }
+
+    void ShowSongMenu(Vector2 position, SongInfo song)
+    {
+        contextMenu.Show(
+
+            position,
+
+            new ContextMenuItem(
+                "Play",
+                () => PlaySong(song)
+            ),
+
+            new ContextMenuItem(
+                "Queue Next",
+                () =>
+                {
+                    musicPlayer.AddNext(song);
+                    RefreshSongQueue();
+                }
+            ),
+
+            new ContextMenuItem(
+                "Add to Playlist",
+                () =>
+                {
+                    Debug.Log("Open playlist picker");
+                }
+            ),
+
+            new ContextMenuItem(
+                "Remove",
+                () =>
+                {
+                    musicPlayer.musicQueue.Remove(song);
+                    RefreshSongQueue();
+                }
+            )
+        );
     }
 
     void OnPlaybackDrag(MouseCaptureEvent e)
@@ -342,6 +459,13 @@ public class MusicPlayerUIController : MonoBehaviour
         RefreshSongQueue();
     }
 
+    void PlayPlaylist(Playlist playlist)
+    {
+        musicPlayer.PlayPlaylist(playlist);
+
+        RefreshPlaylistList();
+    }
+
     [ButtonMethod]
     void RefreshSongQueue()
     {
@@ -353,5 +477,10 @@ public class MusicPlayerUIController : MonoBehaviour
     void RefreshSongList()
     {
         songList.RefreshItems();
+    }
+
+    void RefreshPlaylistList()
+    {
+        playlistList.RefreshItems();
     }
 }

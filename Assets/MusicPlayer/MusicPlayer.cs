@@ -174,7 +174,7 @@ public class MusicPlayer : MonoBehaviour
                     if (currentSong.RMS <= 0)
                     {
                         currentSong.RMS = CalculateWindowedRMS(currentSong.SongPath);
-                        Debug.Log(currentSong.RMS);
+                        Debug.Log("RMS = " + currentSong.RMS);
                     }
 
                     UpdateVolume();
@@ -363,7 +363,7 @@ public class MusicPlayer : MonoBehaviour
     [ButtonMethod]
     public void PlayTestPlaylist()
     {
-        PlayPlaylist(Playlist.GetFromFile(Playlists()[0]));
+        PlayPlaylist(Playlist.GetFromPath(Playlists()[0]));
     }
 
     [ButtonMethod]
@@ -387,33 +387,12 @@ public class MusicPlayer : MonoBehaviour
 
         currentSongIndex = 0;
 
-        foreach (SaveVariable song in playlist.Variables)
+        foreach (SongInfo song in playlist.GetSongs())
         {
-            SongInfo songForQueue = null;
-            bool songCached = false;
-
-            foreach (SongInfo cachedSong in cachedSongs)
-            {
-                if (cachedSong.SongPath == song.SavedName)
-                {
-                    songForQueue = cachedSong;
-                    songCached = true;
-                    break;
-                }
-            }
-
-            if (!songCached)
-            {
-                songForQueue = new SongInfo(song.SavedName);
-                cachedSongs.Append(songForQueue);
-            }
-
-            if (!songForQueue.SearchMetaDataLoaded)
-                songForQueue.GetSongSearchInfo();
-            
-            musicQueue.Add(songForQueue);
+            musicQueue.Add(song);
         }
 
+        Stop();
         Play();
     }
 
@@ -479,11 +458,39 @@ public class MusicPlayer : MonoBehaviour
         Debug.Log("Songs finished caching");
     }
 
+    /// <summary>
+    /// checks if a song exists is already cached
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static bool GetCachedSong(string path, out SongInfo song)
+    {
+        if (songsCached)
+        {
+            for (int i = 0; i < cachedSongs.Length; i++)
+            {
+                SongInfo cachedSong = cachedSongs[i];
+
+                if (cachedSong.SongPath == path)
+                {
+                    song = cachedSong;
+                    return true;
+                }
+            }
+
+            song = null;
+            return false;
+        }
+        else
+        {
+            Debug.Log("Cannot find cached song, songs have not finished caching.");
+
+            song = null;
+            return false;
+        }
+    } 
+
     //get mybox to work with this later
-
-    [ConditionalField(nameof(useExternalSongs))]
-    public bool usePlaylists;
-
     public IEnumerator GetClipFromFile(FileInfo file, Action<AudioClip> callback)
     {
         string extension = file.Extension.ToLower();
@@ -868,7 +875,8 @@ public class SavePath : SaveVariable
 
 public class Playlist : SaveFile
 {
-    public SavePath PlaylistCoverPath;
+    // figure out how to implement later
+    //public SavePath PlaylistCoverPath;
 
     //create playlist
     public Playlist(string name, string savePath = null) : base(name, "m3u", savePath)
@@ -890,17 +898,25 @@ public class Playlist : SaveFile
         return playlist;
     }
 
-    public static Playlist GetFromFile(string path)
+    /// <summary>
+    /// Get a playlist from the specified path
+    /// Will return cached Playlist from the save manager if it already exists in memory
+    /// </summary>
+    /// <param name="path">Full path of the song</param>
+    /// <returns></returns>
+    public static Playlist GetFromPath(string path)
     {
-        if(SaveManager.GetFile(path) != null)
+        Playlist playlist = (Playlist)SaveManager.GetFile(path);
+
+        if (playlist != null)
         {
-            Debug.LogError("Attempted to create a file that already exists");
-            return null;
+            Debug.LogWarning("File already exists in the SaveManager, returning SaveManager's");
+            return playlist;
         }
 
         FileInfo playlistFile = new FileInfo(path);
 
-        Playlist playlist = new Playlist(playlistFile.Name, path);
+        playlist = new Playlist(playlistFile.Name, path);
 
         playlist.UpdateCache();
 
@@ -914,11 +930,12 @@ public class Playlist : SaveFile
             {
                 if (File.Exists(line))
                 {
-                    Debug.Log(line);
-                    playlist.Variables.Add(new SavePath(line));
+                    new SavePath(line, playlist);
                 }
             }
         }
+
+        SaveManager.RegisterFile(playlist);
 
         return playlist;
     }
@@ -969,15 +986,22 @@ public class Playlist : SaveFile
         {
             foreach (string line in cachedText)
             {
-                if (variable.GetType() == typeof(SavePath))
+                if (line.StartsWith('#'))
                 {
-                    if (line == variable.SavedString())
-                        variable.SetFromString(line, false);
+                    // directives
                 }
                 else
                 {
-                    if (line.StartsWith($"{variable.SavedName}="))
-                        variable.SetFromString(line.Remove(0, $"{variable.SavedName}=".Length), false);
+                    if (variable.GetType() == typeof(SavePath))
+                    {
+                        if (line == variable.SavedString())
+                            variable.SetFromString(line, false);
+                    }
+                    else
+                    {
+                        if (line.StartsWith($"{variable.SavedName}="))
+                            variable.SetFromString(line.Remove(0, $"{variable.SavedName}=".Length), false);
+                    }
                 }
             }
         }
@@ -1002,12 +1026,13 @@ public class Playlist : SaveFile
         Variables.Add(newSong);
     }
 
+    /*
     public async Task<Texture2D> GetPlaylistCover()
     {
-        if (!File.Exists(PlaylistCoverPath))
+        if (!File.Exists(PlaylistCoverPath.Value == null ? PlaylistCoverPath.Value : ""))
         {
-            Debug.Log(PlaylistCoverPath + " does not exist");
-            //return something here later
+            Debug.Log((PlaylistCoverPath.Value ?? "empty") + " does not have a cover");
+            return GetSongs()[0].AlbumCover;
         }
         else
         {
@@ -1028,6 +1053,24 @@ public class Playlist : SaveFile
         }
 
         return null;
+    }
+    */
+
+    public SongInfo[] GetSongs()
+    {
+        SongInfo[] songs = new SongInfo[Variables.Count];
+
+        for (int i = 0; i < Variables.Count; i++)
+        {
+            SongInfo song;
+
+            if (MusicPlayer.GetCachedSong(Variables[i].GetAsString(), out song))
+            {
+                songs[i] = song;
+            }
+        }
+
+        return songs;
     }
 }
 

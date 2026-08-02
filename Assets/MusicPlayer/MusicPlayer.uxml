@@ -23,7 +23,7 @@
                         <ui:ListView name="SongQueue" reorderable="true" selection-type="Multiple" picking-mode="Position" class="panel" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);"/>
                     </ui:Tab>
                     <ui:Tab label="Playlists" name="Playlists" style="flex-grow: 1; flex-basis: auto;">
-                        <ui:VisualElement style="background-color: rgb(255, 255, 255); width: 100%; height: 100%;"/>
+                        <ui:ListView name="PlaylistList"/>
                     </ui:Tab>
                     <ui:Tab label="Tab" name="Tab" style="flex-grow: 1; flex-basis: auto;">
                         <ui:VisualElement style="background-color: rgb(255, 255, 255); width: 100%; height: 100%;"/>
