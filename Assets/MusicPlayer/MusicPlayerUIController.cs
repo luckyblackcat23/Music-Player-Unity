@@ -333,7 +333,7 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         Playlist playlist = Playlist.GetFromPath(playlists[index]);
 
-        element.Q<Label>("title").text = playlist.SavedName;
+        element.Q<Label>("title").text = playlist.playlistName;
 
         VisualElement albumArt = element.Q<VisualElement>("albumArt");
 

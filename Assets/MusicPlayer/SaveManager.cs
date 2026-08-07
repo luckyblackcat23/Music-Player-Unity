@@ -88,7 +88,10 @@ public class SaveFile
 
     public SaveFile(string fileName, string fileEnding = ".txt", string savePath = null)
     {
-        SavedName = fileName ?? throw new ArgumentNullException(nameof(fileName));
+        if (fileName != null)
+            SavedName = fileName + fileEnding;
+        else
+            throw new ArgumentNullException(nameof(fileName));
 
         SavedPath = savePath ?? Path.Combine(Globals.SaveFolderPath, fileName);
 
@@ -102,7 +105,8 @@ public class SaveFile
         }
 
         SaveManager.RegisterFile(this);
-
+        
+        /*
         using FileSystemWatcher watcher = new FileSystemWatcher(Globals.SaveFolderPath);
         
         watcher.Changed += (object sender, FileSystemEventArgs e) => WriteVariables();
@@ -111,6 +115,7 @@ public class SaveFile
         watcher.EnableRaisingEvents = true;
 
         Application.quitting += () => watcher.Dispose();
+        */
     }
 
     /// <summary>
@@ -395,4 +400,35 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
         else
             Value = default(T).ToString();
     }
+}
+
+/// <summary>
+/// Stores and retrieves string values
+/// Essentially the same as a SaveString. except it doesn't use the SavedString variable for compatability reasons
+/// </summary>
+public class SavePath : SaveVariable
+{
+    public static implicit operator string(SavePath obj) => obj.Get();
+
+    public SavePath(string path, SaveFile saveFile = null) : base(path, saveFile) { }
+
+    public string Get() => SavedName ?? string.Empty;
+
+    public void Set(string v, bool UpdateOnChange = true)
+    {
+        SavedName = v ?? "";
+
+        if (UpdateOnChange)
+        {
+            SaveFile.WriteFile();
+        }
+    }
+
+    public override object GetAsObject() => Get();
+    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((string)v, UpdateOnChange);
+
+    public override string GetAsString() => SavedName;
+    public override void SetFromString(string v, bool UpdateOnChange = true) => Set(v, UpdateOnChange);
+
+    internal override string SavedString() { return SavedName; }
 }
