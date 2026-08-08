@@ -156,7 +156,11 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songQueue.makeItem = () =>
         {
-            return songItemTemplate.Instantiate();
+            VisualElement item = songItemTemplate.Instantiate();
+
+            item.RegisterCallback<PointerDownEvent>(OnQueueItemRightClick);
+
+            return item;
         };
 
         songQueue.bindItem = BindQueueItem;
@@ -201,7 +205,11 @@ public class MusicPlayerUIController : MonoBehaviour
 
         playlistList.makeItem = () =>
         {
-            return PlaylistItemTemplate.Instantiate();
+            VisualElement item = PlaylistItemTemplate.Instantiate();
+
+            item.RegisterCallback<PointerDownEvent>(OnPlaylistItemRightClick);
+
+            return item;
         };
 
         playlistList.bindItem = BindPlaylistListItem;
@@ -311,6 +319,8 @@ public class MusicPlayerUIController : MonoBehaviour
         element.Q<Label>("duration").text =
             song.MetaDataLoaded ? song.Duration.ToString() : "--:--";
 
+        element.userData = song;
+
         VisualElement albumArt = element.Q<VisualElement>("albumArt");
         albumArt.style.backgroundImage = song.AlbumCover;
 
@@ -344,6 +354,8 @@ public class MusicPlayerUIController : MonoBehaviour
             songs[0].GetSongInfo();
             songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
         }
+
+        element.userData = playlist;
 
         albumArt.style.backgroundImage = songs[0].AlbumCover;
 
@@ -389,41 +401,26 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void ShowSongContextMenu(Vector2 position, SongInfo song)
     {
-        contextMenu.Show(
+        contextMenu.AddItem("Play", () => PlaySong(song));
 
-            position,
+        contextMenu.AddItem("Queue Next", () => 
+        {
+            musicPlayer.AddNext(song);
+            RefreshSongQueue();
+        });
 
-            new ContextMenuItem(
-                "Play",
-                () => PlaySong(song)
-            ),
+        contextMenu.AddItem("Add To Playlist", () =>
+        {
+            Debug.Log("Open playlist picker");
+        });
 
-            new ContextMenuItem(
-                "Queue Next",
-                () =>
-                {
-                    musicPlayer.AddNext(song);
-                    RefreshSongQueue();
-                }
-            ),
+        contextMenu.AddItem("Remove", () =>
+        {
+            musicPlayer.musicQueue.Remove(song);
+            RefreshSongQueue();
+        });
 
-            new ContextMenuItem(
-                "Add to Playlist",
-                () =>
-                {
-                    Debug.Log("Open playlist picker");
-                }
-            ),
-
-            new ContextMenuItem(
-                "Remove",
-                () =>
-                {
-                    musicPlayer.musicQueue.Remove(song);
-                    RefreshSongQueue();
-                }
-            )
-        );
+        contextMenu.Show(position);
     }
 
     void OnSongItemRightClick(PointerDownEvent evt)
@@ -431,9 +428,78 @@ public class MusicPlayerUIController : MonoBehaviour
         if (evt.button != 1)
             return;
 
-        var song = (SongInfo)((VisualElement)evt.currentTarget).userData;
+        SongInfo song = (SongInfo)((VisualElement)evt.currentTarget).userData;
 
-        ShowSongContextMenu(evt.position, song);
+        contextMenu.AddItem("Play", () => PlaySong(song));
+
+        contextMenu.AddItem("Queue Next", () =>
+        {
+            musicPlayer.AddNext(song);
+            RefreshSongQueue();
+        });
+
+        contextMenu.AddItem("Add To Playlist", () =>
+        {
+            Debug.Log("Open playlist picker");
+        });
+
+        contextMenu.Show(evt.position);
+
+        evt.StopPropagation();
+    }
+
+    void OnQueueItemRightClick(PointerDownEvent evt)
+    {
+        if (evt.button != 1)
+            return;
+
+        SongInfo song = (SongInfo)((VisualElement)evt.currentTarget).userData;
+
+        contextMenu.AddItem("Play", () => PlaySong(song));
+
+        contextMenu.AddItem("Queue Next", () =>
+        {
+            musicPlayer.AddNext(song);
+            RefreshSongQueue();
+        });
+
+        contextMenu.AddItem("Add To Playlist", () =>
+        {
+            Debug.Log("Open playlist picker");
+        });
+
+        contextMenu.AddItem("Remove", () =>
+        {
+            musicPlayer.musicQueue.Remove(song);
+            RefreshSongQueue();
+        });
+
+        contextMenu.Show(evt.position);
+
+        evt.StopPropagation();
+    }
+
+    void OnPlaylistItemRightClick(PointerDownEvent evt)
+    {
+        if (evt.button != 1)
+            return;
+
+        Playlist playlist = (Playlist)((VisualElement)evt.currentTarget).userData;
+
+        contextMenu.AddItem("Play", () => PlayPlaylist(playlist));
+
+        contextMenu.AddItem("Queue Next", () =>
+        {
+            musicPlayer.AddPlaylistNext(playlist);
+            RefreshSongQueue();
+        });
+
+        contextMenu.AddItem("Add To Playlist", () =>
+        {
+            Debug.Log("Open playlist picker");
+        });
+
+        contextMenu.Show(evt.position);
 
         evt.StopPropagation();
     }

@@ -1,16 +1,16 @@
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using System.Threading.Tasks;
 using System.Collections;
 using UnityEngine.Events;
 using UnityEngine;
+using ManagedBass;
 using System.Linq;
 using System.IO;
 using System;
 using Tools;
 using MyBox;
-using ManagedBass;
-using UnityEngine.InputSystem;
 //using Kawazu;
 
 //was planning for this to be used for global music
@@ -411,6 +411,14 @@ public class MusicPlayer : MonoBehaviour
 
         Stop();
         Play();
+    }
+
+    public void AddPlaylistNext(Playlist playlist)
+    {
+        foreach (SongInfo song in playlist.GetSongs())
+        {
+            musicQueue.Add(song);
+        }
     }
 
     public void incrementLoop(bool direction = true)

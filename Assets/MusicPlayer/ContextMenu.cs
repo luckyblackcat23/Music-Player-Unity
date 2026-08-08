@@ -1,11 +1,16 @@
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 public class ContextMenu
 {
     readonly VisualElement root;
     readonly VisualElement menu;
+
+    public bool IsOpen => menu.style.display == DisplayStyle.Flex;
+
+    List<ContextMenuItem> items = new();
 
     public ContextMenu(VisualElement root)
     {
@@ -33,9 +38,20 @@ public class ContextMenu
                 Hide();
             }
         });
+
+        root.RegisterCallback<KeyDownEvent>(e =>
+        {
+            if (e.keyCode == KeyCode.Escape)
+                Hide();
+        });
     }
 
-    public void Show(Vector2 position, params ContextMenuItem[] items)
+    public void AddItem(string label, Action action)
+    {
+        items.Add(new ContextMenuItem(label, action));
+    }
+
+    public void Show(Vector2 position)
     {
         menu.Clear();
 
@@ -61,6 +77,17 @@ public class ContextMenu
 
         menu.style.display = DisplayStyle.Flex;
         menu.BringToFront();
+
+        menu.schedule.Execute(() =>
+        {
+            float x = Mathf.Min(position.x, root.resolvedStyle.width - menu.resolvedStyle.width);
+            float y = Mathf.Min(position.y, root.resolvedStyle.height - menu.resolvedStyle.height);
+
+            menu.style.left = Mathf.Max(0, x);
+            menu.style.top = Mathf.Max(0, y);
+        });
+
+        items.Clear();
     }
 
     public void Hide()
@@ -71,14 +98,29 @@ public class ContextMenu
 
 public class ContextMenuItem
 {
-    public string Text;
-    public System.Action Action;
-    public bool Enabled = true;
+    public string Text { get; }
+    public Action Action { get; }
+    public bool Enabled { get; }
 
-    public ContextMenuItem(string text, System.Action action, bool enabled = true)
+    public bool isSeperator { get; }
+
+    public ContextMenuItem(string text, Action action, bool enabled = true)
     {
         Text = text;
         Action = action;
         Enabled = enabled;
+
     }
+
+    /* 
+    finish implementing later
+ 
+    public static ContextMenuItem Separator()
+    {
+        return new ContextMenuItem
+        {
+            isSeperator = true
+        };
+    }
+    */
 }

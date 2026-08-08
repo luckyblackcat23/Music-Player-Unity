@@ -64,23 +64,26 @@
     border-bottom-left-radius: 2px;
 }
 
-.context-menu
-{
+.context-menu {
     position: absolute;
-
     display: none;
-
     width: 180px;
-
-    background-color: rgb(40,40,40);
-
+    background-color: rgba(40, 40, 40, 0.13);
     border-top-width: 1px;
     border-bottom-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
+    border-top-color: rgba(0, 0, 0, 0.18);
+    border-bottom-color: rgba(0, 0, 0, 0.18);
+    border-left-color: rgba(0, 0, 0, 0.18);
+    border-right-color: rgba(0, 0, 0, 0.18);
+}
 
-    border-top-color: rgb(80,80,80);
-    border-bottom-color: rgb(80,80,80);
-    border-left-color: rgb(80,80,80);
-    border-right-color: rgb(80,80,80);
+.context-menu-separator {
+    background-color: rgba(255, 255, 255, 0.56);
+    height: 1px;
+    margin-top: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    margin-left: 8px;
 }
