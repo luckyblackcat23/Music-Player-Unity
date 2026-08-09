@@ -383,16 +383,22 @@ public class MusicPlayer : MonoBehaviour
         PlayPlaylist(Playlist.GetFromPath(Playlists()[0]));
     }
 
+    public static FileNode PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
+
     [ButtonMethod]
     public static string[] Playlists()
     {
-        DirectoryInfo info = new DirectoryInfo(Globals.PlaylistsPath);
-
         List<string> temp = new List<string>();
 
-        foreach (FileInfo playlist in info.GetFiles().Where(file => supportedPlaylistExtensions.Contains(file.Extension.ToLower())).ToArray())
+        foreach (FileNode node in PlaylistDirectoryNode.GetAllChildren())
         {
-            temp.Add(playlist.FullName);
+            if (node.IsDirectory)
+                continue;
+
+            if(supportedPlaylistExtensions.Contains(new FileInfo(node.Path).Extension.ToLower()))
+            {
+                temp.Add(node.Path);
+            }
         }
 
         return temp.ToArray();

@@ -21,7 +21,7 @@ public class MusicPlayerUIController : MonoBehaviour
     [Header("Data")]
     List<SongInfo> songs = new();
     List<SongInfo> queue = new();
-    string[] playlists;
+    FileNode PlaylistFiles;
 
     List<SongInfo> searchTempSongs = new();
 
@@ -199,9 +199,9 @@ public class MusicPlayerUIController : MonoBehaviour
 
         playlistList.fixedItemHeight = 100;
 
-        playlists = MusicPlayer.Playlists();
+        PlaylistFiles = MusicPlayer.PlaylistDirectoryNode;
 
-        playlistList.itemsSource = playlists;
+        playlistList.itemsSource = PlaylistFiles.Children;
 
         playlistList.makeItem = () =>
         {
@@ -341,32 +341,46 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void BindPlaylistListItem(VisualElement element, int index)
     {
-        Playlist playlist = Playlist.GetFromPath(playlists[index]);
+        FileNode node = PlaylistFiles.Children[index];
 
-        element.Q<Label>("title").text = playlist.playlistName;
-
-        VisualElement albumArt = element.Q<VisualElement>("albumArt");
-
-        SongInfo[] songs = playlist.GetSongs();
-
-        if (!songs[0].MetaDataLoaded)
+        if (node.IsDirectory)
         {
-            songs[0].GetSongInfo();
-            songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
+            element.AddToClassList("Directory");
+
+            element.Q<Label>("title").text = node.Name;
+
+            VisualElement albumArt = element.Q<VisualElement>("albumArt");
+
         }
+        else
+        {
+            Playlist playlist = Playlist.GetFromPath(PlaylistFiles.Children[index].Path);
 
-        element.userData = playlist;
+            element.Q<Label>("title").text = playlist.playlistName;
 
-        albumArt.style.backgroundImage = songs[0].AlbumCover;
+            VisualElement albumArt = element.Q<VisualElement>("albumArt");
 
-        Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
+            SongInfo[] songs = playlist.GetSongs();
 
-        thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+            if (!songs[0].MetaDataLoaded)
+            {
+                songs[0].GetSongInfo();
+                songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
+            }
 
-        System.Action action = () => PlayPlaylist(playlist);
+            element.userData = playlist;
 
-        thumbnailPlayButton.userData = action;
-        thumbnailPlayButton.clicked += action;
+            albumArt.style.backgroundImage = songs[0].AlbumCover;
+
+            Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
+
+            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+
+            System.Action action = () => PlayPlaylist(playlist);
+
+            thumbnailPlayButton.userData = action;
+            thumbnailPlayButton.clicked += action;
+        }
     }
 
     void BindSongListItem(VisualElement element, int index)
@@ -397,30 +411,6 @@ public class MusicPlayerUIController : MonoBehaviour
 
         thumbnailPlayButton.userData = action;
         thumbnailPlayButton.clicked += action;
-    }
-
-    void ShowSongContextMenu(Vector2 position, SongInfo song)
-    {
-        contextMenu.AddItem("Play", () => PlaySong(song));
-
-        contextMenu.AddItem("Queue Next", () => 
-        {
-            musicPlayer.AddNext(song);
-            RefreshSongQueue();
-        });
-
-        contextMenu.AddItem("Add To Playlist", () =>
-        {
-            Debug.Log("Open playlist picker");
-        });
-
-        contextMenu.AddItem("Remove", () =>
-        {
-            musicPlayer.musicQueue.Remove(song);
-            RefreshSongQueue();
-        });
-
-        contextMenu.Show(position);
     }
 
     void OnSongItemRightClick(PointerDownEvent evt)

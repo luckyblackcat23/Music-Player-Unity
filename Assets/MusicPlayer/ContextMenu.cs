@@ -51,6 +51,11 @@ public class ContextMenu
         items.Add(new ContextMenuItem(label, action));
     }
 
+    public void AddSeperator()
+    {
+        items.Add(new ContextMenuItem());
+    }
+
     public void Show(Vector2 position)
     {
         menu.Clear();
@@ -109,7 +114,11 @@ public class ContextMenuItem
         Text = text;
         Action = action;
         Enabled = enabled;
+    }
 
+    public ContextMenuItem()
+    {
+        isSeperator = true;
     }
 
     /* 
