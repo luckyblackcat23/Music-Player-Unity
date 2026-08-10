@@ -21,7 +21,8 @@ public class MusicPlayerUIController : MonoBehaviour
     [Header("Data")]
     List<SongInfo> songs = new();
     List<SongInfo> queue = new();
-    FileNode PlaylistFiles;
+    FileNode playlistDirectory;
+    FileNode currentPlaylistDirectory;
 
     List<SongInfo> searchTempSongs = new();
 
@@ -55,6 +56,8 @@ public class MusicPlayerUIController : MonoBehaviour
     public Sprite DontLoopIcon;
     public Sprite LoopIcon;
     public Sprite LoopSingleIcon;
+    
+    public Sprite FolderIcon;
 
     void OnEnable()
     {
@@ -199,9 +202,10 @@ public class MusicPlayerUIController : MonoBehaviour
 
         playlistList.fixedItemHeight = 100;
 
-        PlaylistFiles = MusicPlayer.PlaylistDirectoryNode;
+        playlistDirectory = MusicPlayer.PlaylistDirectoryNode;
+        currentPlaylistDirectory = playlistDirectory;
 
-        playlistList.itemsSource = PlaylistFiles.Children;
+        playlistList.itemsSource = playlistDirectory.Children;
 
         playlistList.makeItem = () =>
         {
@@ -341,7 +345,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void BindPlaylistListItem(VisualElement element, int index)
     {
-        FileNode node = PlaylistFiles.Children[index];
+        FileNode node = currentPlaylistDirectory.Children[index];
 
         if (node.IsDirectory)
         {
@@ -351,10 +355,22 @@ public class MusicPlayerUIController : MonoBehaviour
 
             VisualElement albumArt = element.Q<VisualElement>("albumArt");
 
+            albumArt.style.backgroundImage = new StyleBackground(FolderIcon);
+
+            element.userData = node;
+
+            Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
+
+            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+
+            System.Action action = () => ChangeDisplayedPlaylistDirectory(node);
+
+            thumbnailPlayButton.userData = action;
+            thumbnailPlayButton.clicked += action;
         }
         else
         {
-            Playlist playlist = Playlist.GetFromPath(PlaylistFiles.Children[index].Path);
+            Playlist playlist = Playlist.GetFromPath(currentPlaylistDirectory.Children[index].Path);
 
             element.Q<Label>("title").text = playlist.playlistName;
 
@@ -474,20 +490,33 @@ public class MusicPlayerUIController : MonoBehaviour
         if (evt.button != 1)
             return;
 
-        Playlist playlist = (Playlist)((VisualElement)evt.currentTarget).userData;
+        var userData = ((VisualElement)evt.currentTarget).userData;
 
-        contextMenu.AddItem("Play", () => PlayPlaylist(playlist));
-
-        contextMenu.AddItem("Queue Next", () =>
+        switch (userData)
         {
-            musicPlayer.AddPlaylistNext(playlist);
-            RefreshSongQueue();
-        });
+            case Playlist playlist:
 
-        contextMenu.AddItem("Add To Playlist", () =>
-        {
-            Debug.Log("Open playlist picker");
-        });
+                contextMenu.AddItem("Play", () => PlayPlaylist(playlist));
+
+                contextMenu.AddItem("Queue Next", () =>
+                {
+                    musicPlayer.AddPlaylistNext(playlist);
+                    RefreshSongQueue();
+                });
+
+                contextMenu.AddItem("Add To Playlist", () =>
+                {
+                    Debug.Log("Open playlist picker");
+                });
+
+                break;
+
+            case FileNode fileNode:
+                contextMenu.AddItem("Open", () => ChangeDisplayedPlaylistDirectory(fileNode));
+
+                // add delete option later? make sure to add a confirmation message first
+                break;
+        }
 
         contextMenu.Show(evt.position);
 
@@ -530,6 +559,21 @@ public class MusicPlayerUIController : MonoBehaviour
         RefreshPlaylistList();
     }
 
+
+    void ChangeDisplayedPlaylistDirectory(FileNode directory)
+    {
+        currentPlaylistDirectory = directory;
+        playlistList.itemsSource = currentPlaylistDirectory.Children;
+        playlistList.Rebuild();
+    }
+
+    void ResetDisplayedPlaylistDirectory()
+    {
+        currentPlaylistDirectory = playlistDirectory;
+        playlistList.itemsSource = currentPlaylistDirectory.Children;
+        playlistList.Rebuild();
+    }
+
     [ButtonMethod]
     void RefreshSongQueue()
     {
@@ -543,6 +587,7 @@ public class MusicPlayerUIController : MonoBehaviour
         songList.RefreshItems();
     }
 
+    [ButtonMethod]
     void RefreshPlaylistList()
     {
         playlistList.RefreshItems();

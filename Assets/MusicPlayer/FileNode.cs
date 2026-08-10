@@ -3,11 +3,23 @@ using System.IO;
 
 public class FileNode
 {
+    public static readonly bool readAllFiles = false;
+
     public string Name { get; }
     public string Path { get; }
     public bool IsDirectory { get; }
 
     public List<FileNode> Children { get; } = new();
+
+    private static readonly HashSet<string> supportedFileTypes = new()
+    {
+        ".mp3",
+        ".ogg",
+        ".wav",
+        ".m4a",
+        ".m3u",
+        ".m3u8",
+    };
 
     private FileNode(string name, string path, bool isDirectory)
     {
@@ -29,10 +41,18 @@ public class FileNode
         foreach (DirectoryInfo dir in directory.GetDirectories())
             node.Children.Add(BuildTree(dir.FullName));
 
-        foreach (var file in directory.GetFiles())
-            node.Children.Add(
-                new FileNode(file.Name, file.FullName, false)
-            );
+        foreach (FileInfo file in directory.GetFiles())
+        {
+            if (!readAllFiles)
+            {
+                if (supportedFileTypes.Contains(file.Extension.ToLower()))
+                    node.Children.Add(new FileNode(file.Name, file.FullName, false));
+            }
+            else
+            {
+                node.Children.Add(new FileNode(file.Name, file.FullName, false));
+            }
+        }
 
         return node;
     }
@@ -44,9 +64,9 @@ public class FileNode
 
     public static List<FileNode> GetAllChildren(FileNode node)
     {
-        var result = new List<FileNode>();
+        List<FileNode> result = new List<FileNode>();
 
-        foreach (var child in node.Children)
+        foreach (FileNode child in node.Children)
         {
             result.Add(child);
             result.AddRange(GetAllChildren(child));
