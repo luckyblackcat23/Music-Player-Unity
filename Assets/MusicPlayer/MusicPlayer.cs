@@ -102,6 +102,8 @@ public class MusicPlayer : MonoBehaviour
 
     private void Awake()
     {
+        PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
+
         audioSource = GetComponent<AudioSource>();
 
         if (playAllOnStart)
@@ -383,7 +385,7 @@ public class MusicPlayer : MonoBehaviour
         PlayPlaylist(Playlist.GetFromPath(Playlists()[0]));
     }
 
-    public static FileNode PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
+    public static FileNode PlaylistDirectoryNode;
 
     [ButtonMethod]
     public static string[] Playlists()
@@ -427,7 +429,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    public void incrementLoop(bool direction = true)
+    public void IncrementLoop(bool direction = true)
     {
         if (direction)
         {
@@ -445,15 +447,29 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
+    public void ShuffleQueue()
+    {
+        SongInfo currentSong = musicQueue[currentSongIndex];
+
+        musicQueue.Shuffle();
+
+        currentSongIndex = musicQueue.IndexOf(currentSong);
+    }
+
     //file stuff
     //comment later
 
 
     public static bool songsCached;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     public static async void InitializeLoadingFiles()
     {
+        if (!Directory.Exists(Globals.SongsPath))
+        {
+            Directory.CreateDirectory(Globals.SongsPath);
+        }
+
         if (!Directory.Exists(Globals.PlaylistsPath))
         {
             Directory.CreateDirectory(Globals.PlaylistsPath);
@@ -558,7 +574,6 @@ public class MusicPlayer : MonoBehaviour
         DownloadHandlerAudioClip handler =
             (DownloadHandlerAudioClip)request.downloadHandler;
 
-        // Keep this because you want faster playback startup
         handler.streamAudio = true;
 
         yield return request.SendWebRequest();
