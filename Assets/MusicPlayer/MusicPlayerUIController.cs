@@ -29,6 +29,7 @@ public class MusicPlayerUIController : MonoBehaviour
     ListView songQueue;
 
     ListView playlistList;
+    Button playlistListBackButton;
 
     ListView songList;
 
@@ -89,6 +90,7 @@ public class MusicPlayerUIController : MonoBehaviour
         songQueue = root.Q<ListView>("SongQueue");
 
         playlistList = root.Q<ListView>("PlaylistList");
+        playlistListBackButton = root.Q<Button>("PlaylistListBack");
 
         songList = root.Q<ListView>("SongList");
 
@@ -246,6 +248,8 @@ public class MusicPlayerUIController : MonoBehaviour
         songList.bindItem = BindSongListItem;
 
         songList.selectionType = SelectionType.Single;
+
+        playlistListBackButton.clicked += () => ChangeDisplayedPlaylistDirectory(currentPlaylistDirectory.Parent);
         #endregion
 
         searchBar.RegisterCallback<ChangeEvent<string>>((x) =>
@@ -267,19 +271,15 @@ public class MusicPlayerUIController : MonoBehaviour
         //initialize button events
         shuffleButton.clicked += () => 
         {
-            musicPlayer.shuffle = !musicPlayer.shuffle;
-
-            if (musicPlayer.shuffle)
-                shuffleButton.style.backgroundImage = new StyleBackground(ShuffleIcon);
-            else
-                shuffleButton.style.backgroundImage = new StyleBackground(DontShuffleIcon);
+            musicPlayer.ShuffleQueue();
+            RefreshSongQueue();
         };
         previousButton.clicked += () => musicPlayer.PlayPrevious();
         playButton.clicked += () => musicPlayer.TogglePause();
         nextButton.clicked += () => musicPlayer.PlayNext();
         loopButton.clicked += () =>
         { 
-            musicPlayer.incrementLoop();
+            musicPlayer.IncrementLoop();
             switch (musicPlayer.Loop)
             {
                 case MusicPlayer.LoopOptions.dontLoop:
@@ -562,6 +562,9 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void ChangeDisplayedPlaylistDirectory(FileNode directory)
     {
+        if (directory == null)
+            return;
+
         currentPlaylistDirectory = directory;
         playlistList.itemsSource = currentPlaylistDirectory.Children;
         playlistList.Rebuild();

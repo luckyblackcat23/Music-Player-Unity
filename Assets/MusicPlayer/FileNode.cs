@@ -8,6 +8,7 @@ public class FileNode
     public string Name { get; }
     public string Path { get; }
     public bool IsDirectory { get; }
+    public FileNode Parent;
 
     public List<FileNode> Children { get; } = new();
 
@@ -39,7 +40,11 @@ public class FileNode
         );
 
         foreach (DirectoryInfo dir in directory.GetDirectories())
-            node.Children.Add(BuildTree(dir.FullName));
+        {
+            FileNode childNode = BuildTree(dir.FullName);
+            node.Children.Add(childNode);
+            childNode.Parent = node;
+        }
 
         foreach (FileInfo file in directory.GetFiles())
         {

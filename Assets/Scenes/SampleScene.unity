@@ -500,6 +500,7 @@ MonoBehaviour:
   DontLoopIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
   LoopIcon: {fileID: 1985624535, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
   LoopSingleIcon: {fileID: 1431608731, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  FolderIcon: {fileID: 3201737593864979608, guid: 28582260aa047af4daaf49c6706be7f5, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
