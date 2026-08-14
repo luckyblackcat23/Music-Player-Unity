@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using System.Threading.Tasks;
 using System.Collections;
@@ -127,20 +126,6 @@ public class MusicPlayer : MonoBehaviour
                 PlayNext();
             }
         }
-
-        var k = Keyboard.current;
-
-        if (k == null)
-            return;
-
-        if (k.mediaPlayPause.wasPressedThisFrame)
-            Debug.Log("Play/Pause");
-
-        if (k.mediaForward.wasPressedThisFrame)
-            Debug.Log("Next");
-
-        if (k.mediaRewind.wasPressedThisFrame)
-            Debug.Log("Previous");
     }
 
     [ButtonMethod]
