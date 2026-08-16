@@ -1,7 +1,3 @@
-.panel {
-    background-color: rgba(0, 0, 0, 0.84);
-}
-
 .ButtonHover:hover {
     -unity-background-image-tint-color: rgb(200, 200, 200);
     transition-duration: 0.1s;
@@ -49,7 +45,7 @@
 }
 
 .CurrentSong {
-    background-color: rgba(0, 6, 255, 0.33);
+    background-color: rgba(165, 218, 248, 0.33);
 }
 
 .unity-button {
@@ -62,6 +58,7 @@
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
     border-bottom-left-radius: 2px;
+    -unity-background-image-tint-color: var(--accent);
 }
 
 .context-menu {
@@ -86,4 +83,40 @@
     margin-right: 8px;
     margin-bottom: 8px;
     margin-left: 8px;
+}
+
+.unity-base-slider__fill {
+    background-color: rgb(255, 191, 0);
+}
+
+.accentImageTint {
+    -unity-background-image-tint-color: rgb(255, 191, 0);
+}
+
+.accentBackgroundColor {
+    background-color: rgb(255, 191, 0);
+}
+
+.accentColor {
+    color: rgb(255, 191, 0);
+}
+
+.unity-list-view__item--selected {
+    background-color: rgba(255, 255, 255, 0.56);
+}
+
+.unity-base-slider__dragger {
+    background-color: rgb(197, 148, 0);
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
+}
+
+.unity-base-slider--horizontal .unity-base-slider__tracker {
+    background-color: rgb(197, 148, 0);
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
 }

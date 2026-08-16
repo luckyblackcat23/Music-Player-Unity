@@ -15,29 +15,10 @@ public class StartUp : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        Color SystemColour;
-
-        switch (Application.platform)
-        {
-            case RuntimePlatform.WindowsPlayer:
-                SystemColour = SystemTheme.WindowsTheme.GetAccentColor();
-                break;
-            case RuntimePlatform.WindowsEditor:
-                SystemColour = SystemTheme.WindowsTheme.GetAccentColor();
-                break;
-            case RuntimePlatform.LinuxEditor:
-                SystemColour = SystemTheme.LinuxTheme.GetAccentColor();
-                break;
-            case RuntimePlatform.LinuxPlayer:
-                SystemColour = SystemTheme.LinuxTheme.GetAccentColor();
-                break;
-            default:
-                 SystemColour = new Color(0.2f, 0.6f, 1f);
-                break;
-        }
+        Color SystemColour = SystemTheme.GetAccentColour();
 
         background.color = SystemColour;
-        icon.color = Color.Lerp(SystemColour, Color.white, 0.5f);
+        icon.color = Color.Lerp(SystemColour, Color.white, 0.8f);
 
         StartCoroutine(StartUpWait());
     }

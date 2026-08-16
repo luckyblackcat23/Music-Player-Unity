@@ -85,6 +85,8 @@ public class MusicPlayerUIController : MonoBehaviour
         //assign variables
         VisualElement root = document.rootVisualElement;
 
+        ApplyAccentToClasses(root);
+
         contextMenu = new ContextMenu(root);
 
         songQueue = root.Q<ListView>("SongQueue");
@@ -594,5 +596,42 @@ public class MusicPlayerUIController : MonoBehaviour
     void RefreshPlaylistList()
     {
         playlistList.RefreshItems();
+    }
+    
+    void ApplyAccentToClasses(VisualElement root)
+    {
+        Color accent = SystemTheme.GetAccentColour();
+        Color accentDark = Color.Lerp(accent, Color.black, 0.3f);
+        Color accentLight = Color.Lerp(accent, Color.white, 0.3f);
+
+        foreach (VisualElement element in root.Query(className: "accentImageTint").ToList())
+        {
+            element.style.unityBackgroundImageTintColor = accent;
+        }
+
+        foreach (VisualElement element in root.Query(className: "accentBackgroundColor").ToList())
+        {
+            element.style.backgroundColor = accent;
+        }
+
+        foreach (VisualElement element in root.Query(className: "accentColor").ToList())
+        {
+            element.style.color = accent;
+        }
+
+        foreach (VisualElement element in root.Query(className: "unity-base-slider__fill").ToList())
+        {
+            element.style.backgroundColor = accent;
+        }
+
+        foreach (VisualElement element in root.Query(className: "unity-base-slider__dragger").ToList())
+        {
+            element.style.backgroundColor = accentDark;
+        }
+
+        foreach (VisualElement element in root.Query(className: "unity-base-slider__tracker").ToList())
+        {
+            element.style.backgroundColor = accentDark;
+        }
     }
 }

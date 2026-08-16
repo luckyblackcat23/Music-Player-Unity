@@ -154,6 +154,7 @@ public class SaveFile
                 if (line.StartsWith($"{variable.SavedName}="))
                 {
                     variable.SetFromString(line.Remove(0, $"{variable.SavedName}=".Length), false);
+                    Debug.Log("set variable: " + variable.SavedName + " : " + variable.Value);
                 }
             }
         }

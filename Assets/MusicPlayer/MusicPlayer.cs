@@ -49,7 +49,7 @@ public class MusicPlayer : MonoBehaviour
 
     const float targetRMS = 0.12f;
 
-    private SaveFloat userVolume = new("userVolume", saveData);
+    private static SaveFloat userVolume = new("userVolume", saveData);
     public float UserVolume
     {
         get => userVolume;
