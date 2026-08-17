@@ -296,6 +296,9 @@ public class MusicPlayerUIController : MonoBehaviour
             }
         };
 
+        musicPlayer.OnSongShuffle.AddListener(RefreshSongQueue);
+        musicPlayer.OnSongChange.AddListener(RefreshSongQueue);
+
         volumeSlider.value = musicPlayer.UserVolume; // change to saved value later
 
         playbackSlider.RegisterCallback<MouseCaptureEvent>(OnPlaybackDrag);
@@ -314,35 +317,42 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         SongInfo song = queue[index];
 
-        if (!song.MetaDataLoaded)
+        if(song != null)
         {
-            song.GetSongInfo();
-            song.OnMetaDataLoaded += () => songQueue.RefreshItem(index);
+            if (!song.MetaDataLoaded)
+            {
+                song.GetSongInfo();
+                song.OnMetaDataLoaded += () => songQueue.RefreshItem(index);
+            }
+
+            element.Q<Label>("title").text = song.Title;
+            element.Q<Label>("artist").text = song.Artist;
+            element.Q<Label>("duration").text =
+                song.MetaDataLoaded ? song.Duration.ToString() : "--:--";
+
+            element.userData = song;
+
+            VisualElement albumArt = element.Q<VisualElement>("albumArt");
+            albumArt.style.backgroundImage = song.AlbumCover;
+
+            Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
+
+            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+
+            System.Action action = () => PlaySongFromQueue(index);
+
+            thumbnailPlayButton.userData = action;
+            thumbnailPlayButton.clicked += action;
+
+            if (index == musicPlayer.currentSongIndex)
+                element.AddToClassList("CurrentSong");
+            else
+                element.RemoveFromClassList("CurrentSong");
         }
-
-        element.Q<Label>("title").text = song.Title;
-        element.Q<Label>("artist").text = song.Artist;
-        element.Q<Label>("duration").text =
-            song.MetaDataLoaded ? song.Duration.ToString() : "--:--";
-
-        element.userData = song;
-
-        VisualElement albumArt = element.Q<VisualElement>("albumArt");
-        albumArt.style.backgroundImage = song.AlbumCover;
-
-        Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
-
-        thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
-
-        System.Action action = () => PlaySongFromQueue(index);
-
-        thumbnailPlayButton.userData = action;
-        thumbnailPlayButton.clicked += action;
-
-        if (index == musicPlayer.currentSongIndex)
-            element.AddToClassList("CurrentSong");
         else
-            element.RemoveFromClassList("CurrentSong");
+        {
+            Debug.Log("error while loading song " + index);
+        }
     }
 
     void BindPlaylistListItem(VisualElement element, int index)
@@ -606,7 +616,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         foreach (VisualElement element in root.Query(className: "accentImageTint").ToList())
         {
-            element.style.unityBackgroundImageTintColor = accent;
+            element.style.unityBackgroundImageTintColor = accentLight;
         }
 
         foreach (VisualElement element in root.Query(className: "accentBackgroundColor").ToList())
@@ -617,11 +627,6 @@ public class MusicPlayerUIController : MonoBehaviour
         foreach (VisualElement element in root.Query(className: "accentColor").ToList())
         {
             element.style.color = accent;
-        }
-
-        foreach (VisualElement element in root.Query(className: "unity-base-slider__fill").ToList())
-        {
-            element.style.backgroundColor = accent;
         }
 
         foreach (VisualElement element in root.Query(className: "unity-base-slider__dragger").ToList())

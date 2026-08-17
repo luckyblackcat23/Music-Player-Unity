@@ -41,9 +41,9 @@ public class Playlist : SaveFile
     {
         Playlist playlist = (Playlist)SaveManager.GetFile(path);
 
+        //return pre-existing playlist
         if (playlist != null)
         {
-            Debug.LogWarning("File already exists in the SaveManager, returning SaveManager's");
             return playlist;
         }
 
@@ -71,9 +71,15 @@ public class Playlist : SaveFile
             }
             else
             {
-                if (File.Exists(line))
+                foreach(string fileType in MusicPlayer.supportedAudioExtensions)
                 {
-                    new SavePath(line, playlist);
+                    if (line.ToLower().EndsWith(fileType))
+                    {
+                        if (File.Exists(line))
+                        {
+                            new SavePath(line, playlist);
+                        }
+                    }
                 }
             }
         }

@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/MusicPlayer/MusicPlayerStyling.uss?fileID=7433441132597879392&amp;guid=e31be3d781b4572418858f823860acfb&amp;type=3#MusicPlayerStyling"/>
     <ui:VisualElement name="Panel" class="accentBackgroundColor" style="flex-grow: 1; flex-direction: column-reverse;">
-        <ui:VisualElement name="VisualElement" style="flex-direction: column-reverse; height: 150px; background-color: rgba(0, 0, 0, 0.49); flex-shrink: 1; flex-grow: 0; flex-basis: auto;">
+        <ui:VisualElement name="VisualElement" class="Panel" style="flex-direction: column-reverse; height: 150px; flex-shrink: 1; flex-grow: 0; flex-basis: auto;">
             <ui:Slider value="0" high-value="100" fill="true" name="PlaybackSlider" style="height: 20px; min-height: 20px;"/>
             <ui:VisualElement name="ControlBar" style="flex-direction: row; height: 100%;">
                 <ui:VisualElement name="AlbumArt" style="flex-direction: column-reverse; flex-wrap: nowrap; position: absolute; align-self: center; aspect-ratio: 1; flex-grow: 1; height: 100%; -unity-background-scale-mode: stretch-to-fill; background-image: url(&quot;project://database/Assets/MusicPlayer/DefaultIconDark.png?fileID=2800000&amp;guid=543b5d9d9baf7504ebeea8e602471298&amp;type=3#DefaultIconDark&quot;);"/>
@@ -10,12 +10,12 @@
                     <ui:Button name="Play" class="ButtonHover ButtonPressed accent accentImageTint" style="height: 70px; width: 70px; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(255, 255, 255, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=935154823&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_4&quot;);"/>
                     <ui:Button name="Next" class="ButtonHover ButtonPressed accent accentImageTint" style="height: 70px; width: 70px; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(188, 188, 188, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=120335479&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_6&quot;);"/>
                 </ui:VisualElement>
-                <ui:Slider value="0.3" name="VolumeSlider" fill="true" high-value="1" style="position: absolute; align-self: flex-end; right: 0; left: auto; min-width: 300px; min-height: 48px;"/>
+                <ui:Slider value="0.3" name="VolumeSlider" high-value="1" fill="true" style="position: absolute; align-self: flex-end; right: 0; left: auto; min-width: 300px; min-height: 48px;"/>
                 <ui:Label text="Nothing Playing" enabled="true" name="SongTitle" style="position: absolute; bottom: 0; left: 150px; color: rgb(255, 255, 255); font-size: 30px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="MainView" style="flex-grow: 1; flex-direction: row;">
-            <ui:VisualElement name="PopOutView" style="background-color: rgba(0, 0, 0, 0.49); width: 20%;">
+            <ui:VisualElement name="PopOutView" class="Panel" style="width: 20%;">
                 <ui:TabView name="TabView" style="flex-grow: 1; width: 100%; height: 100%;">
                     <ui:Tab name="Queue" label="Queue" style="flex-grow: 1; flex-basis: auto;">
                         <ui:VisualElement style="flex-grow: 0; flex-direction: row; flex-shrink: 0;">
@@ -30,9 +30,6 @@
                             <ui:TextField label="" placeholder-text="filler text" style="flex-grow: 1; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;"/>
                         </ui:VisualElement>
                         <ui:ListView name="PlaylistList"/>
-                    </ui:Tab>
-                    <ui:Tab label="Tab" name="Tab" style="flex-grow: 1; flex-basis: auto;">
-                        <ui:VisualElement style="background-color: rgb(255, 255, 255); width: 100%; height: 100%;"/>
                     </ui:Tab>
                 </ui:TabView>
             </ui:VisualElement>

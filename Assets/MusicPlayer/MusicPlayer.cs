@@ -92,6 +92,7 @@ public class MusicPlayer : MonoBehaviour
     public UnityEvent OnSongEnd;
     public UnityEvent OnPlay;
     public UnityEvent OnPause;
+    public UnityEvent OnSongShuffle;
 
     public bool useExternalSongs;
 
@@ -148,6 +149,11 @@ public class MusicPlayer : MonoBehaviour
         }
 
         SongInfo currentSong = CurrentSong();
+
+        if (!currentSong.MetaDataLoaded)
+        {
+            currentSong.GetSongInfo();
+        }
 
         if(audioSource.clip == null)
         {
@@ -364,12 +370,6 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    [ButtonMethod]
-    public void PlayTestPlaylist()
-    {
-        PlayPlaylist(Playlist.GetFromPath(Playlists()[0]));
-    }
-
     public static FileNode PlaylistDirectoryNode;
 
     [ButtonMethod]
@@ -439,6 +439,8 @@ public class MusicPlayer : MonoBehaviour
         musicQueue.Shuffle();
 
         currentSongIndex = musicQueue.IndexOf(currentSong);
+
+        OnSongShuffle.Invoke();
     }
 
     //file stuff
@@ -578,7 +580,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    private static readonly HashSet<string> supportedAudioExtensions = new()
+    public static readonly HashSet<string> supportedAudioExtensions = new()
     {
         ".mp3",
         ".ogg",
@@ -586,7 +588,7 @@ public class MusicPlayer : MonoBehaviour
         ".m4a"
     };
 
-    private static readonly HashSet<string> supportedPlaylistExtensions = new()
+    public static readonly HashSet<string> supportedPlaylistExtensions = new()
     {
         ".m3u",
         ".m3u8",
