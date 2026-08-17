@@ -71,9 +71,15 @@ public class Playlist : SaveFile
             }
             else
             {
-                if (File.Exists(line))
+                foreach(string fileType in MusicPlayer.supportedAudioExtensions)
                 {
-                    new SavePath(line, playlist);
+                    if (line.ToLower().EndsWith(fileType))
+                    {
+                        if (File.Exists(line))
+                        {
+                            new SavePath(line, playlist);
+                        }
+                    }
                 }
             }
         }
