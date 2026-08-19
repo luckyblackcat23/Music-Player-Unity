@@ -136,7 +136,7 @@ public class MusicPlayerUIController : MonoBehaviour
                 playbackAlbumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
 
                 songTitle.text = currentSong.Title;
-                songArtist.text = currentSong.Title;
+                songArtist.text = currentSong.Artist;
             }
             else
             {
@@ -151,7 +151,7 @@ public class MusicPlayerUIController : MonoBehaviour
                     playbackAlbumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
 
                     songTitle.text = currentSong.Title;
-                    songArtist.text = currentSong.Title;
+                    songArtist.text = currentSong.Artist;
                 };
             }
 
