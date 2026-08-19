@@ -12,8 +12,8 @@
                 </ui:VisualElement>
                 <ui:Slider value="0.3" name="VolumeSlider" high-value="1" fill="true" style="position: absolute; align-self: flex-end; right: 0; left: auto; min-width: 300px; min-height: 48px;"/>
                 <ui:VisualElement name="SongInformation" style="flex-grow: 1; bottom: 0; left: 150px; position: absolute; flex-shrink: 1;">
-                    <ui:Label text="No Artist" enabled="true" name="SongArtist" style="color: rgb(176, 176, 176); font-size: 20px;"/>
-                    <ui:Label text="Nothing Playing" enabled="true" name="SongTitle" style="color: rgb(255, 255, 255); font-size: 30px;"/>
+                    <ui:Label text="No Artist" enabled="true" name="SongArtist" style="color: rgb(176, 176, 176); font-size: 20px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; height: 30px; -unity-text-align: lower-left;"/>
+                    <ui:Label text="Nothing Playing" enabled="true" name="SongTitle" style="color: rgb(255, 255, 255); font-size: 30px; flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; height: 40px; -unity-text-align: lower-left;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
