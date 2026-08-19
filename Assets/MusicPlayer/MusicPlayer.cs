@@ -112,17 +112,23 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
+    bool songEnding;
+    
     // Update is called once per frame
     void Update()
     {
         if (audioSource.clip)
             playbackTime = audioSource.time;
-
-        if (!audioSource.isPlaying && playbackTime == 0)
+        if (!songEnding)
         {
-            OnSongEnd.Invoke();
-            Debug.Log("playing next song");
-            PlayNext();
+            if (!audioSource.isPlaying && playbackTime == 0)
+            {
+                songEnding = true;
+
+                OnSongEnd.Invoke();
+                Debug.Log("playing next song");
+                PlayNext();
+            }
         }
     }
 
@@ -190,6 +196,8 @@ public class MusicPlayer : MonoBehaviour
                     audioSource.Play();
 
                     clipLength = clip.length;
+
+                    songEnding = false;
                 }));
             }
         }
