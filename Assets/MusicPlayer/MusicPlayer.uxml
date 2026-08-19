@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/MusicPlayer/MusicPlayerStyling.uss?fileID=7433441132597879392&amp;guid=e31be3d781b4572418858f823860acfb&amp;type=3#MusicPlayerStyling"/>
     <ui:VisualElement name="Panel" class="accentBackgroundColor" style="flex-grow: 1; flex-direction: column-reverse;">
-        <ui:VisualElement name="VisualElement" class="Panel" style="flex-direction: column-reverse; height: 150px; flex-shrink: 1; flex-grow: 0; flex-basis: auto;">
+        <ui:VisualElement name="VisualElement" class="Panel" style="flex-direction: column-reverse; height: 150px; flex-shrink: 1; flex-grow: 0; flex-basis: auto; background-color: rgba(0, 0, 0, 0.69);">
             <ui:Slider value="0" high-value="100" fill="true" name="PlaybackSlider" style="height: 20px; min-height: 20px;"/>
             <ui:VisualElement name="ControlBar" style="flex-direction: row; height: 100%;">
                 <ui:VisualElement name="AlbumArt" style="flex-direction: column-reverse; flex-wrap: nowrap; position: absolute; align-self: center; aspect-ratio: 1; flex-grow: 1; height: 100%; -unity-background-scale-mode: stretch-to-fill; background-image: url(&quot;project://database/Assets/MusicPlayer/DefaultIconDark.png?fileID=2800000&amp;guid=543b5d9d9baf7504ebeea8e602471298&amp;type=3#DefaultIconDark&quot;);"/>
@@ -15,19 +15,20 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="MainView" style="flex-grow: 1; flex-direction: row;">
-            <ui:VisualElement name="PopOutView" class="Panel" style="width: 20%;">
+            <ui:VisualElement name="PopOutView" class="Panel" style="width: 20%; background-color: rgba(0, 0, 0, 0.55);">
                 <ui:TabView name="TabView" style="flex-grow: 1; width: 100%; height: 100%;">
                     <ui:Tab name="Queue" label="Queue" style="flex-grow: 1; flex-basis: auto;">
                         <ui:VisualElement style="flex-grow: 0; flex-direction: row; flex-shrink: 0;">
                             <ui:Button text="" name="Shuffle" class="ButtonHover ButtonPressed accent accentImageTint" style="height: 70px; width: 70px; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(188, 188, 188, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=970811466&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_2&quot;);"/>
                             <ui:Button text="" name="Loop" class="ButtonHover ButtonPressed accent accentImageTint" style="background-color: rgba(188, 188, 188, 0); border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=935751669&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_3&quot;); width: 70px; height: 70px;"/>
+                            <ui:TextField label="" placeholder-text="filler text" name="SearchBarQueue" style="flex-grow: 1; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;"/>
                         </ui:VisualElement>
                         <ui:ListView name="SongQueue" reorderable="true" selection-type="Multiple" picking-mode="Position" class="panel" style="flex-grow: 1;"/>
                     </ui:Tab>
                     <ui:Tab label="Playlists" name="Playlists" style="flex-grow: 1; flex-basis: auto;">
                         <ui:VisualElement style="flex-grow: 0; flex-direction: row; flex-shrink: 0;">
                             <ui:Button text="" name="PlaylistListBack" class="ButtonHover ButtonPressed accent accentImageTint" style="background-color: rgba(188, 188, 188, 0); border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=897902550&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_8&quot;); width: 70px; height: 70px;"/>
-                            <ui:TextField label="" placeholder-text="filler text" style="flex-grow: 1; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;"/>
+                            <ui:TextField label="" placeholder-text="filler text" name="SearchBarPlaylists" style="flex-grow: 1; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;"/>
                         </ui:VisualElement>
                         <ui:ListView name="PlaylistList"/>
                     </ui:Tab>

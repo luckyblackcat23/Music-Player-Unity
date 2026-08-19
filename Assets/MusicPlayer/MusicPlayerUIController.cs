@@ -25,6 +25,8 @@ public class MusicPlayerUIController : MonoBehaviour
     FileNode currentPlaylistDirectory;
 
     List<SongInfo> searchTempSongs = new();
+    List<SongInfo> searchTempSongsQueue = new();
+    List<FileNode> searchTempSongsPlaylists = new();
 
     ListView songQueue;
 
@@ -34,6 +36,8 @@ public class MusicPlayerUIController : MonoBehaviour
     ListView songList;
 
     TextField searchBar;
+    TextField searchBarQueue;
+    TextField searchBarPlaylists;
 
     // Playback bar
 
@@ -96,6 +100,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songList = root.Q<ListView>("SongList");
 
+        searchBarQueue = root.Q<TextField>("SearchBarQueue");
+        searchBarPlaylists = root.Q<TextField>("SearchBarPlaylists");
         searchBar = root.Q<TextField>("SearchBar");
 
         playbackAlbumArt = root.Q<VisualElement>("AlbumArt");
@@ -262,12 +268,54 @@ public class MusicPlayerUIController : MonoBehaviour
             {
                 //search Title
                 if (song.Title != null)
-                    if (song.Title.ToLower().Contains(x.newValue.ToLower()))
+                    if (song.Title.Contains(x.newValue, System.StringComparison.OrdinalIgnoreCase))
                         searchTempSongs.Add(song);
             }
 
-            songList.itemsSource = searchTempSongs;
+            if (x.newValue == string.Empty)
+                songList.itemsSource = songs;
+            else
+                songList.itemsSource = searchTempSongs;
+
             RefreshSongList();
+        });
+
+        searchBarQueue.RegisterCallback<ChangeEvent<string>>((x) =>
+        {
+            searchTempSongsQueue.Clear();
+
+            foreach (SongInfo song in queue)
+            {
+                //search Title
+                if (song.Title != null)
+                    if (song.Title.Contains(x.newValue, System.StringComparison.OrdinalIgnoreCase))
+                        searchTempSongsQueue.Add(song);
+            }
+
+            if (x.newValue == string.Empty)
+                songQueue.itemsSource = queue;
+            else
+                songQueue.itemsSource = searchTempSongsQueue;
+
+            songQueue.Rebuild();
+        });
+
+        searchBarPlaylists.RegisterCallback<ChangeEvent<string>>((x) =>
+        {
+            searchTempSongsPlaylists.Clear();
+
+            foreach (FileNode playlist in playlistDirectory.GetAllChildren())
+            {
+                if (playlist.Name.Contains(x.newValue, System.StringComparison.OrdinalIgnoreCase))
+                    searchTempSongsPlaylists.Add(playlist);
+            }
+
+            if (x.newValue == string.Empty)
+                playlistList.itemsSource = playlistDirectory.GetAllChildren();
+            else
+                playlistList.itemsSource = searchTempSongsPlaylists;
+
+            RefreshPlaylistList();
         });
 
         //initialize button events
@@ -315,7 +363,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void BindQueueItem(VisualElement element, int index)
     {
-        SongInfo song = queue[index];
+        SongInfo song = ((List<SongInfo>)songQueue.itemsSource)[index];
 
         if(song != null)
         {
@@ -357,7 +405,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void BindPlaylistListItem(VisualElement element, int index)
     {
-        FileNode node = currentPlaylistDirectory.Children[index];
+        FileNode node = ((List<FileNode>)playlistList.itemsSource)[index];
 
         if (node.IsDirectory)
         {

@@ -118,14 +118,11 @@ public class MusicPlayer : MonoBehaviour
         if (audioSource.clip)
             playbackTime = audioSource.time;
 
-        if (!audioSource.isPlaying)
+        if (!audioSource.isPlaying && playbackTime == 0)
         {
-            if (playbackTime >= clipLength)
-            {
-                OnSongEnd.Invoke();
-                Debug.Log("playing next song");
-                PlayNext();
-            }
+            OnSongEnd.Invoke();
+            Debug.Log("playing next song");
+            PlayNext();
         }
     }
 

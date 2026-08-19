@@ -121,6 +121,4 @@
     border-bottom-color: rgb(0, 0, 0);
 }
 
-.Panel {
-    background-color: rgba(0, 0, 0, 0.69);
-}
+
