@@ -43,6 +43,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     VisualElement playbackAlbumArt;
     Label songTitle;
+    Label songArtist;
 
     Button shuffleButton;
     Button previousButton;
@@ -106,6 +107,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         playbackAlbumArt = root.Q<VisualElement>("AlbumArt");
         songTitle = root.Q<Label>("SongTitle");
+        songArtist = root.Q<Label>("SongArtist");
 
         shuffleButton = root.Q<Button>("Shuffle");
         previousButton = root.Q<Button>("Previous");
@@ -134,6 +136,7 @@ public class MusicPlayerUIController : MonoBehaviour
                 playbackAlbumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
 
                 songTitle.text = currentSong.Title;
+                songArtist.text = currentSong.Title;
             }
             else
             {
@@ -148,6 +151,7 @@ public class MusicPlayerUIController : MonoBehaviour
                     playbackAlbumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
 
                     songTitle.text = currentSong.Title;
+                    songArtist.text = currentSong.Title;
                 };
             }
 

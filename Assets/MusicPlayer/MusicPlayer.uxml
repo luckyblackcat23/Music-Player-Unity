@@ -11,7 +11,10 @@
                     <ui:Button name="Next" class="ButtonHover ButtonPressed accent accentImageTint" style="height: 70px; width: 70px; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(188, 188, 188, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=120335479&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_6&quot;);"/>
                 </ui:VisualElement>
                 <ui:Slider value="0.3" name="VolumeSlider" high-value="1" fill="true" style="position: absolute; align-self: flex-end; right: 0; left: auto; min-width: 300px; min-height: 48px;"/>
-                <ui:Label text="Nothing Playing" enabled="true" name="SongTitle" style="position: absolute; bottom: 0; left: 150px; color: rgb(255, 255, 255); font-size: 30px;"/>
+                <ui:VisualElement name="SongInformation" style="flex-grow: 1; bottom: 0; left: 150px; position: absolute; flex-shrink: 1;">
+                    <ui:Label text="No Artist" enabled="true" name="SongArtist" style="color: rgb(176, 176, 176); font-size: 20px;"/>
+                    <ui:Label text="Nothing Playing" enabled="true" name="SongTitle" style="color: rgb(255, 255, 255); font-size: 30px;"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="MainView" style="flex-grow: 1; flex-direction: row;">
