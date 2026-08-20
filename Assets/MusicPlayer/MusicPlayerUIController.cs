@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MyBox;
 using Tools;
+using System;
 
 public class MusicPlayerUIController : MonoBehaviour
 {
@@ -54,6 +55,7 @@ public class MusicPlayerUIController : MonoBehaviour
     Slider volumeSlider;
 
     Slider playbackSlider;
+    Label playbackTime;
 
     [Header("Resources")]
     public Sprite ShuffleIcon;
@@ -117,6 +119,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         volumeSlider = root.Q<Slider>("VolumeSlider");
 
+        playbackTime = root.Q<Label>("PlaybackTime");
         playbackSlider = root.Q<Slider>("PlaybackSlider");
 
         //initialize song change event
@@ -361,6 +364,10 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         if (!musicPlayer.paused && !playbackSliderDragged)
             playbackSlider.value = musicPlayer.playbackTime;
+
+        TimeSpan time = TimeSpan.FromSeconds(musicPlayer.playbackTime);
+
+        playbackTime.text = time.ToString("mm':'ss");
 
         musicPlayer.UserVolume = volumeSlider.value;
     }
