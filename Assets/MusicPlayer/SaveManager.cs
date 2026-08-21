@@ -86,7 +86,7 @@ public class SaveFile
     /// </summary>
     public List<string> cachedText = new();
 
-    public SaveFile(string fileName, string fileEnding = ".txt", string savePath = null)
+    public SaveFile(string fileName, string fileEnding = ".txt", string savePath = null, bool createIfNotFound = true)
     {
         if (fileName != null)
             SavedName = fileName + fileEnding;
@@ -97,11 +97,16 @@ public class SaveFile
 
         if (!File.Exists(SavedPath))
         {
-            File.CreateText(SavedPath);
+            Debug.LogWarning($"{fileName} does not exist");
 
-            WriteFile();
+            if (createIfNotFound)
+            {
+                File.CreateText(SavedPath);
 
-            Debug.Log($"File '{fileName}' does not exist. creating File");
+                WriteFile();
+
+                Debug.Log($"creating {fileName}");
+            }
         }
 
         SaveManager.RegisterFile(this);

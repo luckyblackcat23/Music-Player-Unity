@@ -3,6 +3,7 @@
     <ui:VisualElement name="Panel" class="accentBackgroundColor" style="flex-grow: 1; flex-direction: column-reverse;">
         <ui:VisualElement name="VisualElement" class="Panel" style="flex-direction: column-reverse; height: 150px; flex-shrink: 1; flex-grow: 0; flex-basis: auto; background-color: rgba(0, 0, 0, 0.69);">
             <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                <ui:Label text="00:00" name="PlaybackTime" style="width: 60px;"/>
                 <ui:Slider value="0" high-value="100" fill="true" name="PlaybackSlider" style="height: 20px; min-height: 20px; flex-grow: 1;"/>
             </ui:VisualElement>
             <ui:VisualElement name="ControlBar" style="flex-direction: row; height: 100%;">

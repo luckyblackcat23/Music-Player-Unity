@@ -299,7 +299,7 @@ public class MusicPlayerUIController : MonoBehaviour
                         searchTempSongsQueue.Add(song);
             }
 
-            if (x.newValue == string.Empty)
+            if (string.IsNullOrEmpty(x.newValue))
                 songQueue.itemsSource = queue;
             else
                 songQueue.itemsSource = searchTempSongsQueue;
@@ -307,18 +307,20 @@ public class MusicPlayerUIController : MonoBehaviour
             songQueue.Rebuild();
         });
 
+        //maybe implement a way to differentiate between checking every folder and checking just the active one
         searchBarPlaylists.RegisterCallback<ChangeEvent<string>>((x) =>
         {
             searchTempSongsPlaylists.Clear();
 
             foreach (FileNode playlist in playlistDirectory.GetAllChildren())
             {
-                if (playlist.Name.Contains(x.newValue, System.StringComparison.OrdinalIgnoreCase))
-                    searchTempSongsPlaylists.Add(playlist);
+                if (!playlist.IsDirectory)
+                    if (playlist.Name.Contains(x.newValue, StringComparison.OrdinalIgnoreCase))
+                        searchTempSongsPlaylists.Add(playlist);
             }
 
-            if (x.newValue == string.Empty)
-                playlistList.itemsSource = playlistDirectory.GetAllChildren();
+            if (string.IsNullOrEmpty(x.newValue))
+                playlistList.itemsSource = playlistDirectory.Children;
             else
                 playlistList.itemsSource = searchTempSongsPlaylists;
 
@@ -441,7 +443,7 @@ public class MusicPlayerUIController : MonoBehaviour
         }
         else
         {
-            Playlist playlist = Playlist.GetFromPath(currentPlaylistDirectory.Children[index].Path);
+            Playlist playlist = Playlist.GetFromPath(node.Path);
 
             element.Q<Label>("title").text = playlist.playlistName;
 
@@ -449,15 +451,18 @@ public class MusicPlayerUIController : MonoBehaviour
 
             SongInfo[] songs = playlist.GetSongs();
 
-            if (!songs[0].MetaDataLoaded)
+            if(songs.Length > 0)
             {
-                songs[0].GetSongInfo();
-                songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
+                if (!songs[0].MetaDataLoaded)
+                {
+                    songs[0].GetSongInfo();
+                    songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
+                }
+
+                albumArt.style.backgroundImage = songs[0].AlbumCover;
             }
 
             element.userData = playlist;
-
-            albumArt.style.backgroundImage = songs[0].AlbumCover;
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
@@ -690,7 +695,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         foreach (VisualElement element in root.Query(className: "unity-base-slider__dragger").ToList())
         {
-            element.style.backgroundColor = accentDark;
+            element.style.backgroundColor = accentLight;
         }
 
         foreach (VisualElement element in root.Query(className: "unity-base-slider__tracker").ToList())

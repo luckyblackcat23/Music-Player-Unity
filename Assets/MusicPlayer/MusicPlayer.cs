@@ -439,13 +439,16 @@ public class MusicPlayer : MonoBehaviour
 
     public void ShuffleQueue()
     {
-        SongInfo currentSong = musicQueue[currentSongIndex];
+        if(musicQueue.Count > 0)
+        {
+            SongInfo currentSong = musicQueue[currentSongIndex];
 
-        musicQueue.Shuffle();
+            musicQueue.Shuffle();
 
-        currentSongIndex = musicQueue.IndexOf(currentSong);
+            currentSongIndex = musicQueue.IndexOf(currentSong);
 
-        OnSongShuffle.Invoke();
+            OnSongShuffle.Invoke();
+        }
     }
 
     //file stuff

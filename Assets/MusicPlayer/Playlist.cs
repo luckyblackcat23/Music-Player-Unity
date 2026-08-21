@@ -12,7 +12,7 @@ public class Playlist : SaveFile
     public string playlistName;
 
     //create playlist
-    public Playlist(string fileName, string savePath = null) : base(fileName, "m3u", savePath)
+    public Playlist(string fileName, string savePath = null) : base(fileName, "m3u", savePath, false)
     {
 
     }

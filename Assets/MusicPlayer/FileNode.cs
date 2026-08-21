@@ -3,7 +3,7 @@ using System.IO;
 
 public class FileNode
 {
-    public static readonly bool readAllFiles = false;
+    public static readonly bool readAllFileTypes = false;
 
     public string Name { get; }
     public string Path { get; }
@@ -48,7 +48,7 @@ public class FileNode
 
         foreach (FileInfo file in directory.GetFiles())
         {
-            if (!readAllFiles)
+            if (!readAllFileTypes)
             {
                 if (supportedFileTypes.Contains(file.Extension.ToLower()))
                     node.Children.Add(new FileNode(file.Name, file.FullName, false));
@@ -74,7 +74,9 @@ public class FileNode
         foreach (FileNode child in node.Children)
         {
             result.Add(child);
-            result.AddRange(GetAllChildren(child));
+
+            if (child.IsDirectory)
+                result.AddRange(GetAllChildren(child));
         }
 
         return result;
