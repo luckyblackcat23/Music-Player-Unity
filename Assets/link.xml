@@ -1,0 +1,4 @@
+<linker>
+  <assembly fullname="TagLibSharp"/>
+  <assembly fullname="ManagedBass"/>
+</linker>

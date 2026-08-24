@@ -12,8 +12,6 @@ public class SongInfo
 
     public float RMS;
 
-    public AudioClip audioClip;
-
     public string SongPath;
 
     private Texture2D _albumCover;
@@ -47,7 +45,7 @@ public class SongInfo
 
     public double Duration;
 
-    public SongInfo(string songPath, Texture2D albumCover = null, string title = "Unknown", string romanisedTitle = "Unknown", string artist = "Unknown", string romanisedArtist = "Unkown", string album = "Unknown", string romanisedAlbum = "Unkown", uint year = 0, string genre = "Unknown genre", double duration = 0)
+    public SongInfo(string songPath, Texture2D albumCover = null, string title = "Unknown", string romanisedTitle = "Unknown", string artist = "Unknown", string romanisedArtist = "Unknown", string album = "Unknown", string romanisedAlbum = "Unknown", uint year = 0, string genre = "Unknown genre", double duration = 0)
     {
         SongPath = songPath;
 
@@ -150,14 +148,8 @@ public class SongInfo
                 {
                     try
                     {
-                        //thank you chatGPT. please dont fuck me over later when i realise i never double checked this
-                        using var ms = new MemoryStream(tfile.Tag.Pictures[0].Data.Data);
-
-                        // Reset position just to be safe
-                        ms.Position = 0;
-
                         // Read bytes
-                        byte[] data = ms.ToArray();
+                        byte[] data = tfile.Tag.Pictures[0].Data.Data;
 
                         // Create an empty texture (size doesn't matter; LoadImage replaces it)
                         Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
@@ -183,6 +175,15 @@ public class SongInfo
             MetaDataLoaded = true;
 
             SearchMetaDataLoaded = true;
+        }
+    }
+
+    public void ReleaseAlbumCover()
+    {
+        if (AlbumCover != null)
+        {
+            UnityEngine.Object.Destroy(AlbumCover);
+            AlbumCover = null;
         }
     }
 }

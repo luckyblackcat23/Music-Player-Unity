@@ -160,46 +160,43 @@ public class MusicPlayer : MonoBehaviour
 
         if(audioSource.clip == null)
         {
-            if(currentSong.audioClip == null)
+            StartCoroutine(GetClipFromFile(new FileInfo(currentSong.SongPath), clip =>
             {
-                StartCoroutine(GetClipFromFile(new FileInfo(currentSong.SongPath), clip =>
+                if (clip == null)
                 {
-                    if (clip == null)
-                    {
-                        playbackTime = 0;
-                        return; // maybe log an error here?
-                    }
+                    playbackTime = 0;
+                    return; // maybe log an error here?
+                }
 
-                    paused = false;
+                paused = false;
 
-                    if (clip != audioSource.clip)
-                    {
-                        playbackTime = 0;
-                    }
+                if (clip != audioSource.clip)
+                {
+                    playbackTime = 0;
+                }
 
-                    if (clip == null || clip != audioSource.clip)
-                    {
-                        OnSongChange.Invoke();
-                    }
+                if (clip == null || clip != audioSource.clip)
+                {
+                    OnSongChange.Invoke();
+                }
 
-                    audioSource.clip = clip;
+                audioSource.clip = clip;
 
-                    if (currentSong.RMS <= 0)
-                    {
-                        currentSong.RMS = CalculateWindowedRMS(currentSong.SongPath);
-                        Debug.Log("RMS = " + currentSong.RMS);
-                    }
+                if (currentSong.RMS <= 0)
+                {
+                    currentSong.RMS = CalculateWindowedRMS(currentSong.SongPath);
+                    Debug.Log("RMS = " + currentSong.RMS);
+                }
 
-                    UpdateVolume();
+                UpdateVolume();
 
-                    audioSource.time = playbackTime;
-                    audioSource.Play();
+                audioSource.time = playbackTime;
+                audioSource.Play();
 
-                    clipLength = clip.length;
+                clipLength = clip.length;
 
-                    songEnding = false;
-                }));
-            }
+                songEnding = false;
+            }));
         }
         else
         {
