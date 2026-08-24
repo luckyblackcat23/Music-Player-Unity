@@ -177,10 +177,10 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 1
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 1
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -474,6 +474,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnPause:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSongShuffle:
     m_PersistentCalls:
       m_Calls: []
   useExternalSongs: 0
