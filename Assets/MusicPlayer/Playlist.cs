@@ -175,36 +175,6 @@ public class Playlist : SaveFile
         Variables.Add(newSong);
     }
 
-    /*
-    public async Task<Texture2D> GetPlaylistCover()
-    {
-        if (!File.Exists(PlaylistCoverPath.Value == null ? PlaylistCoverPath.Value : ""))
-        {
-            Debug.Log((PlaylistCoverPath.Value ?? "empty") + " does not have a cover");
-            return GetSongs()[0].AlbumCover;
-        }
-        else
-        {
-            using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture("file://" + PlaylistCoverPath))
-            {
-                await uwr.SendWebRequest();
-
-                if (uwr.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.Log(uwr.error);
-                }
-                else
-                {
-                    // Get downloaded asset bundle
-                    return DownloadHandlerTexture.GetContent(uwr);
-                }
-            }
-        }
-
-        return null;
-    }
-    */
-
     public SongInfo[] GetSongs()
     {
         SongInfo[] songs = new SongInfo[Variables.Count];

@@ -65,6 +65,8 @@ public class SongInfo
         Genre = genre;
 
         Duration = duration;
+
+        OnMetaDataLoaded += onMetaDataLoaded;
     }
 
     public event Action OnMetaDataLoaded;
@@ -111,8 +113,6 @@ public class SongInfo
     /// <param name="overwrite">overwrite existing values, if there are any</param>
     public void GetSongInfo(bool overwrite = false)
     {
-        OnMetaDataLoaded = onMetaDataLoaded;
-
         if (!MetaDataLoaded || overwrite)
         {
             //using var converter = new KawazuConverter();
@@ -143,7 +143,6 @@ public class SongInfo
 
                 */
 
-                // Album art (optional: lazy-load later)
                 if (tfile.Tag.Pictures.Length > 0)
                 {
                     try
@@ -171,19 +170,21 @@ public class SongInfo
                 Debug.LogError($"Error processing {SongPath}: {ex.Message}");
             }
 
-            OnMetaDataLoaded.Invoke();
+            OnMetaDataLoaded?.Invoke();
             MetaDataLoaded = true;
 
             SearchMetaDataLoaded = true;
         }
     }
 
-    public void ReleaseAlbumCover()
+    public void DisposeAlbumCover()
     {
         if (AlbumCover != null)
         {
             UnityEngine.Object.Destroy(AlbumCover);
             AlbumCover = null;
+
+            MetaDataLoaded = false;
         }
     }
 }

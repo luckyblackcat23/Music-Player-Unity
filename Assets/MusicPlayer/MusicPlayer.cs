@@ -81,7 +81,10 @@ public class MusicPlayer : MonoBehaviour
     public int currentSongIndex = 0;
     public SongInfo CurrentSong()
     {
-        return musicQueue[currentSongIndex];
+        if (musicQueue == null || musicQueue?.Count == 0)
+            return null;
+        else
+            return musicQueue[currentSongIndex];
     }
     
     public AudioSource audioSource;

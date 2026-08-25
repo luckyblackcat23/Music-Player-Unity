@@ -10,6 +10,12 @@ public class MusicPlayerUIController : MonoBehaviour
 {
     public MusicPlayer musicPlayer;
 
+    class SongListItemData
+    {
+        public SongInfo Song;
+        public Action MetadataCallback;
+    }
+
     public bool playbackSliderDragged;
 
     [Header("UI")]
@@ -64,7 +70,7 @@ public class MusicPlayerUIController : MonoBehaviour
     public Sprite DontLoopIcon;
     public Sprite LoopIcon;
     public Sprite LoopSingleIcon;
-    
+
     public Sprite FolderIcon;
 
     void OnEnable()
@@ -85,6 +91,32 @@ public class MusicPlayerUIController : MonoBehaviour
 
         playbackSlider.UnregisterCallback<MouseCaptureEvent>(OnPlaybackDrag);
         playbackSlider.UnregisterCallback<MouseCaptureOutEvent>(OnPlaybackRelease);
+
+        musicPlayer.OnSongShuffle.RemoveListener(RefreshSongQueue);
+        musicPlayer.OnSongChange.RemoveListener(RefreshSongQueue);
+    }
+
+    private int lastDisplayedSecond = -1;
+
+    private void Update()
+    {
+        if (!musicPlayer.paused && !playbackSliderDragged)
+            playbackSlider.value = musicPlayer.playbackTime;
+
+        int currentSecond = Mathf.FloorToInt(musicPlayer.playbackTime);
+
+        if (currentSecond != lastDisplayedSecond)
+        {
+            lastDisplayedSecond = currentSecond;
+
+            TimeSpan time = TimeSpan.FromSeconds(currentSecond);
+            playbackTime.text = time.ToString(@"mm\:ss");
+        }
+
+        volumeSlider.RegisterValueChangedCallback(evt =>
+        {
+            musicPlayer.UserVolume = evt.newValue;
+        });
     }
 
     void SetupListView()
@@ -261,6 +293,7 @@ public class MusicPlayerUIController : MonoBehaviour
         };
 
         songList.bindItem = BindSongListItem;
+        songList.unbindItem = UnbindSongListItem;
 
         songList.selectionType = SelectionType.Single;
 
@@ -328,7 +361,7 @@ public class MusicPlayerUIController : MonoBehaviour
         });
 
         //initialize button events
-        shuffleButton.clicked += () => 
+        shuffleButton.clicked += () =>
         {
             musicPlayer.ShuffleQueue();
             RefreshSongQueue();
@@ -337,7 +370,7 @@ public class MusicPlayerUIController : MonoBehaviour
         playButton.clicked += () => musicPlayer.TogglePause();
         nextButton.clicked += () => musicPlayer.PlayNext();
         loopButton.clicked += () =>
-        { 
+        {
             musicPlayer.IncrementLoop();
             switch (musicPlayer.Loop)
             {
@@ -362,23 +395,11 @@ public class MusicPlayerUIController : MonoBehaviour
         playbackSlider.RegisterCallback<MouseCaptureOutEvent>(OnPlaybackRelease);
     }
 
-    private void Update()
-    {
-        if (!musicPlayer.paused && !playbackSliderDragged)
-            playbackSlider.value = musicPlayer.playbackTime;
-
-        TimeSpan time = TimeSpan.FromSeconds(musicPlayer.playbackTime);
-
-        playbackTime.text = time.ToString("mm':'ss");
-
-        musicPlayer.UserVolume = volumeSlider.value;
-    }
-
     void BindQueueItem(VisualElement element, int index)
     {
         SongInfo song = ((List<SongInfo>)songQueue.itemsSource)[index];
 
-        if(song != null)
+        if (song != null)
         {
             if (!song.MetaDataLoaded)
             {
@@ -398,9 +419,9 @@ public class MusicPlayerUIController : MonoBehaviour
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
-            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as Action;
 
-            System.Action action = () => PlaySongFromQueue(index);
+            Action action = () => PlaySongFromQueue(index);
 
             thumbnailPlayButton.userData = action;
             thumbnailPlayButton.clicked += action;
@@ -434,9 +455,9 @@ public class MusicPlayerUIController : MonoBehaviour
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
-            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as Action;
 
-            System.Action action = () => ChangeDisplayedPlaylistDirectory(node);
+            Action action = () => ChangeDisplayedPlaylistDirectory(node);
 
             thumbnailPlayButton.userData = action;
             thumbnailPlayButton.clicked += action;
@@ -451,12 +472,12 @@ public class MusicPlayerUIController : MonoBehaviour
 
             SongInfo[] songs = playlist.GetSongs();
 
-            if(songs.Length > 0)
+            if (songs.Length > 0)
             {
                 if (!songs[0].MetaDataLoaded)
                 {
                     songs[0].GetSongInfo();
-                    songs[0].OnMetaDataLoaded += () => { RefreshPlaylistList(); };
+                    songs[0].OnMetaDataLoaded += () => RefreshPlaylistList();
                 }
 
                 albumArt.style.backgroundImage = songs[0].AlbumCover;
@@ -466,9 +487,9 @@ public class MusicPlayerUIController : MonoBehaviour
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
-            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+            thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as Action;
 
-            System.Action action = () => PlayPlaylist(playlist);
+            Action action = () => PlayPlaylist(playlist);
 
             thumbnailPlayButton.userData = action;
             thumbnailPlayButton.clicked += action;
@@ -479,10 +500,26 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         SongInfo song = ((List<SongInfo>)songList.itemsSource)[index];
 
+        SongListItemData data = element.userData as SongListItemData;
+
+        if (data == null)
+        {
+            data = new SongListItemData();
+            element.userData = data;
+        }
+
+        data.Song = song;
+
         if (!song.MetaDataLoaded)
         {
             song.GetSongInfo();
-            song.OnMetaDataLoaded += () => songList.RefreshItem(index);
+
+            data.MetadataCallback = () =>
+            {
+                songList.RefreshItem(index);
+            };
+
+            song.OnMetaDataLoaded += data.MetadataCallback;
         }
 
         element.Q<Label>("title").text = song.Title;
@@ -490,19 +527,40 @@ public class MusicPlayerUIController : MonoBehaviour
         element.Q<Label>("duration").text =
             song.SearchMetaDataLoaded ? song.Duration.ToString() : "--:--";
 
-        element.userData = song;
-
         VisualElement albumArt = element.Q<VisualElement>("albumArt");
         albumArt.style.backgroundImage = song.AlbumCover;
 
-        Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
+        Button thumbnailPlayButton =
+            element.Q<Button>("thumbnailPlayButton");
 
-        thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as System.Action;
+        thumbnailPlayButton.clicked -=
+            thumbnailPlayButton.userData as Action;
 
-        System.Action action = () => PlaySong(song);
+        Action action = () => PlaySong(song);
 
         thumbnailPlayButton.userData = action;
         thumbnailPlayButton.clicked += action;
+    }
+
+    void UnbindSongListItem(VisualElement element, int index)
+    {
+        SongListItemData data = element.userData as SongListItemData;
+
+        if (data == null)
+            return;
+
+        if (data.Song != null && data.MetadataCallback != null)
+        {
+            data.Song.OnMetaDataLoaded -= data.MetadataCallback;
+            data.MetadataCallback = null;
+        }
+
+        if (data.Song != null && data.Song != musicPlayer.CurrentSong())
+        {
+            data.Song.DisposeAlbumCover();
+        }
+
+        data.Song = null;
     }
 
     void OnSongItemRightClick(PointerDownEvent evt)
@@ -671,7 +729,7 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         playlistList.RefreshItems();
     }
-    
+
     void ApplyAccentToClasses(VisualElement root)
     {
         Color accent = SystemTheme.GetAccentColour();
