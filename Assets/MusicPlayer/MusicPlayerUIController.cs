@@ -10,8 +10,9 @@ public class MusicPlayerUIController : MonoBehaviour
 {
     public MusicPlayer musicPlayer;
 
-    class SongListItemData
+    class ListItemData
     {
+        public FileNode playlist;
         public SongInfo Song;
         public Action MetadataCallback;
     }
@@ -500,11 +501,11 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         SongInfo song = ((List<SongInfo>)songList.itemsSource)[index];
 
-        SongListItemData data = element.userData as SongListItemData;
+        ListItemData data = element.userData as ListItemData;
 
         if (data == null)
         {
-            data = new SongListItemData();
+            data = new ListItemData();
             element.userData = data;
         }
 
@@ -544,7 +545,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void UnbindSongListItem(VisualElement element, int index)
     {
-        SongListItemData data = element.userData as SongListItemData;
+        ListItemData data = element.userData as ListItemData;
 
         if (data == null)
             return;
@@ -568,7 +569,8 @@ public class MusicPlayerUIController : MonoBehaviour
         if (evt.button != 1)
             return;
 
-        SongInfo song = (SongInfo)((VisualElement)evt.currentTarget).userData;
+        ListItemData songData = (ListItemData)((VisualElement)evt.currentTarget).userData;
+        SongInfo song = songData.Song;
 
         contextMenu.AddItem("Play", () => PlaySong(song));
 
