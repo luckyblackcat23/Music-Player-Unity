@@ -34,6 +34,7 @@
 
 .unity-text-element {
     color: rgb(255, 255, 255);
+    -unity-font-definition: url("project://database/Assets/MusicPlayer/DotGothic16-Regular.ttf?fileID=12800000&guid=8feed8489bdd90b4196f246200e42d0a&type=3#DotGothic16-Regular");
 }
 
 .unity-tab-view__content-viewport {
@@ -119,4 +120,12 @@
     border-right-color: rgba(255, 255, 255, 0.35);
     border-top-color: rgba(255, 255, 255, 0.35);
     border-bottom-color: rgba(255, 255, 255, 0.35);
+}
+
+.unity-tab-view__content-viewport {
+    height: 40px;
+}
+
+.unity-tab__header {
+    height: 40px;
 }

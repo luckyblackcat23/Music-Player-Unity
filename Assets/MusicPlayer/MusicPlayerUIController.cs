@@ -20,7 +20,7 @@ public class MusicPlayerUIController : MonoBehaviour
     public bool playbackSliderDragged;
 
     [Header("UI")]
-    [SerializeField] UIDocument document;
+    [SerializeField] PanelRenderer document;
     [SerializeField] VisualTreeAsset songItemTemplate;
     [SerializeField] VisualTreeAsset PlaylistItemTemplate;
 
@@ -76,7 +76,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnEnable()
     {
-        SetupListView();
+        GetComponent<PanelRenderer>().RegisterUIReloadCallback(SetupListView);
     }
 
     void OnDisable()
@@ -95,6 +95,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
         musicPlayer.OnSongShuffle.RemoveListener(RefreshSongQueue);
         musicPlayer.OnSongChange.RemoveListener(RefreshSongQueue);
+
+        GetComponent<PanelRenderer>().UnregisterUIReloadCallback(SetupListView);
     }
 
     private int lastDisplayedSecond = -1;
@@ -106,11 +108,12 @@ public class MusicPlayerUIController : MonoBehaviour
 
         int currentSecond = Mathf.FloorToInt(musicPlayer.playbackTime);
 
-        if (currentSecond != lastDisplayedSecond)
+        if (currentSecond != lastDisplayedSecond && playbackTime != null)
         {
             lastDisplayedSecond = currentSecond;
 
             TimeSpan time = TimeSpan.FromSeconds(currentSecond);
+
             playbackTime.text = time.ToString(@"mm\:ss");
         }
 
@@ -120,10 +123,15 @@ public class MusicPlayerUIController : MonoBehaviour
         });
     }
 
-    void SetupListView()
+    int uiVersion = 0;
+    void SetupListView(PanelRenderer panelRenderer, VisualElement root, int version)
     {
-        //assign variables
-        VisualElement root = document.rootVisualElement;
+        // The version number only changes when the UI actually reloads, 
+        // so this checks prevents duplicated elements.
+        if (uiVersion == version)
+            return;
+
+        uiVersion = version;
 
         ApplyAccentToClasses(root);
 

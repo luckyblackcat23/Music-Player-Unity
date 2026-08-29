@@ -41,7 +41,7 @@
                 </ui:TabView>
             </ui:VisualElement>
             <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.39);">
-                <ui:TextField placeholder-text="..." name="SearchBar" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
+                <ui:TextField placeholder-text="..." name="SearchBar" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 40px;"/>
                 <ui:ListView name="SongList" class="panel" style="flex-grow: 1;"/>
             </ui:VisualElement>
         </ui:VisualElement>
