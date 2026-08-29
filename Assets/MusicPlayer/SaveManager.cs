@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using UnityEngine;
 
@@ -437,4 +438,82 @@ public class SavePath : SaveVariable
     public override void SetFromString(string v, bool UpdateOnChange = true) => Set(v, UpdateOnChange);
 
     internal override string SavedString() { return SavedName; }
+}
+
+/// <summary>
+/// Stores and retrieves Color values
+/// </summary>
+public class SaveColor : SaveVariable
+{
+    public static implicit operator Color(SaveColor obj) => obj.Get();
+
+    public SaveColor(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+
+    public Color Get() => ParseColor(Value);
+
+    public void Set(Color v, bool UpdateOnChange = true)
+    {
+        Value = string.Join(",",
+            v.r.ToString(CultureInfo.InvariantCulture),
+            v.g.ToString(CultureInfo.InvariantCulture),
+            v.b.ToString(CultureInfo.InvariantCulture),
+            v.a.ToString(CultureInfo.InvariantCulture));
+
+        if (UpdateOnChange)
+        {
+            SaveFile.WriteFile();
+        }
+    }
+
+    public override object GetAsObject() => Get();
+
+    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((Color)v, UpdateOnChange);
+
+    public override string GetAsString() => Value;
+
+    public override void SetFromString(string v, bool UpdateOnChange = true)
+    {
+        if (TryParseColor(v, out Color color))
+            Set(color, UpdateOnChange);
+        else
+            Value = SerializeColor(Color.black);
+    }
+
+    private static Color ParseColor(string value)
+    {
+        return TryParseColor(value, out Color color) ? color : Color.black;
+    }
+
+    private static bool TryParseColor(string value, out Color color)
+    {
+        color = Color.black;
+
+        if (string.IsNullOrEmpty(value))
+            return false;
+
+        string[] colors = value.Split(',');
+
+        if (colors.Length != 4)
+            return false;
+
+        if (!float.TryParse(colors[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float r) ||
+            !float.TryParse(colors[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float g) ||
+            !float.TryParse(colors[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float b) ||
+            !float.TryParse(colors[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float a))
+        {
+            return false;
+        }
+
+        color = new Color(r, g, b, a);
+        return true;
+    }
+
+    private static string SerializeColor(Color color)
+    {
+        return string.Join(",",
+            color.r.ToString(CultureInfo.InvariantCulture),
+            color.g.ToString(CultureInfo.InvariantCulture),
+            color.b.ToString(CultureInfo.InvariantCulture),
+            color.a.ToString(CultureInfo.InvariantCulture));
+    }
 }

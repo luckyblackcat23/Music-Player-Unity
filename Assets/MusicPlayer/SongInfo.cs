@@ -1,8 +1,8 @@
 using UnityEngine;
-using System.IO;
 using System;
 
 //future improvement: Seperate loading romanized stuff and album covers
+[Serializable]
 public class SongInfo
 {
     public static bool DebugMessages = false;
