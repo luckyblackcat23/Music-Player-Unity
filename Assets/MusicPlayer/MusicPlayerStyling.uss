@@ -129,3 +129,7 @@
 .unity-tab__header {
     height: 40px;
 }
+
+.unity-base-field__input {
+    background-color: rgba(50, 50, 50, 0.839);
+}

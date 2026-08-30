@@ -112,7 +112,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cad32be61e3a9684bb9c17a7103539af
+      spriteID: bce321d0e7df3984a930a50870013eeb
       internalID: 1431608731
       vertices: []
       indices: 
@@ -134,7 +134,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e54a9d6da75dfc04088a807ab48a4691
+      spriteID: 9a9a4fff300911d4ea2ad5d34b6c928a
       internalID: 1985624535
       vertices: []
       indices: 
@@ -156,7 +156,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3c7e8cbdb7fe1d14daff84307011e15c
+      spriteID: 101ae322568333647bfaa94267a5730f
       internalID: 970811466
       vertices: []
       indices: 
@@ -178,7 +178,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8fa9d49fd74f1fb4681c7d14e0db49df
+      spriteID: df1e1f7230cdffa4290bd076c10f345b
       internalID: 935751669
       vertices: []
       indices: 
@@ -200,7 +200,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7e118029cb9ff264bb3193d77efbb9fa
+      spriteID: 6eaf68eebd6ca844e99dcbab23a3eebc
       internalID: 935154823
       vertices: []
       indices: 
@@ -222,7 +222,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 57b775533c54dfe43b6e1cf3ba30d8f7
+      spriteID: 336474cceec38e842be345f7e7000ca6
       internalID: 170404430
       vertices: []
       indices: 
@@ -244,7 +244,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 52ee6d05c0f9b8b41be19387f24bfd76
+      spriteID: 589a4bec65084aa4680aadeb58d6ebc2
       internalID: 120335479
       vertices: []
       indices: 
@@ -266,7 +266,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5dae3260af2881a4980b6bde350def9e
+      spriteID: 7be7130755d9bdc4f9f71761a0c7be62
       internalID: -775752643
       vertices: []
       indices: 
@@ -288,7 +288,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3dc7f3b1e3afc804b8293b850b497a60
+      spriteID: 6813d8f9c874c414a814f2f2b30cfc60
       internalID: 897902550
       vertices: []
       indices: 
@@ -310,8 +310,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 234494904ed203c44b0412f939fa1d66
+      spriteID: e6ad673fa2a005a438dda138efd10710
       internalID: 315903273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MusicPlayerUIAssets_10
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 1
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 675a07bf2db01594ba90a396e0c9dc1e
+      internalID: -366740783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MusicPlayerUIAssets_11
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 1
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f2cea6db4be817f48b4e2c13ca6ecca1
+      internalID: 483678747
       vertices: []
       indices: 
       edges: []
@@ -336,6 +380,8 @@ TextureImporter:
     nameFileIdTable:
       MusicPlayerUIAssets_0: 1431608731
       MusicPlayerUIAssets_1: 1985624535
+      MusicPlayerUIAssets_10: -366740783
+      MusicPlayerUIAssets_11: 483678747
       MusicPlayerUIAssets_2: 970811466
       MusicPlayerUIAssets_3: 935751669
       MusicPlayerUIAssets_4: 935154823
