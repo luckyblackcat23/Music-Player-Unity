@@ -36,6 +36,8 @@ public class MusicPlayerUIController : MonoBehaviour
     List<SongInfo> searchTempSongsQueue = new();
     List<FileNode> searchTempSongsPlaylists = new();
 
+    Button settingsButton;
+
     ListView songQueue;
 
     ListView playlistList;
@@ -116,11 +118,6 @@ public class MusicPlayerUIController : MonoBehaviour
 
             playbackTime.text = time.ToString(@"mm\:ss");
         }
-
-        volumeSlider.RegisterValueChangedCallback(evt =>
-        {
-            musicPlayer.UserVolume = evt.newValue;
-        });
     }
 
     int uiVersion = 0;
@@ -317,7 +314,7 @@ public class MusicPlayerUIController : MonoBehaviour
             {
                 //search Title
                 if (song.Title != null)
-                    if (song.Title.Contains(x.newValue, System.StringComparison.OrdinalIgnoreCase))
+                    if (song.Title.Contains(x.newValue, StringComparison.OrdinalIgnoreCase))
                         searchTempSongs.Add(song);
             }
 
@@ -394,6 +391,11 @@ public class MusicPlayerUIController : MonoBehaviour
                     break;
             }
         };
+
+        volumeSlider.RegisterValueChangedCallback(evt =>
+        {
+            musicPlayer.UserVolume = evt.newValue;
+        });
 
         musicPlayer.OnSongShuffle.AddListener(RefreshSongQueue);
         musicPlayer.OnSongChange.AddListener(RefreshSongQueue);
@@ -740,9 +742,10 @@ public class MusicPlayerUIController : MonoBehaviour
         playlistList.RefreshItems();
     }
 
+    public static SaveColor accent = new("accentColour", defaultValue: SystemTheme.GetAccentColour());
+
     void ApplyAccentToClasses(VisualElement root)
     {
-        Color accent = SystemTheme.GetAccentColour();
         Color accentDark = Color.Lerp(accent, Color.black, 0.3f);
         Color accentLight = Color.Lerp(accent, Color.white, 0.3f);
 
@@ -753,12 +756,12 @@ public class MusicPlayerUIController : MonoBehaviour
 
         foreach (VisualElement element in root.Query(className: "accentBackgroundColor").ToList())
         {
-            element.style.backgroundColor = accent;
+            element.style.backgroundColor = accent.Get();
         }
 
         foreach (VisualElement element in root.Query(className: "accentColor").ToList())
         {
-            element.style.color = accent;
+            element.style.color = accent.Get();
         }
 
         foreach (VisualElement element in root.Query(className: "unity-base-slider__dragger").ToList())

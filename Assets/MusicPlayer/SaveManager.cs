@@ -222,7 +222,7 @@ public abstract class SaveVariable
 
     internal virtual string SavedString() => $"{SavedName}={Value}";
 
-    protected SaveVariable(string savedName, SaveFile saveFile = null)
+    protected SaveVariable(string savedName, SaveFile saveFile = null, object defaultValue = null)
     {
         SavedName = savedName ?? throw new ArgumentNullException(nameof(savedName));
 
@@ -235,6 +235,11 @@ public abstract class SaveVariable
         {
             Debug.Log("unable to save this variable as it already exists in the save manager");
         }
+
+        if(defaultValue != null)
+        {
+            SetFromObject(defaultValue, false);
+        }
     }
 }
 
@@ -246,7 +251,7 @@ public class SaveFloat : SaveVariable
 {
     public static implicit operator float(SaveFloat obj) => obj.Get();
 
-    public SaveFloat(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+    public SaveFloat(string savedName, SaveFile saveFile = null, float defaultValue = 0f) : base(savedName, saveFile, defaultValue) { }
 
     public float Get() => float.TryParse(Value, out var f) ? f : 0f;
 
@@ -280,7 +285,7 @@ public class SaveInt : SaveVariable
 {
     public static implicit operator int(SaveInt obj) => obj.Get();
 
-    public SaveInt(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+    public SaveInt(string savedName, SaveFile saveFile = null, int defaultValue = 0) : base(savedName, saveFile, defaultValue) { }
 
     public int Get() => int.TryParse(Value, out var i) ? i : 0;
 
@@ -314,7 +319,7 @@ public class SaveBool : SaveVariable
 {
     public static implicit operator bool(SaveBool obj) => obj.Get();
 
-    public SaveBool(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+    public SaveBool(string savedName, SaveFile saveFile = null, bool defaultValue = false) : base(savedName, saveFile, defaultValue) { }
 
     public bool Get() => bool.TryParse(Value, out var b) && b;
 
@@ -348,7 +353,7 @@ public class SaveString : SaveVariable
 {
     public static implicit operator string(SaveString obj) => obj.Get();
 
-    public SaveString(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+    public SaveString(string savedName, SaveFile saveFile = null, string defaultValue = default) : base(savedName, saveFile, defaultValue) { }
 
     public string Get() => Value ?? string.Empty;
 
@@ -377,7 +382,7 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
 {
     public static implicit operator T(SaveEnum<T> obj) => obj.Get();
 
-    public SaveEnum(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+    public SaveEnum(string savedName, SaveFile saveFile = null, T defaultValue = default) : base(savedName, saveFile, defaultValue) { }
 
     public T Get()
     {
@@ -447,7 +452,7 @@ public class SaveColor : SaveVariable
 {
     public static implicit operator Color(SaveColor obj) => obj.Get();
 
-    public SaveColor(string savedName, SaveFile saveFile = null) : base(savedName, saveFile) { }
+    public SaveColor(string savedName, SaveFile saveFile = null, Color defaultValue = default) : base(savedName, saveFile, defaultValue) { }
 
     public Color Get() => ParseColor(Value);
 

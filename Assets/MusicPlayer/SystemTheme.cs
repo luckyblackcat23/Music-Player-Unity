@@ -11,13 +11,13 @@ public static class SystemTheme
         switch (Application.platform)
         {
             case RuntimePlatform.WindowsPlayer:
-                return SystemTheme.GetWindowsAccentColor();
+                return GetWindowsAccentColor();
             case RuntimePlatform.WindowsEditor:
-                return SystemTheme.GetWindowsAccentColor();
+                return GetWindowsAccentColor();
             case RuntimePlatform.LinuxEditor:
-                return SystemTheme.GetLinuxAccentColor();
+                return GetLinuxAccentColor();
             case RuntimePlatform.LinuxPlayer:
-                return SystemTheme.GetLinuxAccentColor();
+                return GetLinuxAccentColor();
             default:
                 return new Color(0.2f, 0.6f, 1f);
         }
