@@ -6,7 +6,7 @@
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(50, 50, 50, 0.973); padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px; color: rgb(255, 255, 255);">
             <ui:ScrollView name="ScrollView">
-                <ui:VisualElement style="flex-shrink: 0; flex-direction: row; display: flex;">
+                <ui:VisualElement style="flex-shrink: 0; flex-direction: row; display: flex; margin-top: 2px; margin-bottom: 2px;">
                     <ui:VisualElement name="Left" style="flex-grow: 0; flex-shrink: 0; flex-basis: 30%;">
                         <ui:Label text="Accent Colour"/>
                         <ui:Button text="Reset To System Theme" name="ResetAccent" style="margin-right: 4px; margin-left: 0; align-self: flex-start;"/>
@@ -17,12 +17,20 @@
                         <ui:Slider label="Blue" value="0.5" high-value="1" name="ThemeBlue"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-shrink: 0; flex-direction: row;">
+                <ui:VisualElement style="flex-shrink: 0; flex-direction: row; margin-top: 2px; margin-bottom: 2px;">
                     <ui:VisualElement name="Left" style="flex-shrink: 0; flex-basis: 30%;">
                         <ui:Label text="Screen Scale Mode "/>
                     </ui:VisualElement>
                     <ui:VisualElement name="Right" style="flex-shrink: 0; flex-grow: 1;">
-                        <ui:EnumField label="" value="ConstantPixelSize" type="UnityEngine.UIElements.PanelScaleMode, UnityEngine.UIElementsModule" name="ScreenScaleMode"/>
+                        <ui:EnumField label="" value="ConstantPixelSize" type="UnityEngine.UIElements.PanelScaleMode, UnityEngine.UIElementsModule" name="ScreenScaleMode" style="margin-left: 3px;"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-shrink: 0; flex-direction: row; margin-top: 2px; margin-bottom: 2px;">
+                    <ui:VisualElement name="Left" style="flex-shrink: 0; flex-basis: 30%;">
+                        <ui:Label text="Audio Normalisation"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Right" style="flex-shrink: 0; flex-grow: 1;">
+                        <ui:Toggle label="" name="AudioNormalisation" style="margin-left: 7px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:ScrollView>

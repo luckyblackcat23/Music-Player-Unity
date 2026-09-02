@@ -46,13 +46,13 @@ public class MusicPlayer : MonoBehaviour
 
     const float targetRMS = 0.12f;
 
-    private static SaveFloat userVolume = new("userVolume", saveData);
+    private static SaveFloat userVolumeSave = new("userVolume", saveData);
     public float UserVolume
     {
-        get => userVolume;
+        get => userVolumeSave;
         set
         {
-            userVolume.Set(Mathf.Clamp01(value));
+            userVolumeSave.Set(Mathf.Clamp01(value));
 
             UpdateVolume();
         }
@@ -69,6 +69,8 @@ public class MusicPlayer : MonoBehaviour
 
     [ReadOnly]
     public bool shuffle = true;
+
+    public static SaveBool AudioNormalisationEnabled = new SaveBool("AudioNormalisationEnabled", defaultValue: true);
 
     public List<SongInfo> musicQueue = new();
 
@@ -182,10 +184,13 @@ public class MusicPlayer : MonoBehaviour
 
                 audioSource.clip = clip;
 
-                if (currentSong.RMS <= 0)
+                if (AudioNormalisationEnabled)
                 {
-                    currentSong.RMS = CalculateWindowedRMS(currentSong.SongPath);
-                    Debug.Log("RMS = " + currentSong.RMS);
+                    if (currentSong.RMS <= 0)
+                    {
+                        currentSong.RMS = CalculateWindowedRMS(currentSong.SongPath);
+                        Debug.Log("RMS = " + currentSong.RMS);
+                    }
                 }
 
                 UpdateVolume();
@@ -608,7 +613,10 @@ public class MusicPlayer : MonoBehaviour
             NormalisationGain = targetRMS / CurrentSong().RMS;
         }
 
-        audioSource.volume = userVolume * NormalisationGain;
+        if (AudioNormalisationEnabled)
+            audioSource.volume = UserVolume * NormalisationGain;
+        else
+            audioSource.volume = UserVolume;
     }
 
     public static float CalculateWindowedRMS(string path)

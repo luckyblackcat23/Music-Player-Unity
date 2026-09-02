@@ -22,6 +22,9 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
 
     //screen scale mode
     EnumField screenScaleMode;
+
+    //audio normalisation
+    Toggle audioNormalisation;
     
     int uiVersion = 0;
 
@@ -57,6 +60,8 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
 
         screenScaleMode = Root.Q<EnumField>("ScreenScaleMode");
 
+        audioNormalisation = Root.Q<Toggle>("AudioNormalisation");
+
         exitButton.clicked += ExitOptionsMenu;
 
         themeRed.value = MusicPlayerUIController.accent.Get().r;
@@ -70,6 +75,10 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         resetAccent.clicked += () => MusicPlayerUIController.accent.Set(SystemTheme.GetAccentColour());
 
         screenScaleMode.RegisterValueChangedCallback((evt) => panelSettings.scaleMode = (PanelScaleMode)evt.newValue);
+
+        audioNormalisation.value = MusicPlayer.AudioNormalisationEnabled;
+
+        audioNormalisation.RegisterValueChangedCallback((evt) => MusicPlayer.AudioNormalisationEnabled.Set(evt.newValue));
 
         //hide on start
         Root.style.display = DisplayStyle.None;
