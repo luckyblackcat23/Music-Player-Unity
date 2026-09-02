@@ -107,7 +107,7 @@
 }
 
 .unity-base-slider__dragger {
-    background-color: rgb(197, 148, 0);
+    background-color: rgb(168, 168, 168);
     border-left-color: rgb(0, 0, 0);
     border-right-color: rgb(0, 0, 0);
     border-top-color: rgb(0, 0, 0);
@@ -115,7 +115,7 @@
 }
 
 .unity-base-slider--horizontal .unity-base-slider__tracker {
-    background-color: rgb(197, 148, 0);
+    background-color: rgba(175, 175, 175, 0.549);
     border-left-color: rgba(255, 255, 255, 0.35);
     border-right-color: rgba(255, 255, 255, 0.35);
     border-top-color: rgba(255, 255, 255, 0.35);
@@ -132,4 +132,8 @@
 
 .unity-base-field__input {
     background-color: rgba(50, 50, 50, 0.839);
+}
+
+.unity-base-slider__input {
+    background-color: rgba(0, 0, 0, 0);
 }

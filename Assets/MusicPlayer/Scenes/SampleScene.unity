@@ -571,6 +571,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicPlayerOptionsMenu
   document: {fileID: 2071200954}
+  panelSettings: {fileID: 11400000, guid: 76e3c6ee300b8c24280bb64db42066d4, type: 2}
 --- !u!1931382934 &2071200954
 PanelRenderer:
   m_ObjectHideFlags: 0

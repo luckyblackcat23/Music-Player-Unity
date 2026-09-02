@@ -1,19 +1,20 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/MusicPlayer/MusicPlayerStyling.uss?fileID=7433441132597879392&amp;guid=e31be3d781b4572418858f823860acfb&amp;type=3#MusicPlayerStyling"/>
     <ui:VisualElement style="display: flex; width: 100%; height: 100%;">
-        <ui:VisualElement name="topBar" style="height: 40px; background-color: rgb(35, 35, 35);">
-            <ui:Button text="" emoji-fallback-support="false" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=315903273&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_9" name="exitButton" style="width: 36px; align-self: flex-end; height: 36px; background-color: rgba(0, 0, 0, 0); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0);"/>
+        <ui:VisualElement name="topBar" style="height: 40px; background-color: rgba(35, 35, 35, 0.984);">
+            <ui:Button text="" emoji-fallback-support="false" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=315903273&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_9" name="ExitButton" style="width: 36px; align-self: flex-end; height: 36px; background-color: rgba(0, 0, 0, 0); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0);"/>
         </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 1; background-color: rgb(50, 50, 50); padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px; color: rgb(255, 255, 255);">
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(50, 50, 50, 0.973); padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px; color: rgb(255, 255, 255);">
             <ui:ScrollView name="ScrollView">
                 <ui:VisualElement style="flex-shrink: 0; flex-direction: row; display: flex;">
                     <ui:VisualElement name="Left" style="flex-grow: 0; flex-shrink: 0; flex-basis: 30%;">
                         <ui:Label text="Accent Colour"/>
+                        <ui:Button text="Reset To System Theme" name="ResetAccent" style="margin-right: 4px; margin-left: 0; align-self: flex-start;"/>
                     </ui:VisualElement>
                     <ui:VisualElement name="Right" style="flex-shrink: 0; flex-grow: 1;">
-                        <ui:FloatField label="Red" value="0.2" name="ThemeRed"/>
-                        <ui:FloatField label="Green" value="0.6" name="ThemeGreen"/>
-                        <ui:FloatField label="Blue" value="1" name="ThemeBlue"/>
+                        <ui:Slider label="Red" value="0.5" high-value="1" name="ThemeRed"/>
+                        <ui:Slider label="Green" value="0.5" high-value="1" name="ThemeGreen"/>
+                        <ui:Slider label="Blue" value="0.5" high-value="1" name="ThemeBlue"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-shrink: 0; flex-direction: row;">
@@ -21,7 +22,7 @@
                         <ui:Label text="Screen Scale Mode "/>
                     </ui:VisualElement>
                     <ui:VisualElement name="Right" style="flex-shrink: 0; flex-grow: 1;">
-                        <ui:EnumField label="Enum" value="ConstantPixelSize" type="UnityEngine.UIElements.PanelScaleMode, UnityEngine.UIElementsModule" name="ScreenScaleMode"/>
+                        <ui:EnumField label="" value="ConstantPixelSize" type="UnityEngine.UIElements.PanelScaleMode, UnityEngine.UIElementsModule" name="ScreenScaleMode"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:ScrollView>

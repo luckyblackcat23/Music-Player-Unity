@@ -12,9 +12,6 @@ using Tools;
 using MyBox;
 //using Kawazu;
 
-//was planning for this to be used for global music
-//although since its just using unity's audio source
-//you could theoretically have a radio or some other external source place the audio
 [RequireComponent(typeof(AudioSource))]
 public class MusicPlayer : MonoBehaviour
 {
@@ -115,7 +112,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    bool songEnding;
+    bool songEnding = true;
     
     // Update is called once per frame
     void Update()

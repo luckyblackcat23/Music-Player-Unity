@@ -24,6 +24,8 @@ public class MusicPlayerUIController : MonoBehaviour
     [SerializeField] VisualTreeAsset songItemTemplate;
     [SerializeField] VisualTreeAsset PlaylistItemTemplate;
 
+    public static VisualElement root;
+
     ContextMenu contextMenu;
 
     [Header("Data")]
@@ -35,8 +37,6 @@ public class MusicPlayerUIController : MonoBehaviour
     List<SongInfo> searchTempSongs = new();
     List<SongInfo> searchTempSongsQueue = new();
     List<FileNode> searchTempSongsPlaylists = new();
-
-    Button settingsButton;
 
     ListView songQueue;
 
@@ -54,6 +54,8 @@ public class MusicPlayerUIController : MonoBehaviour
     VisualElement playbackAlbumArt;
     Label songTitle;
     Label songArtist;
+
+    Button settingsButton;
 
     Button shuffleButton;
     Button previousButton;
@@ -83,6 +85,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnDisable()
     {
+        accent.onSet -= ApplyAccentToClasses;
+
         if (songQueue != null)
             songQueue.itemsSource = null;
 
@@ -121,7 +125,7 @@ public class MusicPlayerUIController : MonoBehaviour
     }
 
     int uiVersion = 0;
-    void SetupListView(PanelRenderer panelRenderer, VisualElement root, int version)
+    void SetupListView(PanelRenderer panelRenderer, VisualElement root_, int version)
     {
         // The version number only changes when the UI actually reloads, 
         // so this checks prevents duplicated elements.
@@ -130,7 +134,11 @@ public class MusicPlayerUIController : MonoBehaviour
 
         uiVersion = version;
 
-        ApplyAccentToClasses(root);
+        root = root_;
+
+        accent.onSet += ApplyAccentToClasses;
+
+        ApplyAccentToClasses();
 
         contextMenu = new ContextMenu(root);
 
@@ -148,6 +156,8 @@ public class MusicPlayerUIController : MonoBehaviour
         playbackAlbumArt = root.Q<VisualElement>("AlbumArt");
         songTitle = root.Q<Label>("SongTitle");
         songArtist = root.Q<Label>("SongArtist");
+
+        settingsButton = root.Q<Button>("SettingsButton");
 
         shuffleButton = root.Q<Button>("Shuffle");
         previousButton = root.Q<Button>("Previous");
@@ -366,15 +376,16 @@ public class MusicPlayerUIController : MonoBehaviour
             RefreshPlaylistList();
         });
 
-        //initialize button events
+        settingsButton.clicked += MusicPlayerOptionsMenu.ShowOptionsMenu;
+
         shuffleButton.clicked += () =>
         {
             musicPlayer.ShuffleQueue();
             RefreshSongQueue();
         };
-        previousButton.clicked += () => musicPlayer.PlayPrevious();
-        playButton.clicked += () => musicPlayer.TogglePause();
-        nextButton.clicked += () => musicPlayer.PlayNext();
+        previousButton.clicked += musicPlayer.PlayPrevious;
+        playButton.clicked += musicPlayer.TogglePause;
+        nextButton.clicked += musicPlayer.PlayNext;
         loopButton.clicked += () =>
         {
             musicPlayer.IncrementLoop();
@@ -392,10 +403,7 @@ public class MusicPlayerUIController : MonoBehaviour
             }
         };
 
-        volumeSlider.RegisterValueChangedCallback(evt =>
-        {
-            musicPlayer.UserVolume = evt.newValue;
-        });
+        volumeSlider.RegisterValueChangedCallback(evt => musicPlayer.UserVolume = evt.newValue);
 
         musicPlayer.OnSongShuffle.AddListener(RefreshSongQueue);
         musicPlayer.OnSongChange.AddListener(RefreshSongQueue);
@@ -744,7 +752,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     public static SaveColor accent = new("accentColour", defaultValue: SystemTheme.GetAccentColour());
 
-    void ApplyAccentToClasses(VisualElement root)
+    static void ApplyAccentToClasses()
     {
         Color accentDark = Color.Lerp(accent, Color.black, 0.3f);
         Color accentLight = Color.Lerp(accent, Color.white, 0.3f);

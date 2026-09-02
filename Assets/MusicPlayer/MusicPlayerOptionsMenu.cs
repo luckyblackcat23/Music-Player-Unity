@@ -7,17 +7,20 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
     [SerializeField] PanelRenderer document;
     [SerializeField] PanelSettings panelSettings;
 
-    bool visible;
+    public static bool visible;
+    static VisualElement Root;
 
-    VisualElement Root;
-    //VisualElement topBar;
     Button exitButton;
 
     //Option Elements
-    FloatField themeRed;
-    FloatField themeGreen;
-    FloatField themeBlue;
+    //accent theme
+    Slider themeRed;
+    Slider themeGreen;
+    Slider themeBlue;
 
+    Button resetAccent;
+
+    //screen scale mode
     EnumField screenScaleMode;
     
     int uiVersion = 0;
@@ -46,27 +49,25 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         //topBar = Root.Q<VisualElement>("TopBar");
         exitButton = Root.Q<Button>("ExitButton");
 
-        themeRed = Root.Q<FloatField>("ThemeRed");
-        themeGreen = Root.Q<FloatField>("ThemeGreen");
-        themeBlue = Root.Q<FloatField>("ThemeBlue");
+        themeRed = Root.Q<Slider>("ThemeRed");
+        themeGreen = Root.Q<Slider>("ThemeGreen");
+        themeBlue = Root.Q<Slider>("ThemeBlue");
+
+        resetAccent = Root.Q<Button>("ResetAccent");
 
         screenScaleMode = Root.Q<EnumField>("ScreenScaleMode");
 
-        /* maybe reimplement later
-        if (TopBar != null)
-        {
-            TopBar.RegisterCallback<PointerDownEvent>(startDragging);
-            TopBar.RegisterCallback<PointerUpEvent>(endDragging);
-            TopBar.RegisterCallback<PointerMoveEvent>(moveWindow);
-            TopBar.RegisterCallback<PointerOutEvent>(outWindow);
-        }
-        */
-
         exitButton.clicked += ExitOptionsMenu;
 
-        themeRed.RegisterValueChangedCallback((evt) => accentRed = evt.newValue);
-        themeGreen.RegisterValueChangedCallback((evt) => accentGreen = evt.newValue);
-        themeBlue.RegisterValueChangedCallback((evt) => accentBlue = evt.newValue);
+        themeRed.value = MusicPlayerUIController.accent.Get().r;
+        themeGreen.value = MusicPlayerUIController.accent.Get().g;
+        themeBlue.value = MusicPlayerUIController.accent.Get().b;
+
+        themeRed.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetRed(evt.newValue));
+        themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetGreen(evt.newValue));
+        themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetBlue(evt.newValue));
+
+        resetAccent.clicked += () => MusicPlayerUIController.accent.Set(SystemTheme.GetAccentColour());
 
         screenScaleMode.RegisterValueChangedCallback((evt) => panelSettings.scaleMode = (PanelScaleMode)evt.newValue);
 
@@ -74,60 +75,15 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         Root.style.display = DisplayStyle.None;
     }
 
-    private void ExitOptionsMenu()
+    public static void ExitOptionsMenu()
     {
         Root.style.display = DisplayStyle.None;
         visible = false;
     }
 
-    public void ShowOptionsMenu()
+    public static void ShowOptionsMenu()
     {
         Root.style.display = DisplayStyle.Flex;
         visible = true;
-    }
-
-    /*
-    Vector3 dragPosition;
-    bool isDragging;
-
-    private void outWindow(PointerOutEvent evt)
-    {
-        if (isDragging)
-        {
-            var diff = evt.localPosition - dragPosition;
-            Root.style.left = Root.resolvedStyle.left + diff.x;
-            Root.style.top = Root.resolvedStyle.top + diff.y;
-        }
-    }
-
-    private void moveWindow(PointerMoveEvent evt)
-    {
-        if (isDragging)
-        {
-            var diff = evt.localPosition - dragPosition;
-            Root.style.left = Root.resolvedStyle.left + diff.x;
-            Root.style.top = Root.resolvedStyle.top + diff.y;
-        }
-    }
-
-    private void endDragging(PointerUpEvent evt)
-    {
-        isDragging = false;
-    }
-
-    private void startDragging(PointerDownEvent evt)
-    {
-        isDragging = true;
-        dragPosition = evt.localPosition;
-    }
-    */
-
-    float accentRed;
-    float accentGreen;
-    float accentBlue;
-
-    public void UpdateAccentColour()
-    {
-
     }
 }

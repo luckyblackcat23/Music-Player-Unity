@@ -7,6 +7,8 @@ using UnityEngine;
 //technically, it's more efficient to store the data as raw binary instead of string data. this method was simpler for me to program though
 public static class SaveManager
 {
+    public static readonly bool debug = false;
+
     //list containing the name of the save files
     public static List<string> SaveFiles()
     {
@@ -61,7 +63,7 @@ public static class SaveManager
             Directory.CreateDirectory(Globals.SaveFolderPath);
     }
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void WriteAllVariables()
     {
         foreach (SaveFile saveFile in saveFiles)
@@ -134,6 +136,9 @@ public class SaveFile
             using StreamWriter sw = new StreamWriter(SavedPath, false);
             foreach (var variable in Variables)
             {
+                if (SaveManager.debug)
+                    Debug.Log($"{variable.SavedName} updated in file to {variable.Value}");
+
                 sw.WriteLine(variable.SavedString());
             }
         }
@@ -159,8 +164,10 @@ public class SaveFile
             {
                 if (line.StartsWith($"{variable.SavedName}="))
                 {
+                    if (SaveManager.debug)
+                        Debug.Log($"{variable.SavedName} updated from file to {variable.Value}");
+
                     variable.SetFromString(line.Remove(0, $"{variable.SavedName}=".Length), false);
-                    Debug.Log("set variable: " + variable.SavedName + " : " + variable.Value);
                 }
             }
         }
@@ -213,6 +220,9 @@ public abstract class SaveVariable
         }
     }
 
+    //maybe add events for when the file is updated?
+    public event Action onSet;
+
     // enforce that all derived classes must implement Set and Get
     public abstract object GetAsObject();
     public abstract void SetFromObject(object v, bool UpdateOnChange = true);
@@ -241,6 +251,14 @@ public abstract class SaveVariable
             SetFromObject(defaultValue, false);
         }
     }
+
+    protected void OnSet()
+    {
+        if (SaveManager.debug)
+            Debug.Log($"{SavedName} value set to: {Value}");
+
+        onSet?.Invoke();
+    }
 }
 
 
@@ -258,6 +276,7 @@ public class SaveFloat : SaveVariable
     public void Set(float v, bool UpdateOnChange = true)
     {
         Value = v.ToString();
+        OnSet();
 
         if (UpdateOnChange)
         {
@@ -292,6 +311,7 @@ public class SaveInt : SaveVariable
     public void Set(int v, bool UpdateOnChange = true)
     {
         Value = v.ToString();
+        OnSet();
 
         if (UpdateOnChange)
         {
@@ -326,6 +346,7 @@ public class SaveBool : SaveVariable
     public void Set(bool v, bool UpdateOnChange = true)
     {
         Value = v.ToString();
+        OnSet();
 
         if (UpdateOnChange)
         {
@@ -360,6 +381,7 @@ public class SaveString : SaveVariable
     public void Set(string v, bool UpdateOnChange = true)
     {
         Value = v ?? "";
+        OnSet();
 
         if (UpdateOnChange)
         {
@@ -394,6 +416,7 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
     public void Set(T v, bool UpdateOnChange = true)
     {
         Value = v.ToString();
+        OnSet();
 
         if (UpdateOnChange)
         {
@@ -429,6 +452,7 @@ public class SavePath : SaveVariable
     public void Set(string v, bool UpdateOnChange = true)
     {
         SavedName = v ?? "";
+        OnSet();
 
         if (UpdateOnChange)
         {
@@ -458,16 +482,28 @@ public class SaveColor : SaveVariable
 
     public void Set(Color v, bool UpdateOnChange = true)
     {
-        Value = string.Join(",",
-            v.r.ToString(CultureInfo.InvariantCulture),
-            v.g.ToString(CultureInfo.InvariantCulture),
-            v.b.ToString(CultureInfo.InvariantCulture),
-            v.a.ToString(CultureInfo.InvariantCulture));
+        Value = string.Join(",", v.r.ToString(CultureInfo.InvariantCulture), v.g.ToString(CultureInfo.InvariantCulture), v.b.ToString(CultureInfo.InvariantCulture), v.a.ToString(CultureInfo.InvariantCulture));
+        OnSet();
 
         if (UpdateOnChange)
         {
             SaveFile.WriteFile();
         }
+    }
+
+    public void SetRed(float r, bool UpdateOnChange = true)
+    {
+        Set(new Color(r, Get().g, Get().b), UpdateOnChange);
+    }
+
+    public void SetGreen(float g, bool UpdateOnChange = true)
+    {
+        Set(new Color(Get().r, g, Get().b), UpdateOnChange);
+    }
+
+    public void SetBlue(float b, bool UpdateOnChange = true)
+    {
+        Set(new Color(Get().r, Get().g, b), UpdateOnChange);
     }
 
     public override object GetAsObject() => Get();
