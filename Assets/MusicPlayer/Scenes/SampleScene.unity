@@ -441,6 +441,7 @@ MonoBehaviour:
   shuffle: 1
   musicQueue: []
   currentSongIndex: 0
+  audioMixer: {fileID: 24100000, guid: d48fb8f88f5304649af0e24e8fe56bf8, type: 2}
   audioSource: {fileID: 1767018685}
   OnSongChange:
     m_PersistentCalls:

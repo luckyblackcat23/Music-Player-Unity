@@ -134,7 +134,7 @@ public class SaveFile
         try
         {
             using StreamWriter sw = new StreamWriter(SavedPath, false);
-            foreach (var variable in Variables)
+            foreach (var variable in Variables.ToArray())
             {
                 if (SaveManager.debug)
                     Debug.Log($"{variable.SavedName} updated in file to {variable.Value}");
@@ -158,7 +158,7 @@ public class SaveFile
     {
         UpdateCache();
 
-        foreach (SaveVariable variable in Variables)
+        foreach (SaveVariable variable in Variables.ToArray())
         {
             foreach (string line in cachedText)
             {
@@ -355,13 +355,13 @@ public class SaveBool : SaveVariable
     }
 
     public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((bool)v);
+    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((bool)v, UpdateOnChange);
 
     public override string GetAsString() => Value;
     public override void SetFromString(string v, bool UpdateOnChange = true)
     {
         if (bool.TryParse(v, out bool result))
-            Set(result);
+            Set(result, UpdateOnChange);
         else
             Value = default(bool).ToString();
     }

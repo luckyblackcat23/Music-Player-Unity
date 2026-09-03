@@ -10,6 +10,7 @@ using System.IO;
 using System;
 using Tools;
 using MyBox;
+using UnityEngine.Audio;
 //using Kawazu;
 
 [RequireComponent(typeof(AudioSource))]
@@ -70,7 +71,7 @@ public class MusicPlayer : MonoBehaviour
     [ReadOnly]
     public bool shuffle = true;
 
-    public static SaveBool AudioNormalisationEnabled = new SaveBool("AudioNormalisationEnabled", defaultValue: true);
+    public static SaveBool AudioNormalisationEnabled = new SaveBool("AudioNormalisationEnabled", saveData, true);
 
     public List<SongInfo> musicQueue = new();
 
@@ -85,7 +86,9 @@ public class MusicPlayer : MonoBehaviour
         else
             return musicQueue[currentSongIndex];
     }
-    
+
+    [SerializeField] private AudioMixer audioMixer;
+
     public AudioSource audioSource;
 
     [Space(10)]
@@ -608,15 +611,17 @@ public class MusicPlayer : MonoBehaviour
     {
         float NormalisationGain = 1f;
 
-        if (musicQueue.Count > 0)
+        if (AudioNormalisationEnabled)
         {
-            NormalisationGain = targetRMS / CurrentSong().RMS;
+            if (musicQueue.Count > 0)
+            {
+                NormalisationGain = targetRMS / CurrentSong().RMS;
+            }
         }
 
-        if (AudioNormalisationEnabled)
-            audioSource.volume = UserVolume * NormalisationGain;
-        else
-            audioSource.volume = UserVolume;
+        audioMixer.SetFloat("Volume", 20f * Mathf.Log10(NormalisationGain));
+
+        audioSource.volume = UserVolume;
     }
 
     public static float CalculateWindowedRMS(string path)
@@ -683,7 +688,7 @@ public class MusicPlayer : MonoBehaviour
         {
             double averageEnergy = windowEnergy / windowSamples;
 
-            if (averageEnergy >= 0.0001)
+            if (averageEnergy >= 0.0000001)
             {
                 totalEnergy += averageEnergy;
                 windows++;
