@@ -10,7 +10,7 @@ public class SongInfo
     public bool MetaDataLoaded;
     public bool SearchMetaDataLoaded;
 
-    public float RMS;
+    public float LUFS;
 
     public string SongPath;
 

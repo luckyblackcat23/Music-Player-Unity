@@ -1,16 +1,17 @@
 using System.Collections.Generic;
-using UnityEngine.Networking;
 using System.Threading.Tasks;
-using System.Collections;
+using UnityEngine.Networking;
 using UnityEngine.Events;
+using System.Collections;
+using UnityEngine.Audio;
 using UnityEngine;
 using ManagedBass;
 using System.Linq;
 using System.IO;
+using R128Net;
 using System;
-using Tools;
 using MyBox;
-using UnityEngine.Audio;
+using Tools;
 //using Kawazu;
 
 [RequireComponent(typeof(AudioSource))]
@@ -45,7 +46,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    const float targetRMS = 0.12f;
+    const float targetLUFS = -14f;
 
     private static SaveFloat userVolumeSave = new("userVolume", saveData);
     public float UserVolume
@@ -77,7 +78,7 @@ public class MusicPlayer : MonoBehaviour
 
     public static SongInfo[] cachedSongs;
 
-    [ReadOnly] 
+    [ReadOnly]
     public int currentSongIndex = 0;
     public SongInfo CurrentSong()
     {
@@ -118,7 +119,7 @@ public class MusicPlayer : MonoBehaviour
     }
 
     bool songEnding = true;
-    
+
     // Update is called once per frame
     void Update()
     {
@@ -163,7 +164,7 @@ public class MusicPlayer : MonoBehaviour
             currentSong.GetSongInfo();
         }
 
-        if(audioSource.clip == null)
+        if (audioSource.clip == null)
         {
             StartCoroutine(GetClipFromFile(new FileInfo(currentSong.SongPath), clip =>
             {
@@ -189,10 +190,10 @@ public class MusicPlayer : MonoBehaviour
 
                 if (AudioNormalisationEnabled)
                 {
-                    if (currentSong.RMS <= 0)
+                    if (currentSong.LUFS <= 0)
                     {
-                        currentSong.RMS = CalculateWindowedRMS(currentSong.SongPath);
-                        Debug.Log("RMS = " + currentSong.RMS);
+                        currentSong.LUFS = CalculateLUFS(currentSong.SongPath);
+                        Debug.Log("LUFS = " + currentSong.LUFS);
                     }
                 }
 
@@ -252,7 +253,7 @@ public class MusicPlayer : MonoBehaviour
             {
                 RestartQueue(shuffle);
             }
-            else 
+            else
                 Pause();
         }
     }
@@ -392,7 +393,7 @@ public class MusicPlayer : MonoBehaviour
             if (node.IsDirectory)
                 continue;
 
-            if(supportedPlaylistExtensions.Contains(new FileInfo(node.Path).Extension.ToLower()))
+            if (supportedPlaylistExtensions.Contains(new FileInfo(node.Path).Extension.ToLower()))
             {
                 temp.Add(node.Path);
             }
@@ -444,7 +445,7 @@ public class MusicPlayer : MonoBehaviour
 
     public void ShuffleQueue()
     {
-        if(musicQueue.Count > 0)
+        if (musicQueue.Count > 0)
         {
             SongInfo currentSong = musicQueue[currentSongIndex];
 
@@ -488,7 +489,7 @@ public class MusicPlayer : MonoBehaviour
             SongInfo song = new SongInfo(fileInfo[i].FullName);
             cachedSongs[i] = song;
 
-            tasks.Add(Task.Run(() => 
+            tasks.Add(Task.Run(() =>
             {
                 song.GetSongSearchInfo();
             }));
@@ -531,7 +532,7 @@ public class MusicPlayer : MonoBehaviour
             song = null;
             return false;
         }
-    } 
+    }
 
     //get mybox to work with this later
     public IEnumerator GetClipFromFile(FileInfo file, Action<AudioClip> callback)
@@ -569,7 +570,7 @@ public class MusicPlayer : MonoBehaviour
                 audioType
             );
 
-        
+
 
         DownloadHandlerAudioClip handler =
             (DownloadHandlerAudioClip)request.downloadHandler;
@@ -609,98 +610,81 @@ public class MusicPlayer : MonoBehaviour
 
     public void UpdateVolume()
     {
-        float NormalisationGain = 1f;
+        float gainDb = 1f;
 
         if (AudioNormalisationEnabled)
         {
             if (musicQueue.Count > 0)
             {
-                NormalisationGain = targetRMS / CurrentSong().RMS;
+                gainDb = targetLUFS / CurrentSong().LUFS;
             }
         }
 
-        audioMixer.SetFloat("Volume", 20f * Mathf.Log10(NormalisationGain));
+        audioMixer.SetFloat("Volume", Mathf.Pow(10f, gainDb / 20f));
 
         audioSource.volume = UserVolume;
     }
 
-    public static float CalculateWindowedRMS(string path)
+    public static float CalculateLUFS(string path)
     {
-        int stream = Bass.CreateStream(path, Flags: BassFlags.Decode | BassFlags.Float);
+        int stream = Bass.CreateStream(
+            path,
+            Flags: BassFlags.Decode | BassFlags.Float
+        );
 
         if (stream == 0)
         {
             Debug.LogError($"Failed to open stream: {Bass.LastError}");
-            return 0;
+            return float.NegativeInfinity;
         }
 
-        var info = Bass.ChannelGetInfo(stream);
-
-        int channels = info.Channels;
-        int sampleRate = info.Frequency;
-
-        // 400 ms worth of samples
-        int windowSize = Mathf.RoundToInt(sampleRate * 0.4f) * channels;
-
-        float[] buffer = new float[8192];
-
-        double totalEnergy = 0;
-        int windows = 0;
-
-        double windowEnergy = 0;
-        int windowSamples = 0;
-
-        while (true)
+        try
         {
-            int bytesRead = Bass.ChannelGetData(stream, buffer, buffer.Length);
+            var info = Bass.ChannelGetInfo(stream);
 
-            if (bytesRead <= 0)
-                break;
+            int channels = info.Channels;
+            int sampleRate = info.Frequency;
 
-            int samplesRead = bytesRead / sizeof(float);
+            // R128 integrated loudness meter.
+            var meter = new IntegratedLoudnessMeter(
+                channels,
+                sampleRate
+            );
 
-            for (int i = 0; i < samplesRead; i++)
+            // Number of FLOAT samples, not bytes.
+            float[] buffer = new float[8192];
+
+            while (true)
             {
-                float sample = buffer[i];
+                int bytesRead = Bass.ChannelGetData(
+                    stream,
+                    buffer,
+                    buffer.Length
+                );
 
-                windowEnergy += sample * sample;
-                windowSamples++;
+                if (bytesRead <= 0)
+                    break;
 
-                if (windowSamples >= windowSize)
-                {
-                    double averageEnergy = windowEnergy / windowSamples;
+                int samplesRead = bytesRead / sizeof(float);
 
-                    // Ignore near silence
-                    if (averageEnergy >= 0.0001)
-                    {
-                        totalEnergy += averageEnergy;
-                        windows++;
-                    }
-
-                    windowEnergy = 0;
-                    windowSamples = 0;
-                }
+                // R128Net expects interleaved float PCM.
+                meter.AddFrames(
+                    buffer,
+                    0,
+                    samplesRead
+                );
             }
-        }
 
-        // Handle the final partial window
-        if (windowSamples > 0)
+            double lufs = meter.IntegratedLoudness;
+
+            meter.Dispose();
+
+            return (float)lufs;
+        }
+        finally
         {
-            double averageEnergy = windowEnergy / windowSamples;
-
-            if (averageEnergy >= 0.0000001)
-            {
-                totalEnergy += averageEnergy;
-                windows++;
-            }
+            Bass.StreamFree(stream);
         }
-
-        Bass.StreamFree(stream);
-
-        if (windows == 0)
-            return 0;
-
-        return Mathf.Sqrt((float)(totalEnergy / windows));
     }
 }
 
