@@ -158,7 +158,7 @@ public class Playlist : SaveFile
         return cachedText;
     }
 
-    public void AddSong(SongInfo song)
+    public void AddSong(SongInfo song, bool writeFile = true)
     {
         foreach (SavePath songPath in Variables)
         {
@@ -173,6 +173,26 @@ public class Playlist : SaveFile
         newSong.Set(song.SongPath);
 
         Variables.Add(newSong);
+
+        if (writeFile)
+            WriteFile();
+
+    }
+
+    public void AddSongs(SongInfo[] songs, bool writeFile = true)
+    {
+        foreach(SongInfo song in songs)
+        {
+            AddSong(song, false);
+        }
+
+        if (writeFile)
+            WriteFile();
+    }
+
+    public void AddPlaylist(Playlist playlist, bool writeFile = true)
+    {
+        AddSongs(playlist.GetSongs(), writeFile);
     }
 
     public SongInfo[] GetSongs()
