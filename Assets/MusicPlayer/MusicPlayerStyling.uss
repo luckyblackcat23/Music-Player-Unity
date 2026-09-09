@@ -25,11 +25,11 @@
 }
 
 .unity-tab__header {
-    background-color: rgba(50, 50, 50, 0.84);
+    background-color: rgba(50, 50, 50, 0.392);
     flex-grow: 1;
     flex-shrink: 0;
     justify-content: center;
-    height: 39px;
+    height: 40px;
 }
 
 .unity-text-element {
@@ -126,12 +126,10 @@
     height: 40px;
 }
 
-.unity-tab__header {
-    height: 40px;
-}
+
 
 .unity-base-field__input {
-    background-color: rgba(50, 50, 50, 0.816);
+    background-color: rgba(50, 50, 50, 0.588);
 }
 
 .unity-base-slider__input {

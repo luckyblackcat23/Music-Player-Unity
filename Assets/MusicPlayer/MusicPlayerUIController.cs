@@ -38,6 +38,8 @@ public class MusicPlayerUIController : MonoBehaviour
     List<SongInfo> searchTempSongsQueue = new();
     List<FileNode> searchTempSongsPlaylists = new();
 
+    VisualElement popOutView;
+
     ListView songQueue;
 
     ListView playlistList;
@@ -55,6 +57,7 @@ public class MusicPlayerUIController : MonoBehaviour
     Label songTitle;
     Label songArtist;
 
+    Button popOutButton;
     Button settingsButton;
 
     Button shuffleButton;
@@ -69,6 +72,9 @@ public class MusicPlayerUIController : MonoBehaviour
     Label playbackTime;
 
     [Header("Resources")]
+    public Sprite PopOutViewOutIcon;
+    public Sprite PopOutViewInIcon;
+
     public Sprite ShuffleIcon;
     public Sprite DontShuffleIcon;
 
@@ -142,6 +148,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
         contextMenu = new ContextMenu(root);
 
+        popOutView = root.Q<VisualElement>("PopOutView");
+
         songQueue = root.Q<ListView>("SongQueue");
 
         playlistList = root.Q<ListView>("PlaylistList");
@@ -157,6 +165,7 @@ public class MusicPlayerUIController : MonoBehaviour
         songTitle = root.Q<Label>("SongTitle");
         songArtist = root.Q<Label>("SongArtist");
 
+        popOutButton = root.Q<Button>("PopOutButton");
         settingsButton = root.Q<Button>("SettingsButton");
 
         shuffleButton = root.Q<Button>("Shuffle");
@@ -376,6 +385,7 @@ public class MusicPlayerUIController : MonoBehaviour
             RefreshPlaylistList();
         });
 
+        popOutButton.clicked += TogglePopOutView;
         settingsButton.clicked += MusicPlayerOptionsMenu.ShowOptionsMenu;
 
         shuffleButton.clicked += () =>
@@ -729,6 +739,24 @@ public class MusicPlayerUIController : MonoBehaviour
         currentPlaylistDirectory = playlistDirectory;
         playlistList.itemsSource = currentPlaylistDirectory.Children;
         playlistList.Rebuild();
+    }
+
+    bool popOutDisplayed = true;
+
+    void TogglePopOutView()
+    {
+        if (popOutDisplayed)
+        {
+            popOutButton.style.backgroundImage = new StyleBackground(PopOutViewInIcon);
+            popOutView.style.display = DisplayStyle.None;
+            popOutDisplayed = false;
+        }
+        else
+        {
+            popOutButton.style.backgroundImage = new StyleBackground(PopOutViewInIcon);
+            popOutView.style.display = DisplayStyle.Flex;
+            popOutDisplayed = true;
+        }
     }
 
     [ButtonMethod]
