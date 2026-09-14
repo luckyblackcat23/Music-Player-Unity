@@ -11,8 +11,8 @@ public class MediaInputManager : MonoBehaviour
 
         // Windows -> MusicPlayer
         mediaPlatform.PlayPauseRequested += musicPlayer.TogglePause;
-        mediaPlatform.NextRequested += musicPlayer.PlayNext;
-        mediaPlatform.PreviousRequested += musicPlayer.PlayPrevious;
+        mediaPlatform.NextRequested += HandlePlayNext;
+        mediaPlatform.PreviousRequested += HandlePlayPrevious;
         mediaPlatform.SeekRequested += HandleSeek;
 
         // MusicPlayer -> Windows
@@ -63,6 +63,16 @@ public class MediaInputManager : MonoBehaviour
 
         // Immediately update Windows' timeline.
         mediaPlatform?.UpdatePosition(seconds);
+    }
+
+    private void HandlePlayNext()
+    {
+        musicPlayer.PlayNext();
+    }
+
+    private void HandlePlayPrevious()
+    {
+        musicPlayer.PlayPrevious();
     }
 
     void Update()

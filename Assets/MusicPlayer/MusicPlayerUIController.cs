@@ -393,9 +393,9 @@ public class MusicPlayerUIController : MonoBehaviour
             musicPlayer.ShuffleQueue();
             RefreshSongQueue();
         };
-        previousButton.clicked += musicPlayer.PlayPrevious;
+        previousButton.clicked += PlayPrevious;
         playButton.clicked += musicPlayer.TogglePause;
-        nextButton.clicked += musicPlayer.PlayNext;
+        nextButton.clicked += PlayNext;
         loopButton.clicked += () =>
         {
             musicPlayer.IncrementLoop();
@@ -723,6 +723,15 @@ public class MusicPlayerUIController : MonoBehaviour
         RefreshPlaylistList();
     }
 
+    void PlayNext()
+    {
+        musicPlayer.PlayNext();
+    }
+
+    void PlayPrevious()
+    {
+        musicPlayer.PlayPrevious();
+    }
 
     void ChangeDisplayedPlaylistDirectory(FileNode directory)
     {

@@ -114,7 +114,10 @@ public class MusicPlayer : MonoBehaviour
             SongInfo lastSong;
 
             if (GetCachedSong(currentSongPath, out lastSong))
+            {
                 PlayNow(lastSong);
+                Pause();
+            }
             else
                 playbackTime.Set(0, false);
         }
@@ -241,10 +244,10 @@ public class MusicPlayer : MonoBehaviour
 
     /// <summary>
     /// Play the next song in the queue.
-    /// Will EXPLAIN LATER
+    /// whole lot more but will EXPLAIN LATER
     /// </summary>
     [ButtonMethod]
-    public void PlayNext()
+    public void PlayNext(bool startPlayback = true)
     {
         if (currentSongIndex + 1 < musicQueue.Count)
         {
@@ -252,7 +255,8 @@ public class MusicPlayer : MonoBehaviour
 
             Stop();
 
-            Play();
+            if (startPlayback)
+                Play();
         }
         else
         {
@@ -269,7 +273,7 @@ public class MusicPlayer : MonoBehaviour
     /// Play the previous song in the queue.
     /// </summary>
     [ButtonMethod]
-    public void PlayPrevious()
+    public void PlayPrevious(bool startPlayback = true)
     {
         Stop();
         currentSongIndex--;
@@ -279,13 +283,14 @@ public class MusicPlayer : MonoBehaviour
             currentSongIndex = 0;
         }
 
-        Play();
+        if (startPlayback)
+            Play();
     }
 
     /// <summary>
     /// Have this song play now, replacing the current song
     /// </summary>
-    public void PlayNow(SongInfo song)
+    public void PlayNow(SongInfo song, bool startPlayback = true)
     {
         if (musicQueue.Count > 0)
             musicQueue.Insert(currentSongIndex, song);
@@ -293,17 +298,21 @@ public class MusicPlayer : MonoBehaviour
             musicQueue.Add(song);
 
         Stop();
-        Play();
+
+        if (startPlayback)
+            Play();
     }
 
     /// <summary>
     /// Play a song from the Queue using it's index
     /// </summary>
-    public void PlayIndex(int index_)
+    public void PlayIndex(int index_, bool startPlayback = true)
     {
         Stop();
         currentSongIndex = index_;
-        Play();
+
+        if (startPlayback)
+            Play();
     }
 
     /// <summary>
