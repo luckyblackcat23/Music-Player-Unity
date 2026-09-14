@@ -446,13 +446,14 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
 
 /// <summary>
 /// Stores and retrieves string values
-/// Similar to saved string. has some extra checks to see if it's a valid path.
+/// Similar to saved string. has some extra checks to see if it's a valid path. almost exclusively for playlists or any ordered save file
 /// </summary>
 public class SavePath : SaveVariable
 {
     public static implicit operator string(SavePath obj) => obj.Get();
 
     public SavePath(string path, SaveFile saveFile = null, string defaultValue = default) : base(path, saveFile, defaultValue) { }
+    public SavePath(SaveFile saveFile = null, string defaultValue = default) : base(null, saveFile, defaultValue) { }
 
     public string Get() => SavedName ?? string.Empty;
 
@@ -460,7 +461,7 @@ public class SavePath : SaveVariable
     {
         if (!string.IsNullOrEmpty(v))
         {
-            if (Uri.IsWellFormedUriString(v, UriKind.RelativeOrAbsolute))
+            if (Uri.IsWellFormedUriString(v, UriKind.RelativeOrAbsolute) || new FileInfo(v).Exists)
             {
                 SavedName = v;
                 OnSet();

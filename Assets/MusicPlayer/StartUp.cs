@@ -1,3 +1,4 @@
+using MyBox;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -54,5 +55,11 @@ public class StartUp : MonoBehaviour
         }
 
         SceneManager.UnloadSceneAsync(0);
+    }
+
+    [ButtonMethod]
+    void openSave()
+    {
+        Globals.OpenSavePath();
     }
 }

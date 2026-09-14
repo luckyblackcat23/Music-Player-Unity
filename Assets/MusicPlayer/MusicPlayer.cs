@@ -77,7 +77,7 @@ public class MusicPlayer : MonoBehaviour
 
     public static SongInfo[] cachedSongs;
 
-    public static SavePath currentSongPath = new SavePath("CurrentSongPath", saveData);
+    public static SaveString currentSongPath = new SaveString("LastLoadedSongPath", saveData);
 
     [ReadOnly]
     public int currentSongIndex = 0;
@@ -105,14 +105,21 @@ public class MusicPlayer : MonoBehaviour
 
     private void Awake()
     {
+        OnSongChange.AddListener(() => currentSongPath.Set(CurrentSong().SongPath));
+
         if (string.IsNullOrEmpty(currentSongPath))
             playbackTime.Set(0, false);
         else
         {
-            SongInfo lastSong = new SongInfo(currentSongPath);
+            SongInfo lastSong;
+
+            if (GetCachedSong(currentSongPath, out lastSong))
+                PlayNow(lastSong);
+            else
+                playbackTime.Set(0, false);
         }
 
-            PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
+        PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
 
         audioSource = GetComponent<AudioSource>();
     }
@@ -499,7 +506,7 @@ public class MusicPlayer : MonoBehaviour
 
         songsCached = true;
 
-        Debug.Log("Songs finished caching");
+        Debug.Log($"Finished caching {tasks.Count} songs");
     }
 
     /// <summary>
@@ -509,29 +516,33 @@ public class MusicPlayer : MonoBehaviour
     /// <returns></returns>
     public static bool GetCachedSong(string path, out SongInfo song)
     {
-        if (songsCached)
-        {
-            for (int i = 0; i < cachedSongs.Length; i++)
-            {
-                SongInfo cachedSong = cachedSongs[i];
+        song = null;
 
-                if (cachedSong.SongPath == path)
-                {
-                    song = cachedSong;
-                    return true;
-                }
-            }
-
-            song = null;
-            return false;
-        }
-        else
+        if (!songsCached)
         {
             Debug.Log("Cannot find cached song, songs have not finished caching.");
-
-            song = null;
             return false;
         }
+
+        string targetPath = Path.GetFullPath(path);
+
+        for (int i = 0; i < cachedSongs.Length; i++)
+        {
+            SongInfo cachedSong = cachedSongs[i];
+
+            if (cachedSong == null || string.IsNullOrEmpty(cachedSong.SongPath))
+                continue;
+
+            string cachedPath = Path.GetFullPath(cachedSong.SongPath);
+
+            if (string.Equals(cachedPath, targetPath, StringComparison.OrdinalIgnoreCase))
+            {
+                song = cachedSong;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     //get mybox to work with this later
