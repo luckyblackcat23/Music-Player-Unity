@@ -10,72 +10,33 @@ public class WindowsMediaPlatform : IMediaPlatform
 
     [DllImport(DLL, CallingConvention = CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.I1)]
-    private static extern bool InitializeMediaControls(
-        IntPtr hwnd
-    );
+    private static extern bool InitializeMediaControls(IntPtr hwnd);
 
     [DllImport(DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern void ShutdownMediaControls();
 
-    [DllImport(
-        DLL,
-        EntryPoint = "SetPlaying",
-        CallingConvention = CallingConvention.Cdecl
-    )]
+    [DllImport(DLL, EntryPoint = "SetPlaying", CallingConvention = CallingConvention.Cdecl)]
     private static extern void NativeSetPlaying();
 
-    [DllImport(
-        DLL,
-        EntryPoint = "SetPaused",
-        CallingConvention = CallingConvention.Cdecl
-    )]
+    [DllImport(DLL, EntryPoint = "SetPaused", CallingConvention = CallingConvention.Cdecl)]
     private static extern void NativeSetPaused();
 
-    [DllImport(
-        DLL,
-        EntryPoint = "SetStopped",
-        CallingConvention = CallingConvention.Cdecl
-    )]
+    [DllImport(DLL, EntryPoint = "SetStopped", CallingConvention = CallingConvention.Cdecl)]
     private static extern void NativeSetStopped();
 
-    [DllImport(
-        DLL,
-        CallingConvention = CallingConvention.Cdecl
-    )]
-    private static extern void SetMetadata(
-        [MarshalAs(UnmanagedType.LPWStr)] string title,
-        [MarshalAs(UnmanagedType.LPWStr)] string artist,
-        [MarshalAs(UnmanagedType.LPWStr)] string album,
-        double durationSeconds
-    );
+    [DllImport(DLL, EntryPoint = "SetMetadata", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void NativeSetMetadata([MarshalAs(UnmanagedType.LPWStr)] string title, [MarshalAs(UnmanagedType.LPWStr)] string artist, [MarshalAs(UnmanagedType.LPWStr)] string album, double durationSeconds);
 
-    [DllImport(
-        DLL,
-        CallingConvention = CallingConvention.Cdecl
-    )]
-    private static extern void SetArtwork(
-        byte[] data,
-        int dataSize
-    );
+    [DllImport(DLL, EntryPoint = "SetArtwork", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void NativeSetArtwork(byte[] data, int dataSize);
 
-    [DllImport(
-        DLL,
-        CallingConvention = CallingConvention.Cdecl
-    )]
-    private static extern void UpdatePosition(
-        double positionSeconds
-    );
+    [DllImport(DLL, EntryPoint = "UpdatePosition", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void NativeUpdatePosition(double positionSeconds);
 
-    [DllImport(
-        DLL,
-        CallingConvention = CallingConvention.Cdecl
-    )]
+    [DllImport(DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int PollMediaButton();
 
-    [DllImport(
-        DLL,
-        CallingConvention = CallingConvention.Cdecl
-    )]
+    [DllImport(DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern double PollSeekPosition();
 
     public event Action PlayRequested;
@@ -103,25 +64,20 @@ public class WindowsMediaPlatform : IMediaPlatform
             Debug.LogError(
                 "WindowsMediaPlatform: Could not find Unity window."
             );
-
             return;
         }
 
-        initialized =
-            InitializeMediaControls(hwnd);
+        initialized = InitializeMediaControls(hwnd);
 
         if (!initialized)
         {
             Debug.LogError(
                 "WindowsMediaPlatform: Failed to initialize Windows media controls."
             );
-
             return;
         }
 
-        Debug.Log(
-            "Windows media controls initialized."
-        );
+        Debug.Log("Windows media controls initialized.");
     }
 
     private static IntPtr GetUnityWindow()
@@ -137,12 +93,7 @@ public class WindowsMediaPlatform : IMediaPlatform
         if (!initialized)
             return;
 
-        //
-        // Media buttons
-        //
-
-        int button =
-            PollMediaButton();
+        int button = PollMediaButton();
 
         switch (button)
         {
@@ -163,56 +114,42 @@ public class WindowsMediaPlatform : IMediaPlatform
                 break;
         }
 
-        //
-        // Seek requests
-        //
-
-        double seekPosition =
-            PollSeekPosition();
+        double seekPosition = PollSeekPosition();
 
         if (seekPosition >= 0.0)
         {
-            SeekRequested?.Invoke(
-                (float)seekPosition
-            );
+            SeekRequested?.Invoke((float)seekPosition);
         }
     }
 
     public void SetPlaying()
     {
-        if (!initialized)
-            return;
-
-        NativeSetPlaying();
+        if (initialized)
+            NativeSetPlaying();
     }
 
     public void SetPaused()
     {
-        if (!initialized)
-            return;
-
-        NativeSetPaused();
+        if (initialized)
+            NativeSetPaused();
     }
 
     public void SetStopped()
     {
-        if (!initialized)
-            return;
-
-        NativeSetStopped();
+        if (initialized)
+            NativeSetStopped();
     }
 
     public void SetMetadata(
         string title,
         string artist,
         string album,
-        float durationSeconds
-    )
+        float durationSeconds)
     {
         if (!initialized)
             return;
 
-        SetMetadata(
+        NativeSetMetadata(
             title ?? "",
             artist ?? "",
             album ?? "",
@@ -222,24 +159,17 @@ public class WindowsMediaPlatform : IMediaPlatform
 
     public void SetArtwork(Texture2D artwork)
     {
-        if (!initialized)
-            return;
-
-        if (artwork == null)
+        if (!initialized || artwork == null)
             return;
 
         try
         {
-            byte[] png =
-                artwork.EncodeToPNG();
+            byte[] png = artwork.EncodeToPNG();
 
             if (png == null || png.Length == 0)
                 return;
 
-            SetArtwork(
-                png,
-                png.Length
-            );
+            NativeSetArtwork(png, png.Length);
         }
         catch (Exception e)
         {
@@ -254,7 +184,7 @@ public class WindowsMediaPlatform : IMediaPlatform
         if (!initialized)
             return;
 
-        UpdatePosition(
+        NativeUpdatePosition(
             Math.Max(0.0, seconds)
         );
     }
@@ -265,7 +195,6 @@ public class WindowsMediaPlatform : IMediaPlatform
             return;
 
         NativeSetStopped();
-
         ShutdownMediaControls();
 
         initialized = false;

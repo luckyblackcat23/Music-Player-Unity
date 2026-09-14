@@ -41,9 +41,9 @@
                 </ui:TabView>
             </ui:VisualElement>
             <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.39);">
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                <ui:VisualElement name="VisualElement" style="flex-grow: 0; flex-direction: row;">
                     <ui:Button text="" class="ButtonHover ButtonPressed accent accentImageTint" style="background-color: rgba(188, 188, 188, 0); border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); background-image: url(&quot;project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=935751669&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_3&quot;); width: 70px; height: 70px;"/>
-                    <ui:TextField placeholder-text="..." name="SearchBar" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 40px; flex-grow: 1;"/>
+                    <ui:TextField placeholder-text="..." name="SearchBar" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1; align-self: stretch; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;"/>
                 </ui:VisualElement>
                 <ui:ListView name="SongList" class="panel" style="flex-grow: 1;"/>
             </ui:VisualElement>

@@ -60,8 +60,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    [ReadOnly]
-    public float playbackTime;
+    public static SaveFloat playbackTime;
 
     [ReadOnly]
     public float clipLength = 1;
@@ -77,6 +76,8 @@ public class MusicPlayer : MonoBehaviour
     public List<SongInfo> musicQueue = new();
 
     public static SongInfo[] cachedSongs;
+
+    public static SavePath currentSongPath = new SavePath("CurrentSongPath", saveData);
 
     [ReadOnly]
     public int currentSongIndex = 0;
@@ -108,6 +109,9 @@ public class MusicPlayer : MonoBehaviour
 
     private void Awake()
     {
+        if (string.IsNullOrEmpty(currentSongPath))
+            playbackTime.Set(0, false);
+
         PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
 
         audioSource = GetComponent<AudioSource>();
@@ -124,7 +128,8 @@ public class MusicPlayer : MonoBehaviour
     void Update()
     {
         if (audioSource.clip)
-            playbackTime = audioSource.time;
+            playbackTime.Set(audioSource.time, false);
+
         if (!songEnding)
         {
             if (!audioSource.isPlaying && playbackTime == 0)
@@ -170,7 +175,7 @@ public class MusicPlayer : MonoBehaviour
             {
                 if (clip == null)
                 {
-                    playbackTime = 0;
+                    playbackTime.Set(0, false);
                     return; // maybe log an error here?
                 }
 
@@ -178,7 +183,7 @@ public class MusicPlayer : MonoBehaviour
 
                 if (clip != audioSource.clip)
                 {
-                    playbackTime = 0;
+                    playbackTime.Set(0, false);
                 }
 
                 if (clip == null || clip != audioSource.clip)

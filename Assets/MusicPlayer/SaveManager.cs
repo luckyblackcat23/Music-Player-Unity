@@ -439,24 +439,32 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
 
 /// <summary>
 /// Stores and retrieves string values
-/// Essentially the same as a SaveString. except it doesn't use the SavedString variable for compatability reasons
+/// Similar to saved string. has some extra checks to see if it's a valid path.
 /// </summary>
 public class SavePath : SaveVariable
 {
     public static implicit operator string(SavePath obj) => obj.Get();
 
-    public SavePath(string path, SaveFile saveFile = null) : base(path, saveFile) { }
+    public SavePath(string path, SaveFile saveFile = null, string defaultValue = default) : base(path, saveFile, defaultValue) { }
 
     public string Get() => SavedName ?? string.Empty;
 
     public void Set(string v, bool UpdateOnChange = true)
     {
-        SavedName = v ?? "";
-        OnSet();
-
-        if (UpdateOnChange)
+        if (!string.IsNullOrEmpty(v))
         {
-            SaveFile.WriteFile();
+            if (Uri.IsWellFormedUriString(v, UriKind.RelativeOrAbsolute))
+            {
+                SavedName = v;
+                OnSet();
+
+                if (UpdateOnChange)
+                {
+                    SaveFile.WriteFile();
+                }
+            }
+            else
+                Debug.LogError($"Invalid path: {v}");
         }
     }
 

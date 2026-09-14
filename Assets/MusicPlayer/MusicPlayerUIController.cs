@@ -116,9 +116,9 @@ public class MusicPlayerUIController : MonoBehaviour
     private void Update()
     {
         if (!musicPlayer.paused && !playbackSliderDragged)
-            playbackSlider.value = musicPlayer.playbackTime;
+            playbackSlider.value = MusicPlayer.playbackTime.Get();
 
-        int currentSecond = Mathf.FloorToInt(musicPlayer.playbackTime);
+        int currentSecond = Mathf.FloorToInt(MusicPlayer.playbackTime);
 
         if (currentSecond != lastDisplayedSecond && playbackTime != null)
         {
