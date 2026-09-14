@@ -54,7 +54,7 @@ public class MusicPlayer : MonoBehaviour
         get => userVolumeSave;
         set
         {
-            userVolumeSave.Set(Mathf.Clamp01(value));
+            userVolumeSave.Set(Mathf.Clamp01(value), false);
 
             UpdateVolume();
         }
