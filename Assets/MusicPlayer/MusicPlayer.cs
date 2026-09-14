@@ -103,10 +103,6 @@ public class MusicPlayer : MonoBehaviour
 
     public bool useExternalSongs;
 
-    [Tooltip("Start playing the music before the songs are done importing/downloading.")]
-    [ConditionalField(nameof(useExternalSongs))]
-    public bool playAllOnStart;
-
     private void Awake()
     {
         if (string.IsNullOrEmpty(currentSongPath))
@@ -115,11 +111,6 @@ public class MusicPlayer : MonoBehaviour
         PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
 
         audioSource = GetComponent<AudioSource>();
-
-        if (playAllOnStart)
-        {
-            PlayAll();
-        }
     }
 
     bool songEnding = true;
