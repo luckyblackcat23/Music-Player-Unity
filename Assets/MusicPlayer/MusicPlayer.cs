@@ -115,8 +115,9 @@ public class MusicPlayer : MonoBehaviour
 
             if (GetCachedSong(currentSongPath, out lastSong))
             {
-                PlayNow(lastSong);
-                Pause();
+                lastSong.GetSongInfo();
+
+                PlayNow(lastSong, false);
             }
             else
                 playbackTime.Set(0, false);
