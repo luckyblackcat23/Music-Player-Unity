@@ -59,6 +59,8 @@ public static class SaveManager
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     public static void Initialize()
     {
+        Application.quitting += OnQuit;
+
         if (!Directory.Exists(Globals.SaveFolderPath))
             Directory.CreateDirectory(Globals.SaveFolderPath);
     }
@@ -70,6 +72,11 @@ public static class SaveManager
         {
             saveFile.WriteVariables();
         }
+    }
+
+    private static void OnQuit()
+    {
+        WriteAllVariables();
     }
 }
 
@@ -85,7 +92,7 @@ public class SaveFile
     public List<SaveVariable> Variables { get; } = new();
 
     /// <summary>
-    /// The file as it was written in the last read pass.
+    /// The file as it was written last time it was read.
     /// </summary>
     public List<string> cachedText = new();
 

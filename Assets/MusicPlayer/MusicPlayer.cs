@@ -60,7 +60,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    public static SaveFloat playbackTime;
+    public static SaveFloat playbackTime = new SaveFloat("PlaybackTime", saveData);
 
     [ReadOnly]
     public float clipLength = 1;
@@ -107,8 +107,12 @@ public class MusicPlayer : MonoBehaviour
     {
         if (string.IsNullOrEmpty(currentSongPath))
             playbackTime.Set(0, false);
+        else
+        {
+            SongInfo lastSong = new SongInfo(currentSongPath);
+        }
 
-        PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
+            PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
 
         audioSource = GetComponent<AudioSource>();
     }
