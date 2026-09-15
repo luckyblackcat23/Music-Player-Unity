@@ -149,7 +149,6 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    [ButtonMethod]
     public void Pause()
     {
         paused = true;
@@ -159,7 +158,6 @@ public class MusicPlayer : MonoBehaviour
     /// <summary>
     /// Starts playback. Plays the audioclip.
     /// </summary>
-    [ButtonMethod]
     public void Play(bool startPlayback = true)
     {
         if (currentSongIndex >= musicQueue.Count)
@@ -253,7 +251,6 @@ public class MusicPlayer : MonoBehaviour
     /// Play the next song in the queue.
     /// whole lot more but will EXPLAIN LATER
     /// </summary>
-    [ButtonMethod]
     public void PlayNext(bool startPlayback = true)
     {
         if (currentSongIndex + 1 < musicQueue.Count)
@@ -278,7 +275,6 @@ public class MusicPlayer : MonoBehaviour
     /// <summary>
     /// Play the previous song in the queue.
     /// </summary>
-    [ButtonMethod]
     public void PlayPrevious(bool startPlayback = true)
     {
         Stop();
@@ -401,25 +397,6 @@ public class MusicPlayer : MonoBehaviour
     }
 
     public static FileNode PlaylistDirectoryNode;
-
-    [ButtonMethod]
-    public static string[] Playlists()
-    {
-        List<string> temp = new List<string>();
-
-        foreach (FileNode node in PlaylistDirectoryNode.GetAllChildren())
-        {
-            if (node.IsDirectory)
-                continue;
-
-            if (supportedPlaylistExtensions.Contains(new FileInfo(node.Path).Extension.ToLower()))
-            {
-                temp.Add(node.Path);
-            }
-        }
-
-        return temp.ToArray();
-    }
 
     public void PlayPlaylist(Playlist playlist)
     {

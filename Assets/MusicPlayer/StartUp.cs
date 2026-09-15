@@ -16,6 +16,8 @@ public class StartUp : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
+        Application.targetFrameRate = 30;
+        
         Color SystemColour = SystemTheme.GetAccentColour();
 
         background.color = SystemColour;
