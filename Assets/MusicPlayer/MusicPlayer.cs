@@ -160,7 +160,7 @@ public class MusicPlayer : MonoBehaviour
     /// Starts playback. Plays the audioclip.
     /// </summary>
     [ButtonMethod]
-    public void Play()
+    public void Play(bool startPlayback = true)
     {
         if (currentSongIndex >= musicQueue.Count)
         {
@@ -185,8 +185,6 @@ public class MusicPlayer : MonoBehaviour
                     return; // maybe log an error here?
                 }
 
-                paused = false;
-
                 if (clip != audioSource.clip)
                 {
                     playbackTime.Set(0, false);
@@ -210,16 +208,24 @@ public class MusicPlayer : MonoBehaviour
 
                 UpdateVolume();
 
-                audioSource.time = playbackTime;
-                audioSource.Play();
-
                 clipLength = clip.length;
+                audioSource.time = playbackTime;
+
+                if (!startPlayback)
+                    return;
+
+                paused = false;
+
+                audioSource.Play();
 
                 songEnding = false;
             }));
         }
         else
         {
+            if (!startPlayback)
+                return;
+
             audioSource.UnPause();
             paused = false;
         }
@@ -256,8 +262,7 @@ public class MusicPlayer : MonoBehaviour
 
             Stop();
 
-            if (startPlayback)
-                Play();
+            Play(startPlayback);
         }
         else
         {
@@ -284,8 +289,7 @@ public class MusicPlayer : MonoBehaviour
             currentSongIndex = 0;
         }
 
-        if (startPlayback)
-            Play();
+        Play(startPlayback);
     }
 
     /// <summary>
@@ -300,8 +304,7 @@ public class MusicPlayer : MonoBehaviour
 
         Stop();
 
-        if (startPlayback)
-            Play();
+        Play(startPlayback);
     }
 
     /// <summary>
@@ -312,8 +315,7 @@ public class MusicPlayer : MonoBehaviour
         Stop();
         currentSongIndex = index_;
 
-        if (startPlayback)
-            Play();
+        Play(startPlayback);
     }
 
     /// <summary>
