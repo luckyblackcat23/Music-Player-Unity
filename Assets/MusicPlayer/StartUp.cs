@@ -13,6 +13,14 @@ public class StartUp : MonoBehaviour
 
     public static bool debug;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+    public static void Initialization()
+    {
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        WindowsTitleBar.SetColour(SystemTheme.GetAccentColour());
+#endif
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -24,6 +32,8 @@ public class StartUp : MonoBehaviour
         icon.color = Color.Lerp(SystemColour, Color.white, 0.8f);
 
         StartCoroutine(StartUpWait());
+
+        SaveManager.LoadAll();
     }
 
     float fade = 1f;

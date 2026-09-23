@@ -91,8 +91,6 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnDisable()
     {
-        accent.onSet -= ApplyAccentToClasses;
-
         if (songQueue != null)
             songQueue.itemsSource = null;
 
@@ -141,8 +139,6 @@ public class MusicPlayerUIController : MonoBehaviour
         uiVersion = version;
 
         root = root_;
-
-        accent.onSet += ApplyAccentToClasses;
 
         ApplyAccentToClasses();
 
@@ -495,13 +491,13 @@ public class MusicPlayerUIController : MonoBehaviour
         {
             Playlist playlist = Playlist.GetFromPath(node.Path);
 
-            element.Q<Label>("title").text = playlist.playlistName;
+            element.Q<Label>("title").text = playlist.Name;
 
             VisualElement albumArt = element.Q<VisualElement>("albumArt");
 
-            SongInfo[] songs = playlist.GetSongs();
+            List<SongInfo> songs = playlist.GetSongs();
 
-            if (songs.Length > 0)
+            if (songs.Count > 0)
             {
                 if (!songs[0].MetaDataLoaded)
                 {
@@ -787,9 +783,9 @@ public class MusicPlayerUIController : MonoBehaviour
         playlistList.RefreshItems();
     }
 
-    public static SaveColor accent = new("accentColour", defaultValue: SystemTheme.GetAccentColour());
+    public static SaveColor accent = new SaveColor("accentColour", MusicPlayer.saveData, SystemTheme.GetAccentColour());
 
-    static void ApplyAccentToClasses()
+    public static void ApplyAccentToClasses()
     {
         Color accentDark = Color.Lerp(accent, Color.black, 0.3f);
         Color accentLight = Color.Lerp(accent, Color.white, 0.3f);
@@ -818,5 +814,9 @@ public class MusicPlayerUIController : MonoBehaviour
         {
             element.style.backgroundColor = accentDark;
         }
+
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        WindowsTitleBar.SetColour(accent);
+#endif
     }
 }

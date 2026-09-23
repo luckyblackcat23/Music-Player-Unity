@@ -1,214 +1,409 @@
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
 using System;
-using MyBox;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-public class Playlist : SaveFile
+public class Playlist
 {
-    // figure out how to implement later
-    //public SavePath PlaylistCoverPath;
+    /// <summary>
+    /// Name of the playlist.
+    /// </summary>
+    public string Name { get; private set; }
 
-    public string playlistName;
+    /// <summary>
+    /// Full path to the playlist file.
+    /// </summary>
+    public string Path { get; private set; }
 
-    //create playlist
-    public Playlist(string fileName, string savePath = null) : base(fileName, "m3u", savePath, false)
+    /// <summary>
+    /// Songs contained in this playlist, in playlist order.
+    /// </summary>
+    public List<string> Songs { get; } = new();
+
+    /// <summary>
+    /// M3U directives/comments that were present in the file.
+    /// These are preserved when saving.
+    /// </summary>
+    private readonly List<string> directives = new();
+
+    /// <summary>
+    /// Creates a playlist from an existing file.
+    /// </summary>
+    public Playlist(string path)
     {
+        Path = path;
+        Name = System.IO.Path.GetFileNameWithoutExtension(path);
 
+        Load();
     }
 
-    public static Playlist CreatePlaylist(string name, List<SongInfo> songs)
+    /// <summary>
+    /// Creates a new playlist.
+    /// </summary>
+    public Playlist(string name, string directory, bool save = true)
     {
-        List<SavePath> songPaths = new();
+        Name = name;
+        Path = System.IO.Path.Combine(directory, name + ".m3u");
 
-        Playlist playlist = new Playlist(name);
+        if (save)
+            Save();
+    }
 
-        foreach (SongInfo s in songs)
-        {
-            playlist.AddSong(s);
-        }
+    /// <summary>
+    /// Creates a playlist and adds the supplied songs.
+    /// </summary>
+    public static Playlist CreatePlaylist(
+        string name,
+        List<SongInfo> songs,
+        string directory)
+    {
+        Playlist playlist = new Playlist(name, directory, false);
+
+        playlist.AddSongs(songs, false);
+        playlist.Save();
 
         return playlist;
     }
 
     /// <summary>
-    /// Get a playlist from the specified path
-    /// Will return cached Playlist from the save manager if it already exists in memory
+    /// Loads a playlist from a path.
     /// </summary>
-    /// <param name="path">Full path of the song</param>
-    /// <returns></returns>
     public static Playlist GetFromPath(string path)
     {
-        Playlist playlist = (Playlist)SaveManager.GetFile(path);
-
-        //return pre-existing playlist
-        if (playlist != null)
-        {
-            return playlist;
-        }
-
-        FileInfo playlistFile = new FileInfo(path);
-
-        playlist = new Playlist(playlistFile.Name, path);
-
-        playlist.playlistName = playlistFile.Name.RemoveEnd(playlistFile.Extension);
-
-        playlist.UpdateCache();
-
-        foreach (string line in playlist.cachedText)
-        {
-            if (line.StartsWith('#'))
-            {
-                //directives
-                if (line == "#EXTM3U")
-                {
-
-                }
-                else
-                {
-
-                }
-            }
-            else
-            {
-                foreach(string fileType in MusicPlayer.supportedAudioExtensions)
-                {
-                    if (line.ToLower().EndsWith(fileType))
-                    {
-                        if (File.Exists(line))
-                        {
-                            new SavePath(line, playlist);
-                        }
-                    }
-                }
-            }
-        }
-
-        SaveManager.RegisterFile(playlist);
-
-        return playlist;
+        return PlaylistManager.GetPlaylist(path);
     }
 
-    internal override void WriteFile(bool updateCacheAfter = true)
+    /// <summary>
+    /// Loads the playlist from disk.
+    /// </summary>
+    public void Load()
     {
-        UpdateCache();
+        Songs.Clear();
+        directives.Clear();
 
-        try
+        if (!File.Exists(Path))
+            return;
+
+        foreach (string line in File.ReadLines(Path))
         {
-            List<string> Directives = new();
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
 
-            //ensure we dont overwrite directives already in the file
-            foreach (string line in cachedText)
+            if (line.StartsWith("#"))
             {
-                if (line.StartsWith('#'))
-                {
-                    Directives.Add(line);
-                }
+                directives.Add(line);
+                continue;
             }
 
-            using StreamWriter sw = new StreamWriter(SavedPath, false);
-
-            foreach (string directive in Directives)
-            {
-                sw.WriteLine(directive);
-            }
-
-            foreach (var variable in Variables)
-            {
-                sw.WriteLine(variable.SavedString());
-            }
+            Songs.Add(line);
         }
-        catch (Exception ex)
-        {
-            Debug.Log($"[SaveFile] Failed to save {SavedName}: {ex}");
-        }
-
-        if (updateCacheAfter)
-            UpdateCache();
     }
 
-    public override List<string> WriteVariables()
+    /// <summary>
+    /// Saves the playlist to disk.
+    /// </summary>
+    public void Save()
     {
-        UpdateCache();
+        string directory = System.IO.Path.GetDirectoryName(Path);
 
-        foreach (SaveVariable variable in Variables)
-        {
-            foreach (string line in cachedText)
-            {
-                if (line.StartsWith('#'))
-                {
-                    // directives
-                }
-                else
-                {
-                    if (variable.GetType() == typeof(SavePath))
-                    {
-                        if (line == variable.SavedString())
-                            variable.SetFromString(line, false);
-                    }
-                    else
-                    {
-                        if (line.StartsWith($"{variable.SavedName}="))
-                            variable.SetFromString(line.Remove(0, $"{variable.SavedName}=".Length), false);
-                    }
-                }
-            }
-        }
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
 
-        return cachedText;
+        using StreamWriter writer = new StreamWriter(Path, false);
+
+        foreach (string directive in directives)
+            writer.WriteLine(directive);
+
+        foreach (string song in Songs)
+            writer.WriteLine(song);
     }
 
-    public void AddSong(SongInfo song, bool writeFile = true)
+    /// <summary>
+    /// Adds a song to the playlist.
+    /// </summary>
+    public void AddSong(SongInfo song, bool save = true)
     {
-        foreach (SavePath songPath in Variables)
-        {
-            if (songPath == song.SongPath)
-            {
-                //song already exists in the playlist. add confirmation message before adding
-                return;
-            }
-        }
+        if (song == null)
+            return;
 
-        SavePath newSong = new SavePath(song.Title, this);
-        newSong.Set(song.SongPath);
-
-        Variables.Add(newSong);
-
-        if (writeFile)
-            WriteFile();
-
+        AddSong(song.SongPath, save);
     }
 
-    public void AddSongs(SongInfo[] songs, bool writeFile = true)
+    /// <summary>
+    /// Adds a song path to the playlist.
+    /// </summary>
+    public void AddSong(string songPath, bool save = true)
     {
-        foreach(SongInfo song in songs)
-        {
+        if (string.IsNullOrEmpty(songPath))
+            return;
+
+        if (Songs.Contains(songPath))
+            return;
+
+        Songs.Add(songPath);
+
+        if (save)
+            Save();
+    }
+
+    /// <summary>
+    /// Adds multiple songs to the playlist.
+    /// </summary>
+    public void AddSongs(List<SongInfo> songs, bool save = true)
+    {
+        if (songs == null)
+            return;
+
+        foreach (SongInfo song in songs)
             AddSong(song, false);
+
+        if (save)
+            Save();
+    }
+
+    /// <summary>
+    /// Removes a song from the playlist.
+    /// </summary>
+    public void RemoveSong(SongInfo song, bool save = true)
+    {
+        if (song == null)
+            return;
+
+        RemoveSong(song.SongPath, save);
+    }
+
+    /// <summary>
+    /// Removes a song path from the playlist.
+    /// </summary>
+    public void RemoveSong(string songPath, bool save = true)
+    {
+        if (!Songs.Remove(songPath))
+            return;
+
+        if (save)
+            Save();
+    }
+
+    /// <summary>
+    /// Removes a song at a specific index.
+    /// </summary>
+    public void RemoveSongAt(int index, bool save = true)
+    {
+        if (index < 0 || index >= Songs.Count)
+            return;
+
+        Songs.RemoveAt(index);
+
+        if (save)
+            Save();
+    }
+
+    /// <summary>
+    /// Moves a song from one position to another.
+    /// </summary>
+    public void MoveSong(int from, int to, bool save = true)
+    {
+        if (from < 0 || from >= Songs.Count)
+            return;
+
+        if (to < 0 || to >= Songs.Count)
+            return;
+
+        if (from == to)
+            return;
+
+        string song = Songs[from];
+
+        Songs.RemoveAt(from);
+        Songs.Insert(to, song);
+
+        if (save)
+            Save();
+    }
+
+    /// <summary>
+    /// Gets the SongInfo objects for all songs that are currently cached.
+    /// </summary>
+    public List<SongInfo> GetSongs()
+    {
+        List<SongInfo> songs = new();
+
+        foreach (string path in Songs)
+        {
+            if (MusicPlayer.GetCachedSong(path, out SongInfo song))
+                songs.Add(song);
         }
 
-        if (writeFile)
-            WriteFile();
+        return songs;
     }
 
-    public void AddPlaylist(Playlist playlist, bool writeFile = true)
+    /// <summary>
+    /// Gets the SongInfo objects for all songs in the playlist.
+    /// </summary>
+    public List<SongInfo> GetSongs(bool loadMissing)
     {
-        AddSongs(playlist.GetSongs(), writeFile);
-    }
+        List<SongInfo> songs = new();
 
-    public SongInfo[] GetSongs()
-    {
-        SongInfo[] songs = new SongInfo[Variables.Count];
-
-        for (int i = 0; i < Variables.Count; i++)
+        foreach (string path in Songs)
         {
-            SongInfo song;
-
-            if (MusicPlayer.GetCachedSong(Variables[i].GetAsString(), out song))
+            if (MusicPlayer.GetCachedSong(path, out SongInfo song))
             {
-                songs[i] = song;
+                songs.Add(song);
+            }
+            else if (loadMissing && File.Exists(path))
+            {
+                SongInfo newSong = new SongInfo(path);
+                songs.Add(newSong);
             }
         }
 
         return songs;
+    }
+
+    /// <summary>
+    /// Checks whether the playlist contains a song.
+    /// </summary>
+    public bool Contains(SongInfo song)
+    {
+        return song != null && Songs.Contains(song.SongPath);
+    }
+
+    /// <summary>
+    /// Checks whether the playlist contains a song path.
+    /// </summary>
+    public bool Contains(string songPath)
+    {
+        return Songs.Contains(songPath);
+    }
+
+    /// <summary>
+    /// Adds an M3U directive/comment.
+    /// </summary>
+    public void AddDirective(string directive, bool save = true)
+    {
+        if (string.IsNullOrEmpty(directive))
+            return;
+
+        if (!directive.StartsWith("#"))
+            directive = "#" + directive;
+
+        directives.Add(directive);
+
+        if (save)
+            Save();
+    }
+
+    /// <summary>
+    /// Removes an M3U directive/comment.
+    /// </summary>
+    public void RemoveDirective(string directive, bool save = true)
+    {
+        if (!directives.Remove(directive))
+            return;
+
+        if (save)
+            Save();
+    }
+}
+
+
+public static class PlaylistManager
+{
+    private static readonly List<Playlist> playlists = new();
+
+    /// <summary>
+    /// Gets a playlist from the cache, or loads it from disk.
+    /// </summary>
+    public static Playlist GetPlaylist(string path)
+    {
+        Playlist playlist = playlists.FirstOrDefault(
+            p => string.Equals(
+                p.Path,
+                path,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (playlist != null)
+            return playlist;
+
+        playlist = new Playlist(path);
+        playlists.Add(playlist);
+
+        return playlist;
+    }
+
+    /// <summary>
+    /// Creates a new playlist and adds it to the cache.
+    /// </summary>
+    public static Playlist CreatePlaylist(
+        string name,
+        string directory)
+    {
+        Playlist playlist = new Playlist(name, directory);
+
+        playlists.Add(playlist);
+
+        return playlist;
+    }
+
+    /// <summary>
+    /// Creates a new playlist with songs and adds it to the cache.
+    /// </summary>
+    public static Playlist CreatePlaylist(
+        string name,
+        List<SongInfo> songs,
+        string directory)
+    {
+        Playlist playlist = Playlist.CreatePlaylist(
+            name,
+            songs,
+            directory);
+
+        playlists.Add(playlist);
+
+        return playlist;
+    }
+
+    /// <summary>
+    /// Returns all currently loaded playlists.
+    /// </summary>
+    public static IReadOnlyList<Playlist> Playlists => playlists;
+
+    /// <summary>
+    /// Removes a playlist from the manager.
+    /// Does not delete the file from disk.
+    /// </summary>
+    public static bool RemovePlaylist(Playlist playlist)
+    {
+        if (playlist == null)
+            return false;
+
+        return playlists.Remove(playlist);
+    }
+
+    /// <summary>
+    /// Saves every loaded playlist.
+    /// </summary>
+    public static void SaveAll()
+    {
+        foreach (Playlist playlist in playlists)
+            playlist.Save();
+    }
+
+    /// <summary>
+    /// Reloads every loaded playlist from disk.
+    /// </summary>
+    public static void LoadAll()
+    {
+        foreach (Playlist playlist in playlists)
+            playlist.Load();
+    }
+
+    /// <summary>
+    /// Clears the playlist cache.
+    /// Does not delete any playlist files.
+    /// </summary>
+    public static void Clear()
+    {
+        playlists.Clear();
     }
 }

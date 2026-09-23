@@ -18,7 +18,7 @@ using Tools;
 public class MusicPlayer : MonoBehaviour
 {
     //Saved data
-    public static SaveFile saveData = new("MusicPlayerData.txt");
+    public static SaveFile saveData = new("MusicPlayerData");
 
     public enum LoopOptions { dontLoop, loop, loopSingle }
 
@@ -54,7 +54,7 @@ public class MusicPlayer : MonoBehaviour
         get => userVolumeSave;
         set
         {
-            userVolumeSave.Set(Mathf.Clamp01(value), false);
+            userVolumeSave.Set(Mathf.Clamp01(value));
 
             UpdateVolume();
         }
@@ -108,7 +108,7 @@ public class MusicPlayer : MonoBehaviour
         OnSongChange.AddListener(() => currentSongPath.Set(CurrentSong().SongPath));
 
         if (string.IsNullOrEmpty(currentSongPath))
-            playbackTime.Set(0, false);
+            playbackTime.Set(0);
         else
         {
             SongInfo lastSong;
@@ -120,7 +120,7 @@ public class MusicPlayer : MonoBehaviour
                 PlayNow(lastSong, false);
             }
             else
-                playbackTime.Set(0, false);
+                playbackTime.Set(0);
         }
 
         PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
@@ -134,7 +134,7 @@ public class MusicPlayer : MonoBehaviour
     void Update()
     {
         if (audioSource.clip)
-            playbackTime.Set(audioSource.time, false);
+            playbackTime.Set(audioSource.time);
 
         if (!songEnding)
         {
@@ -179,13 +179,13 @@ public class MusicPlayer : MonoBehaviour
             {
                 if (clip == null)
                 {
-                    playbackTime.Set(0, false);
+                    playbackTime.Set(0);
                     return; // maybe log an error here?
                 }
 
                 if (clip != audioSource.clip)
                 {
-                    playbackTime.Set(0, false);
+                    playbackTime.Set(0);
                 }
 
                 if (clip == null || clip != audioSource.clip)

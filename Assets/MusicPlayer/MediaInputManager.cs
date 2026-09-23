@@ -51,9 +51,6 @@ public class MediaInputManager : MonoBehaviour
         {
             mediaPlatform?.SetArtwork(song.AlbumCover);
         }
-
-        // Make the newly selected song the active playing session.
-        mediaPlatform?.SetPlaying();
     }
 
     private void HandleSeek(float seconds)

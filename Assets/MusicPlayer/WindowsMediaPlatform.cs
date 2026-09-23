@@ -39,8 +39,6 @@ public class WindowsMediaPlatform : IMediaPlatform
     [DllImport(DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern double PollSeekPosition();
 
-    public event Action PlayRequested;
-    public event Action PauseRequested;
     public event Action PlayPauseRequested;
     public event Action NextRequested;
     public event Action PreviousRequested;
@@ -82,11 +80,8 @@ public class WindowsMediaPlatform : IMediaPlatform
 
     private static IntPtr GetUnityWindow()
     {
-        return GetActiveWindow();
+        return System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
     }
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetActiveWindow();
 
     public void Poll()
     {
@@ -97,19 +92,16 @@ public class WindowsMediaPlatform : IMediaPlatform
 
         switch (button)
         {
-            case 1:
-                PlayRequested?.Invoke();
+            case 1: // Play
+            case 2: // Pause
+                PlayPauseRequested?.Invoke();
                 break;
 
-            case 2:
-                PauseRequested?.Invoke();
-                break;
-
-            case 3:
+            case 3: // Next
                 NextRequested?.Invoke();
                 break;
 
-            case 4:
+            case 4: // Previous
                 PreviousRequested?.Invoke();
                 break;
         }

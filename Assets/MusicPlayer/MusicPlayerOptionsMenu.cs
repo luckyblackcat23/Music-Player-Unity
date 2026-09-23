@@ -72,6 +72,10 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetGreen(evt.newValue));
         themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetBlue(evt.newValue));
 
+        themeRed.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccentToClasses());
+        themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccentToClasses());
+        themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccentToClasses());
+
         resetAccent.clicked += () => MusicPlayerUIController.accent.Set(SystemTheme.GetAccentColour());
 
         screenScaleMode.RegisterValueChangedCallback((evt) => panelSettings.scaleMode = (PanelScaleMode)evt.newValue);

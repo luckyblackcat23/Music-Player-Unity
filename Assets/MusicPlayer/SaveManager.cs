@@ -8,6 +8,7 @@ using UnityEngine;
 public static class SaveManager
 {
     public static readonly bool debug = false;
+    public const bool DefaultSaveOnChange = false;
 
     //list containing the name of the save files
     public static List<string> SaveFiles()
@@ -33,7 +34,7 @@ public static class SaveManager
         // create default file if it doesn't exist
         if (mainFile == null)
         {
-            mainFile = new SaveFile("MainSave.txt");
+            mainFile = new SaveFile("MainSave");
         }
         return mainFile;
     }
@@ -56,7 +57,7 @@ public static class SaveManager
     }
 
     //call some other way if used elsewhere
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void Initialize()
     {
         Application.quitting += OnQuit;
@@ -64,19 +65,27 @@ public static class SaveManager
         if (!Directory.Exists(Globals.SaveFolderPath))
             Directory.CreateDirectory(Globals.SaveFolderPath);
     }
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    public static void WriteAllVariables()
+    
+    //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    public static void LoadAll()
     {
         foreach (SaveFile saveFile in saveFiles)
         {
-            saveFile.WriteVariables();
+            saveFile.Load();
+        }
+    }
+    
+    public static void SaveAll()
+    {
+        foreach (SaveFile saveFile in saveFiles)
+        {
+            saveFile.Save();
         }
     }
 
     private static void OnQuit()
     {
-        WriteAllVariables();
+        SaveAll();
     }
 }
 
@@ -89,21 +98,25 @@ public class SaveFile
     public string SavedPath { get; }
     public string FileEnding { get; }
 
-    public List<SaveVariable> Variables { get; } = new();
+    public bool SaveOnChange { get; set; } = SaveManager.DefaultSaveOnChange;
 
     /// <summary>
     /// The file as it was written last time it was read.
     /// </summary>
-    public List<string> cachedText = new();
+    protected Dictionary<string, string> values = new();
+
+    public IReadOnlyDictionary<string, string> Values => values;
+
+    public event Action<string> OnValueChanged;
 
     public SaveFile(string fileName, string fileEnding = ".txt", string savePath = null, bool createIfNotFound = true)
     {
-        if (fileName != null)
-            SavedName = fileName + fileEnding;
-        else
+        if (fileName == null)
             throw new ArgumentNullException(nameof(fileName));
 
-        SavedPath = savePath ?? Path.Combine(Globals.SaveFolderPath, fileName);
+        SavedName = fileName + fileEnding;
+        SavedPath = savePath ?? Path.Combine(Globals.SaveFolderPath, SavedName);
+        FileEnding = fileEnding;
 
         if (!File.Exists(SavedPath))
         {
@@ -111,19 +124,17 @@ public class SaveFile
 
             if (createIfNotFound)
             {
-                File.CreateText(SavedPath);
-
-                WriteFile();
-
+                File.CreateText(SavedPath).Dispose();
+                Save();
                 Debug.Log($"creating {fileName}");
             }
         }
 
         SaveManager.RegisterFile(this);
-        
+
         /*
         using FileSystemWatcher watcher = new FileSystemWatcher(Globals.SaveFolderPath);
-        
+
         watcher.Changed += (object sender, FileSystemEventArgs e) => WriteVariables();
 
         watcher.Filter = $"{fileName}";
@@ -133,25 +144,25 @@ public class SaveFile
         */
     }
 
+
     /// <summary>
-    /// Updates the file to match the SaveVariables
+    /// Saves the everything stored to associated file
     /// </summary>
-    internal virtual void WriteFile(bool updateCacheAfter = true)
+    public virtual void Save(bool updateCacheAfter = true)
     {
         try
         {
             using StreamWriter sw = new StreamWriter(SavedPath, false);
-            foreach (var variable in Variables.ToArray())
-            {
-                if (SaveManager.debug)
-                    Debug.Log($"{variable.SavedName} updated in file to {variable.Value}");
 
-                sw.WriteLine(variable.SavedString());
+            foreach (var pair in values)
+            {
+                sw.WriteLine($"{pair.Key}={pair.Value}");
             }
         }
         catch (Exception ex)
         {
-            Debug.Log($"[SaveFile] Failed to save {SavedName}: {ex}");
+            Debug.LogError(
+                $"[SaveFile] Failed to save {SavedName}: {ex}");
         }
 
         if (updateCacheAfter)
@@ -161,26 +172,13 @@ public class SaveFile
     /// <summary>
     /// Updates the SaveVariables to match the file
     /// </summary>
-    public virtual List<string> WriteVariables()
+    public virtual Dictionary<string, string> Load()
     {
         UpdateCache();
-
-        foreach (SaveVariable variable in Variables.ToArray())
-        {
-            foreach (string line in cachedText)
-            {
-                if (line.StartsWith($"{variable.SavedName}="))
-                {
-                    if (SaveManager.debug)
-                        Debug.Log($"{variable.SavedName} updated from file to {variable.Value}");
-
-                    variable.SetFromString(line.Remove(0, $"{variable.SavedName}=".Length), false);
-                }
-            }
-        }
-
-        return cachedText;
+        return values;
     }
+
+    public List<string> cachedText = new();
 
     /// <summary>
     /// Updates the cachedText
@@ -189,25 +187,166 @@ public class SaveFile
     {
         try
         {
-            using (StreamReader sr = new StreamReader(SavedPath, false))
+            using StreamReader sr = new StreamReader(SavedPath);
+
+            values.Clear();
+
+            string line;
+
+            while ((line = sr.ReadLine()) != null)
             {
-                cachedText.Clear();
+                cachedText.Add(line);
 
-                string line = sr.ReadLine();
+                int separator = line.IndexOf('=');
 
-                while (line != null)
-                {
-                    cachedText.Add(line);
+                if (separator <= 0)
+                    continue;
 
-                    line = sr.ReadLine();
-                }
+                string key = line.Substring(0, separator);
+                string value = line.Substring(separator + 1);
+
+                values[key] = value;
             }
         }
         catch (Exception ex)
         {
-            Debug.Log($"[SaveFile] Failed to read {SavedName}: {ex}");
+            Debug.LogError($"[SaveFile] Failed to read {SavedName}: {ex}");
         }
     }
+
+    public bool HasValue(string key)
+    {
+        return values.ContainsKey(key);
+    }
+
+    public string Get(string key, string defaultValue = null)
+    {
+        if (values.TryGetValue(key, out string value))
+            return value;
+
+        return defaultValue;
+    }
+
+    public void Set(string key, string value)
+    {
+        values[key] = value;
+
+        OnValueChanged?.Invoke(key);
+
+        if (SaveOnChange)
+            Save();
+    }
+
+    #region Float
+    public float GetFloat(string key, float defaultValue = 0f)
+    {
+        if (float.TryParse(Get(key), NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
+        {
+            return result;
+        }
+
+        return defaultValue;
+    }
+
+    public void SetFloat(string key, float value)
+    {
+        Set(key, value.ToString(CultureInfo.InvariantCulture));
+    }
+    #endregion
+
+    #region Int
+    public int GetInt(string key, int defaultValue = 0)
+    {
+        if (int.TryParse(Get(key), out int result))
+            return result;
+
+        return defaultValue;
+    }
+
+    public void SetInt(string key, int value)
+    {
+        Set(key, value.ToString());
+    }
+    #endregion
+
+    #region Bool
+    public bool GetBool(string key, bool defaultValue = false)
+    {
+        if (bool.TryParse(Get(key), out bool result))
+            return result;
+
+        return defaultValue;
+    }
+
+    public void SetBool(string key, bool value)
+    {
+        Set(key, value.ToString());
+    }
+    #endregion
+
+    #region String
+    public string GetString(string key, string defaultValue = "")
+    {
+        return Get(key, defaultValue) ?? defaultValue;
+    }
+
+    public void SetString(string key, string value)
+    {
+        Set(key, value ?? "");
+    }
+    #endregion
+
+    #region Enum
+    public T GetEnum<T>(string key, T defaultValue = default) where T : struct, Enum
+    {
+        if (Enum.TryParse(Get(key), true, out T result))
+            return result;
+
+        return defaultValue;
+    }
+
+    public void SetEnum<T>(string key, T value) where T : struct, Enum
+    {
+        Set(key, value.ToString());
+    }
+    #endregion
+
+    #region Color
+    public Color GetColor(string key, Color defaultValue = default)
+    {
+        string value = Get(key);
+
+        if (string.IsNullOrEmpty(value))
+            return defaultValue;
+
+        string[] parts = value.Split(',');
+
+        if (parts.Length != 4)
+            return defaultValue;
+
+        if (!float.TryParse(parts[0], NumberStyles.Float,
+                CultureInfo.InvariantCulture, out float r))
+            return defaultValue;
+
+        if (!float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float g))
+            return defaultValue;
+
+        if (!float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float b))
+            return defaultValue;
+
+        if (!float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float a))
+            return defaultValue;
+
+        return new Color(r, g, b, a);
+    }
+
+    public void SetColor(string key, Color value)
+    {
+        string serialized = string.Join(",", value.r.ToString(CultureInfo.InvariantCulture), value.g.ToString(CultureInfo.InvariantCulture), value.b.ToString(CultureInfo.InvariantCulture), value.a.ToString(CultureInfo.InvariantCulture));
+
+        Set(key, serialized);
+    }
+    #endregion
 }
 
 /// <summary>
@@ -215,57 +354,22 @@ public class SaveFile
 /// </summary>
 public abstract class SaveVariable
 {
-    public string SavedName { get; internal set; }
+    public string SavedName { get; }
     public SaveFile SaveFile { get; }
-    private string _value = "";
-    internal string Value
-    {
-        get => _value;
-        set
-        {
-            _value = value;
-        }
-    }
 
-    //maybe add events for when the file is updated?
-    public event Action onSet;
-
-    // enforce that all derived classes must implement Set and Get
-    public abstract object GetAsObject();
-    public abstract void SetFromObject(object v, bool UpdateOnChange = true);
-
-    public abstract string GetAsString();
-    public abstract void SetFromString(string v, bool UpdateOnChange = true);
-
-    internal virtual string SavedString() => $"{SavedName}={Value}";
-
-    protected SaveVariable(string savedName, SaveFile saveFile = null, object defaultValue = null)
+    protected SaveVariable(string savedName, SaveFile saveFile)
     {
         SavedName = savedName ?? throw new ArgumentNullException(nameof(savedName));
 
-        // decide which file this variable belongs to
-        SaveFile = saveFile ?? SaveManager.MainSave();
-
-        if (!SaveFile.Variables.Contains(this))
-            SaveFile.Variables.Add(this);
-        else
-        {
-            Debug.Log("unable to save this variable as it already exists in the save manager");
-        }
-
-        if(defaultValue != null)
-        {
-            SetFromObject(defaultValue, false);
-        }
+        SaveFile = saveFile
+            ?? throw new ArgumentNullException(nameof(saveFile));
     }
 
-    protected void OnSet()
-    {
-        if (SaveManager.debug)
-            Debug.Log($"{SavedName} value set to: {Value}");
+    public abstract object GetAsObject();
+    public abstract void SetFromObject(object value);
 
-        onSet?.Invoke();
-    }
+    public abstract string GetAsString();
+    public abstract void SetFromString(string value);
 }
 
 
@@ -276,31 +380,25 @@ public class SaveFloat : SaveVariable
 {
     public static implicit operator float(SaveFloat obj) => obj.Get();
 
-    public SaveFloat(string savedName, SaveFile saveFile = null, float defaultValue = 0f) : base(savedName, saveFile, defaultValue) { }
-
-    public float Get() => float.TryParse(Value, out var f) ? f : 0f;
-
-    public void Set(float v, bool UpdateOnChange = true)
+    public SaveFloat(string savedName, SaveFile saveFile = null, float defaultValue = 0f) : base(savedName, saveFile ?? SaveManager.MainSave())
     {
-        Value = v.ToString();
-        OnSet();
-
-        if (UpdateOnChange)
-        {
-            SaveFile.WriteFile();
-        }
+        if (!SaveFile.HasValue(SavedName))
+            SaveFile.SetFloat(SavedName, defaultValue);
     }
 
-    public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((float)v, UpdateOnChange);
+    public float Get() => SaveFile.GetFloat(SavedName);
+    
 
-    public override string GetAsString() => Value;
-    public override void SetFromString(string v, bool UpdateOnChange = true)
+    public void Set(float value) => SaveFile.SetFloat(SavedName, value);
+
+    public override object GetAsObject() => Get();
+    public override void SetFromObject(object value) => Set((float)value);
+
+    public override string GetAsString() => Get().ToString(CultureInfo.InvariantCulture);
+    public override void SetFromString(string value)
     {
-        if (float.TryParse(v, out float result))
-            Set(result, UpdateOnChange);
-        else
-            Value = default(float).ToString();
+        if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
+            Set(result);
     }
 }
 
@@ -311,31 +409,20 @@ public class SaveInt : SaveVariable
 {
     public static implicit operator int(SaveInt obj) => obj.Get();
 
-    public SaveInt(string savedName, SaveFile saveFile = null, int defaultValue = 0) : base(savedName, saveFile, defaultValue) { }
+    public SaveInt(string savedName, SaveFile saveFile = null, int defaultValue = 0) : base(savedName, saveFile ?? SaveManager.MainSave()) { }
 
-    public int Get() => int.TryParse(Value, out var i) ? i : 0;
+    public int Get() => SaveFile.GetInt(SavedName);
 
-    public void Set(int v, bool UpdateOnChange = true)
-    {
-        Value = v.ToString();
-        OnSet();
-
-        if (UpdateOnChange)
-        {
-            SaveFile.WriteFile();
-        }
-    }
+    public void Set(int value) => SaveFile.SetInt(SavedName, value);
 
     public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((int)v, UpdateOnChange);
+    public override void SetFromObject(object value) => Set((int)value);
 
-    public override string GetAsString() => Value;
-    public override void SetFromString(string v, bool UpdateOnChange = true)
+    public override string GetAsString() => Get().ToString(CultureInfo.InvariantCulture);
+    public override void SetFromString(string value)
     {
-        if (int.TryParse(v, out int result))
-            Set(result, UpdateOnChange);
-        else
-            Value = default(int).ToString();
+        if (int.TryParse(value, out int result))
+            Set(result);
     }
 }
 
@@ -346,31 +433,24 @@ public class SaveBool : SaveVariable
 {
     public static implicit operator bool(SaveBool obj) => obj.Get();
 
-    public SaveBool(string savedName, SaveFile saveFile = null, bool defaultValue = false) : base(savedName, saveFile, defaultValue) { }
-
-    public bool Get() => bool.TryParse(Value, out var b) && b;
-
-    public void Set(bool v, bool UpdateOnChange = true)
+    public SaveBool(string savedName, SaveFile saveFile = null, bool defaultValue = false) : base(savedName, saveFile ?? SaveManager.MainSave())
     {
-        Value = v.ToString();
-        OnSet();
-
-        if (UpdateOnChange)
-        {
-            SaveFile.WriteFile();
-        }
+        if (!SaveFile.HasValue(SavedName))
+            SaveFile.SetBool(SavedName, defaultValue);
     }
 
-    public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((bool)v, UpdateOnChange);
+    public bool Get() => SaveFile.GetBool(SavedName);
 
-    public override string GetAsString() => Value;
-    public override void SetFromString(string v, bool UpdateOnChange = true)
+    public void Set(bool value) => SaveFile.SetBool(SavedName, value);
+
+    public override object GetAsObject() => Get();
+    public override void SetFromObject(object value) => Set((bool)value);
+
+    public override string GetAsString() => Get().ToString(CultureInfo.InvariantCulture);
+    public override void SetFromString(string value)
     {
-        if (bool.TryParse(v, out bool result))
-            Set(result, UpdateOnChange);
-        else
-            Value = default(bool).ToString();
+        if (bool.TryParse(value, out bool result))
+            Set(result);
     }
 }
 
@@ -381,27 +461,21 @@ public class SaveString : SaveVariable
 {
     public static implicit operator string(SaveString obj) => obj.Get();
 
-    public SaveString(string savedName, SaveFile saveFile = null, string defaultValue = default) : base(savedName, saveFile, defaultValue) { }
-
-    public string Get() => Value ?? string.Empty;
-
-    public void Set(string v, bool UpdateOnChange = true)
+    public SaveString(string savedName, SaveFile saveFile = null, string defaultValue = "") : base(savedName, saveFile ?? SaveManager.MainSave())
     {
-        Value = v ?? "";
-        OnSet();
-
-        if (UpdateOnChange)
-        {
-            SaveFile.WriteFile();
-        }
+        if (!SaveFile.HasValue(SavedName))
+            SaveFile.SetString(SavedName, defaultValue);
     }
 
-    public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((string)v, UpdateOnChange);
+    public string Get() => SaveFile.GetString(SavedName);
 
-    //huh, guess these are kind of pointless here
-    public override string GetAsString() => Value;
-    public override void SetFromString(string v, bool UpdateOnChange = true) => Set(v, UpdateOnChange);
+    public void Set(string value) => SaveFile.SetString(SavedName, value);
+
+    public override object GetAsObject() => Get();
+    public override void SetFromObject(object value) => Set((string)value);
+
+    public override string GetAsString() => Get();
+    public override void SetFromString(string value) => Set(value);
 }
 
 /// <summary>
@@ -411,78 +485,21 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
 {
     public static implicit operator T(SaveEnum<T> obj) => obj.Get();
 
-    public SaveEnum(string savedName, SaveFile saveFile = null, T defaultValue = default) : base(savedName, saveFile, defaultValue) { }
+    public SaveEnum(string savedName, SaveFile saveFile = null, T defaultValue = default) : base(savedName, saveFile ?? SaveManager.MainSave()) { }
 
-    public T Get()
-    {
-        if (Enum.TryParse(Value, out T result))
-            return result;
-        return default; // fallback to first enum value
-    }
+    public T Get() => SaveFile.GetEnum<T>(SavedName);
 
-    public void Set(T v, bool UpdateOnChange = true)
-    {
-        Value = v.ToString();
-        OnSet();
-
-        if (UpdateOnChange)
-        {
-            SaveFile.WriteFile();
-        }
-    }
+    public void Set(T value) => SaveFile.SetEnum(SavedName, value);
 
     public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((T)v, UpdateOnChange);
+    public override void SetFromObject(object value) => Set((T)value);
 
-    public override string GetAsString() => Value;
-    public override void SetFromString(string v, bool UpdateOnChange = true)
+    public override string GetAsString() => Get().ToString();
+    public override void SetFromString(string v)
     {
-        if (Enum.TryParse(v, out T result))
-            Set(result, UpdateOnChange);
-        else
-            Value = default(T).ToString();
+        if (Enum.TryParse(v, true, out T result))
+            Set(result);
     }
-}
-
-/// <summary>
-/// Stores and retrieves string values
-/// Similar to saved string. has some extra checks to see if it's a valid path. almost exclusively for playlists or any ordered save file
-/// </summary>
-public class SavePath : SaveVariable
-{
-    public static implicit operator string(SavePath obj) => obj.Get();
-
-    public SavePath(string path, SaveFile saveFile = null, string defaultValue = default) : base(path, saveFile, defaultValue) { }
-    public SavePath(SaveFile saveFile = null, string defaultValue = default) : base(null, saveFile, defaultValue) { }
-
-    public string Get() => SavedName ?? string.Empty;
-
-    public void Set(string v, bool UpdateOnChange = true)
-    {
-        if (!string.IsNullOrEmpty(v))
-        {
-            if (Uri.IsWellFormedUriString(v, UriKind.RelativeOrAbsolute) || new FileInfo(v).Exists)
-            {
-                SavedName = v;
-                OnSet();
-
-                if (UpdateOnChange)
-                {
-                    SaveFile.WriteFile();
-                }
-            }
-            else
-                Debug.LogError($"Invalid path: {v}");
-        }
-    }
-
-    public override object GetAsObject() => Get();
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((string)v, UpdateOnChange);
-
-    public override string GetAsString() => SavedName;
-    public override void SetFromString(string v, bool UpdateOnChange = true) => Set(v, UpdateOnChange);
-
-    internal override string SavedString() { return SavedName; }
 }
 
 /// <summary>
@@ -492,53 +509,35 @@ public class SaveColor : SaveVariable
 {
     public static implicit operator Color(SaveColor obj) => obj.Get();
 
-    public SaveColor(string savedName, SaveFile saveFile = null, Color defaultValue = default) : base(savedName, saveFile, defaultValue) { }
+    public SaveColor(string savedName, SaveFile saveFile = null, Color defaultValue = default) : base(savedName, saveFile) { }
 
-    public Color Get() => ParseColor(Value);
+    public Color Get(Color defaultValue = default) => SaveFile.GetColor(SavedName, defaultValue);
 
-    public void Set(Color v, bool UpdateOnChange = true)
+    public void Set(Color value) => SaveFile.SetColor(SavedName, value);
+
+    public void SetRed(float r)
     {
-        Value = string.Join(",", v.r.ToString(CultureInfo.InvariantCulture), v.g.ToString(CultureInfo.InvariantCulture), v.b.ToString(CultureInfo.InvariantCulture), v.a.ToString(CultureInfo.InvariantCulture));
-        OnSet();
-
-        if (UpdateOnChange)
-        {
-            SaveFile.WriteFile();
-        }
+        Set(new Color(r, Get().g, Get().b));
     }
 
-    public void SetRed(float r, bool UpdateOnChange = true)
+    public void SetGreen(float g)
     {
-        Set(new Color(r, Get().g, Get().b), UpdateOnChange);
+        Set(new Color(Get().r, g, Get().b));
     }
 
-    public void SetGreen(float g, bool UpdateOnChange = true)
+    public void SetBlue(float b)
     {
-        Set(new Color(Get().r, g, Get().b), UpdateOnChange);
-    }
-
-    public void SetBlue(float b, bool UpdateOnChange = true)
-    {
-        Set(new Color(Get().r, Get().g, b), UpdateOnChange);
+        Set(new Color(Get().r, Get().g, b));
     }
 
     public override object GetAsObject() => Get();
+    public override void SetFromObject(object v) => Set((Color)v);
 
-    public override void SetFromObject(object v, bool UpdateOnChange = true) => Set((Color)v, UpdateOnChange);
-
-    public override string GetAsString() => Value;
-
-    public override void SetFromString(string v, bool UpdateOnChange = true)
+    public override string GetAsString() => Get().ToString();
+    public override void SetFromString(string v)
     {
         if (TryParseColor(v, out Color color))
-            Set(color, UpdateOnChange);
-        else
-            Value = SerializeColor(Color.black);
-    }
-
-    private static Color ParseColor(string value)
-    {
-        return TryParseColor(value, out Color color) ? color : Color.black;
+            Set(color);
     }
 
     private static bool TryParseColor(string value, out Color color)
@@ -563,14 +562,5 @@ public class SaveColor : SaveVariable
 
         color = new Color(r, g, b, a);
         return true;
-    }
-
-    private static string SerializeColor(Color color)
-    {
-        return string.Join(",",
-            color.r.ToString(CultureInfo.InvariantCulture),
-            color.g.ToString(CultureInfo.InvariantCulture),
-            color.b.ToString(CultureInfo.InvariantCulture),
-            color.a.ToString(CultureInfo.InvariantCulture));
     }
 }
