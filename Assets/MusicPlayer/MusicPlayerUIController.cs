@@ -43,9 +43,11 @@ public class MusicPlayerUIController : MonoBehaviour
     ListView songQueue;
 
     ListView playlistList;
-    Button playlistListBackButton;
+    AccentButton playlistListBackButton;
 
     ListView songList;
+
+    AccentButton shuffleAllButton;
 
     TextField searchBar;
     TextField searchBarQueue;
@@ -57,14 +59,14 @@ public class MusicPlayerUIController : MonoBehaviour
     Label songTitle;
     Label songArtist;
 
-    Button popOutButton;
-    Button settingsButton;
+    AccentButton popOutButton;
+    AccentButton settingsButton;
 
-    Button shuffleButton;
-    Button previousButton;
-    Button playButton;
-    Button nextButton;
-    Button loopButton;
+    AccentButton shuffleButton;
+    AccentButton previousButton;
+    AccentButton playButton;
+    AccentButton nextButton;
+    AccentButton loopButton;
 
     Slider volumeSlider;
 
@@ -86,7 +88,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnEnable()
     {
-        GetComponent<PanelRenderer>().RegisterUIReloadCallback(SetupListView);
+        GetComponent<PanelRenderer>().RegisterUIReloadCallback(Initialize);
     }
 
     void OnDisable()
@@ -106,7 +108,7 @@ public class MusicPlayerUIController : MonoBehaviour
         musicPlayer.OnSongShuffle.RemoveListener(RefreshSongQueue);
         musicPlayer.OnSongChange.RemoveListener(RefreshSongQueue);
 
-        GetComponent<PanelRenderer>().UnregisterUIReloadCallback(SetupListView);
+        GetComponent<PanelRenderer>().UnregisterUIReloadCallback(Initialize);
     }
 
     private int lastDisplayedSecond = -1;
@@ -129,7 +131,7 @@ public class MusicPlayerUIController : MonoBehaviour
     }
 
     int uiVersion = 0;
-    void SetupListView(PanelRenderer panelRenderer, VisualElement root_, int version)
+    void Initialize(PanelRenderer panelRenderer, VisualElement root_, int version)
     {
         // The version number only changes when the UI actually reloads, 
         // so this checks prevents duplicated elements.
@@ -149,9 +151,11 @@ public class MusicPlayerUIController : MonoBehaviour
         songQueue = root.Q<ListView>("SongQueue");
 
         playlistList = root.Q<ListView>("PlaylistList");
-        playlistListBackButton = root.Q<Button>("PlaylistListBack");
+        playlistListBackButton = root.Q<AccentButton>("PlaylistListBack");
 
         songList = root.Q<ListView>("SongList");
+
+        shuffleAllButton = root.Q<AccentButton>("ShuffleAll");
 
         searchBarQueue = root.Q<TextField>("SearchBarQueue");
         searchBarPlaylists = root.Q<TextField>("SearchBarPlaylists");
@@ -161,14 +165,14 @@ public class MusicPlayerUIController : MonoBehaviour
         songTitle = root.Q<Label>("SongTitle");
         songArtist = root.Q<Label>("SongArtist");
 
-        popOutButton = root.Q<Button>("PopOutButton");
-        settingsButton = root.Q<Button>("SettingsButton");
+        popOutButton = root.Q<AccentButton>("PopOutButton");
+        settingsButton = root.Q<AccentButton>("SettingsButton");
 
-        shuffleButton = root.Q<Button>("Shuffle");
-        previousButton = root.Q<Button>("Previous");
-        playButton = root.Q<Button>("Play");
-        nextButton = root.Q<Button>("Next");
-        loopButton = root.Q<Button>("Loop");
+        shuffleButton = root.Q<AccentButton>("Shuffle");
+        previousButton = root.Q<AccentButton>("Previous");
+        playButton = root.Q<AccentButton>("Play");
+        nextButton = root.Q<AccentButton>("Next");
+        loopButton = root.Q<AccentButton>("Loop");
 
         volumeSlider = root.Q<Slider>("VolumeSlider");
 
@@ -341,6 +345,8 @@ public class MusicPlayerUIController : MonoBehaviour
             RefreshSongList();
         });
 
+        shuffleAllButton.clicked += ShuffleAll;
+
         searchBarQueue.RegisterCallback<ChangeEvent<string>>((x) =>
         {
             searchTempSongsQueue.Clear();
@@ -398,7 +404,7 @@ public class MusicPlayerUIController : MonoBehaviour
             switch (musicPlayer.Loop)
             {
                 case MusicPlayer.LoopOptions.dontLoop:
-                    loopButton.style.backgroundImage = new StyleBackground(DontLoopIcon);
+                    loopButton.IconImage = new StyleBackground(DontLoopIcon);
                     break;
                 case MusicPlayer.LoopOptions.loop:
                     loopButton.style.backgroundImage = new StyleBackground(LoopIcon);
@@ -489,25 +495,23 @@ public class MusicPlayerUIController : MonoBehaviour
         }
         else
         {
-            Playlist playlist = Playlist.GetFromPath(node.Path);
+            Playlist playlist = PlaylistManager.GetPlaylist(node.Path);
 
             element.Q<Label>("title").text = playlist.Name;
 
             VisualElement albumArt = element.Q<VisualElement>("albumArt");
 
-            List<SongInfo> songs = playlist.GetSongs();
-
-            if (songs.Count > 0)
+            if (playlist.TryGetFirstSong(out SongInfo song))
             {
-                if (!songs[0].MetaDataLoaded)
+                if (!song.MetaDataLoaded)
                 {
-                    songs[0].GetSongInfo();
-                    songs[0].OnMetaDataLoaded += () => RefreshPlaylistList();
+                    song.GetSongInfo();
+                    song.OnMetaDataLoaded += () => playlistList.RefreshItem(index);
                 }
 
-                albumArt.style.backgroundImage = songs[0].AlbumCover;
+                albumArt.style.backgroundImage = song.AlbumCover;
             }
-
+            
             element.userData = playlist;
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
@@ -729,6 +733,14 @@ public class MusicPlayerUIController : MonoBehaviour
         musicPlayer.PlayPrevious();
     }
 
+    void ShuffleAll()
+    {
+        musicPlayer.PlayAll(true);
+        queue = musicPlayer.musicQueue;
+        songQueue.itemsSource = queue;
+        songQueue.Rebuild();
+    }
+
     void ChangeDisplayedPlaylistDirectory(FileNode directory)
     {
         if (directory == null)
@@ -758,7 +770,7 @@ public class MusicPlayerUIController : MonoBehaviour
         }
         else
         {
-            popOutButton.style.backgroundImage = new StyleBackground(PopOutViewInIcon);
+            popOutButton.style.backgroundImage = new StyleBackground(PopOutViewOutIcon);
             popOutView.style.display = DisplayStyle.Flex;
             popOutDisplayed = true;
         }
@@ -792,7 +804,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
         foreach (VisualElement element in root.Query(className: "accentImageTint").ToList())
         {
-            element.style.unityBackgroundImageTintColor = accentLight;
+            if (!element.ClassListContains("ButtonHover"))
+                element.style.unityBackgroundImageTintColor = accentLight;
         }
 
         foreach (VisualElement element in root.Query(className: "accentBackgroundColor").ToList())
@@ -815,8 +828,9 @@ public class MusicPlayerUIController : MonoBehaviour
             element.style.backgroundColor = accentDark;
         }
 
-#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
-        WindowsTitleBar.SetColour(accent);
-#endif
+        foreach (AccentButton button in root.Query<AccentButton>().ToList())
+        {
+            button.color = accentLight;
+        }
     }
 }

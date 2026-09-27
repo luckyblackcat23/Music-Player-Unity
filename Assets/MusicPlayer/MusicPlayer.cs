@@ -17,6 +17,8 @@ using Tools;
 [RequireComponent(typeof(AudioSource))]
 public class MusicPlayer : MonoBehaviour
 {
+    public static MusicPlayer instance;
+
     //Saved data
     public static SaveFile saveData = new("MusicPlayerData");
 
@@ -105,6 +107,8 @@ public class MusicPlayer : MonoBehaviour
 
     private void Awake()
     {
+        instance = this;
+
         OnSongChange.AddListener(() => currentSongPath.Set(CurrentSong().SongPath));
 
         if (string.IsNullOrEmpty(currentSongPath))
@@ -197,8 +201,9 @@ public class MusicPlayer : MonoBehaviour
 
                 if (AudioNormalisationEnabled)
                 {
-                    if (currentSong.LUFS <= 0)
+                    if (!currentSong.LUFSCalculated)
                     {
+                        currentSong.LUFSCalculated = true;
                         currentSong.LUFS = CalculateLUFS(currentSong.SongPath);
                         Debug.Log("LUFS = " + currentSong.LUFS);
                     }
@@ -392,7 +397,7 @@ public class MusicPlayer : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Songs folder has not finished caching");
+            Debug.LogError("Attempted to play all songs when songs have not finished caching");
         }
     }
 

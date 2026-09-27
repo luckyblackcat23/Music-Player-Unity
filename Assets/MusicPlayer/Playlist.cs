@@ -19,6 +19,7 @@ public class Playlist
     /// Songs contained in this playlist, in playlist order.
     /// </summary>
     public List<string> Songs { get; } = new();
+    public List<SongInfo> SongInfos;
 
     /// <summary>
     /// M3U directives/comments that were present in the file.
@@ -52,10 +53,7 @@ public class Playlist
     /// <summary>
     /// Creates a playlist and adds the supplied songs.
     /// </summary>
-    public static Playlist CreatePlaylist(
-        string name,
-        List<SongInfo> songs,
-        string directory)
+    public static Playlist CreatePlaylist(string name, List<SongInfo> songs, string directory)
     {
         Playlist playlist = new Playlist(name, directory, false);
 
@@ -138,6 +136,7 @@ public class Playlist
             return;
 
         if (Songs.Contains(songPath))
+            //maybe add a confirmation window instead here?
             return;
 
         Songs.Add(songPath);
@@ -242,7 +241,10 @@ public class Playlist
     /// </summary>
     public List<SongInfo> GetSongs(bool loadMissing)
     {
-        List<SongInfo> songs = new();
+        if (SongInfos == null)
+            return SongInfos;
+
+        List<SongInfo> songs = new List<SongInfo>(Songs.Count);
 
         foreach (string path in Songs)
         {
@@ -257,7 +259,20 @@ public class Playlist
             }
         }
 
+        SongInfos = songs;
         return songs;
+    }
+
+    public bool TryGetFirstSong(out SongInfo song)
+    {
+        foreach (string path in Songs)
+        {
+            if (MusicPlayer.GetCachedSong(path, out song))
+                return true;
+        }
+
+        song = null;
+        return false;
     }
 
     /// <summary>
@@ -317,10 +332,7 @@ public static class PlaylistManager
     public static Playlist GetPlaylist(string path)
     {
         Playlist playlist = playlists.FirstOrDefault(
-            p => string.Equals(
-                p.Path,
-                path,
-                StringComparison.OrdinalIgnoreCase));
+            p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase));
 
         if (playlist != null)
             return playlist;
@@ -334,9 +346,7 @@ public static class PlaylistManager
     /// <summary>
     /// Creates a new playlist and adds it to the cache.
     /// </summary>
-    public static Playlist CreatePlaylist(
-        string name,
-        string directory)
+    public static Playlist CreatePlaylist(string name, string directory)
     {
         Playlist playlist = new Playlist(name, directory);
 
@@ -348,15 +358,9 @@ public static class PlaylistManager
     /// <summary>
     /// Creates a new playlist with songs and adds it to the cache.
     /// </summary>
-    public static Playlist CreatePlaylist(
-        string name,
-        List<SongInfo> songs,
-        string directory)
+    public static Playlist CreatePlaylist(string name, List<SongInfo> songs, string directory)
     {
-        Playlist playlist = Playlist.CreatePlaylist(
-            name,
-            songs,
-            directory);
+        Playlist playlist = Playlist.CreatePlaylist(name, songs, directory);
 
         playlists.Add(playlist);
 
