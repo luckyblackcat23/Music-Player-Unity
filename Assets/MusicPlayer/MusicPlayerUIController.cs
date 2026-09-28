@@ -142,7 +142,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         root = root_;
 
-        ApplyAccentToClasses();
+        ApplyAccent();
 
         contextMenu = new ContextMenu(root);
 
@@ -386,6 +386,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
             RefreshPlaylistList();
         });
+
+        playbackAlbumArt.RegisterCallback<MouseUpEvent>(evt => AlbumArtFocusUI.ShowFocusMenu());
 
         popOutButton.clicked += TogglePopOutView;
         settingsButton.clicked += MusicPlayerOptionsMenu.ShowOptionsMenu;
@@ -796,11 +798,15 @@ public class MusicPlayerUIController : MonoBehaviour
     }
 
     public static SaveColor accent = new SaveColor("accentColour", MusicPlayer.saveData, SystemTheme.GetAccentColour());
+    public static Color accentDark;
+    public static Color accentLight;
 
-    public static void ApplyAccentToClasses()
+    public static Action OnAccentChange;
+
+    public static void ApplyAccent()
     {
-        Color accentDark = Color.Lerp(accent, Color.black, 0.3f);
-        Color accentLight = Color.Lerp(accent, Color.white, 0.3f);
+        accentDark = Color.Lerp(accent, Color.black, 0.3f);
+        accentLight = Color.Lerp(accent, Color.white, 0.3f);
 
         foreach (VisualElement element in root.Query(className: "accentImageTint").ToList())
         {
@@ -832,5 +838,7 @@ public class MusicPlayerUIController : MonoBehaviour
         {
             button.color = accentLight;
         }
+
+        OnAccentChange?.Invoke();
     }
 }

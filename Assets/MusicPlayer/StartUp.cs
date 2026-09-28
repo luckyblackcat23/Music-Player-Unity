@@ -2,12 +2,18 @@ using MyBox;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class StartUp : MonoBehaviour
 {
-    public Image background;
-    public RawImage icon;
+    [SerializeField] PanelRenderer document;
+
+    VisualElement root;
+
+    int uiVersion = 0;
+
+    VisualElement background;
+    Image icon;
 
     float timeElapsed;
 
@@ -24,47 +30,81 @@ public class StartUp : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        Application.targetFrameRate = 30;
-        
-        Color SystemColour = SystemTheme.GetAccentColour();
+        document.RegisterUIReloadCallback(OnUIReload);
 
-        background.color = SystemColour;
-        icon.color = Color.Lerp(SystemColour, Color.white, 0.8f);
+        Application.targetFrameRate = 30;
 
         StartCoroutine(StartUpWait());
 
         SaveManager.LoadAll();
     }
 
+    private void OnUIReload(PanelRenderer panelRenderer, VisualElement root, int version)
+    {
+        // The version number only changes when the UI actually reloads, 
+        // so this checks prevents duplicated elements.
+        if (uiVersion == version)
+            return;
+
+        uiVersion = version;
+
+        this.root = root;
+
+        background = root.Q<VisualElement>("Background");
+        icon = root.Q<Image>("Icon");
+
+        Color SystemColour = SystemTheme.GetAccentColour();
+
+        background.style.backgroundColor = SystemColour;
+        icon.style.unityBackgroundImageTintColor = Color.Lerp(SystemColour, Color.white, 0.8f);
+    }
+    
     float fade = 1f;
 
     IEnumerator StartUpWait()
     {
-        //gives up after 5 seconds. might wanna add some error screen or something if that triggers
-        while (!MusicPlayer.songsCached && timeElapsed < 5f)
+        // Wait for the UI Toolkit document to initialise.
+        while (background == null || icon == null)
+            yield return null;
+
+        // Wait for songs to finish caching, with a 10 second timeout.
+        timeElapsed = 0f;
+
+        while (!MusicPlayer.songsCached && timeElapsed < 10f)
         {
             timeElapsed += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
+            yield return null;
         }
+
+        // Debug startup delay
         if (debug)
         {
-            while (timeElapsed < 5f)
+            while (timeElapsed < 10f)
             {
                 timeElapsed += Time.deltaTime;
-                yield return new WaitForEndOfFrame();
+                yield return null;
             }
         }
 
+        // Load the main scene.
         SceneManager.LoadScene(1, LoadSceneMode.Additive);
 
-        while (fade > 0)
-        {
-            background.color = new Color(background.color.r, background.color.g, background.color.b, fade);
-            icon.color = new Color(icon.color.r, icon.color.g, icon.color.b, fade);
+        // Fade out the startup UI.
+        fade = 1f;
 
+        while (fade > 0f)
+        {
             fade -= Time.deltaTime * 1.1f;
-            yield return new WaitForEndOfFrame();
+
+            background.style.opacity = fade;
+            icon.style.opacity = fade;
+
+            yield return null;
         }
+
+        // Make sure it reaches exactly zero.
+        background.style.opacity = 0f;
+        icon.style.opacity = 0f;
 
         SceneManager.UnloadSceneAsync(0);
     }

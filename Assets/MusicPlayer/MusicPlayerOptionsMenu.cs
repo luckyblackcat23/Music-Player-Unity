@@ -72,9 +72,9 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetGreen(evt.newValue));
         themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetBlue(evt.newValue));
 
-        themeRed.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccentToClasses());
-        themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccentToClasses());
-        themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccentToClasses());
+        themeRed.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccent());
+        themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccent());
+        themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccent());
 
         resetAccent.clicked += () => MusicPlayerUIController.accent.Set(SystemTheme.GetAccentColour());
 

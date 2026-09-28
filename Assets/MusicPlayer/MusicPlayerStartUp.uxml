@@ -1,0 +1,5 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="Background" style="flex-grow: 1; background-color: rgb(255, 232, 0); padding-top: 200px; padding-right: 200px; padding-bottom: 200px; padding-left: 200px;">
+        <ui:Image name="Icon" style="background-image: url(&quot;project://database/Assets/MusicPlayer/DefaultIcon.png?fileID=2800000&amp;guid=f3a470c7343fba44595b47949ce6d983&amp;type=3#DefaultIcon&quot;); flex-grow: 1; aspect-ratio: 1; align-self: center; -unity-background-image-tint-color: rgb(255, 183, 0);"/>
+    </ui:VisualElement>
+</ui:UXML>
