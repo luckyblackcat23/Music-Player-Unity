@@ -3,22 +3,21 @@ using UnityEngine;
 public class MediaInputManager : MonoBehaviour
 {
     private IMediaPlatform mediaPlatform;
-    public MusicPlayer musicPlayer;
 
     void Start()
     {
         mediaPlatform = new WindowsMediaPlatform();
 
         // Windows -> MusicPlayer
-        mediaPlatform.PlayPauseRequested += musicPlayer.TogglePause;
+        mediaPlatform.PlayPauseRequested += MusicPlayer .TogglePause;
         mediaPlatform.NextRequested += HandlePlayNext;
         mediaPlatform.PreviousRequested += HandlePlayPrevious;
         mediaPlatform.SeekRequested += HandleSeek;
 
         // MusicPlayer -> Windows
-        musicPlayer.OnPlay.AddListener(HandlePlay);
-        musicPlayer.OnPause.AddListener(HandlePause);
-        musicPlayer.OnSongChange.AddListener(HandleSongChange);
+        MusicPlayer.OnPlay.AddListener(HandlePlay);
+        MusicPlayer.OnPause.AddListener(HandlePause);
+        MusicPlayer.OnSongChange.AddListener(HandleSongChange);
 
         // If a song is already loaded when this starts,
         // immediately give Windows its metadata.
@@ -37,10 +36,7 @@ public class MediaInputManager : MonoBehaviour
 
     private void HandleSongChange()
     {
-        if (musicPlayer == null)
-            return;
-
-        SongInfo song = musicPlayer.CurrentSong();
+        SongInfo song = MusicPlayer .CurrentSong();
 
         if (song == null)
             return;
@@ -56,7 +52,7 @@ public class MediaInputManager : MonoBehaviour
     private void HandleSeek(float seconds)
     {
         // Replace this with your actual MusicPlayer seek method.
-        musicPlayer.SetSongTime(seconds);
+        MusicPlayer .SetSongTime(seconds);
 
         // Immediately update Windows' timeline.
         mediaPlatform?.UpdatePosition(seconds);
@@ -64,12 +60,12 @@ public class MediaInputManager : MonoBehaviour
 
     private void HandlePlayNext()
     {
-        musicPlayer.PlayNext();
+        MusicPlayer .PlayNext();
     }
 
     private void HandlePlayPrevious()
     {
-        musicPlayer.PlayPrevious();
+        MusicPlayer .PlayPrevious();
     }
 
     void Update()
@@ -79,12 +75,9 @@ public class MediaInputManager : MonoBehaviour
 
     void OnDestroy()
     {
-        if (musicPlayer != null)
-        {
-            musicPlayer.OnPlay.RemoveListener(HandlePlay);
-            musicPlayer.OnPause.RemoveListener(HandlePause);
-            musicPlayer.OnSongChange.RemoveListener(HandleSongChange);
-        }
+        MusicPlayer.OnPlay.RemoveListener(HandlePlay);
+        MusicPlayer.OnPause.RemoveListener(HandlePause);
+        MusicPlayer.OnSongChange.RemoveListener(HandleSongChange);
 
         mediaPlatform?.Shutdown();
     }

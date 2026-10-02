@@ -8,8 +8,6 @@ using System;
 
 public class MusicPlayerUIController : MonoBehaviour
 {
-    public MusicPlayer musicPlayer;
-
     class ListItemData
     {
         public FileNode playlist;
@@ -105,8 +103,8 @@ public class MusicPlayerUIController : MonoBehaviour
         playbackSlider.UnregisterCallback<MouseCaptureEvent>(OnPlaybackDrag);
         playbackSlider.UnregisterCallback<MouseCaptureOutEvent>(OnPlaybackRelease);
 
-        musicPlayer.OnSongShuffle.RemoveListener(RefreshSongQueue);
-        musicPlayer.OnSongChange.RemoveListener(RefreshSongQueue);
+        MusicPlayer.OnSongShuffle.RemoveListener(RefreshSongQueue);
+        MusicPlayer.OnSongChange.RemoveListener(RefreshSongQueue);
 
         GetComponent<PanelRenderer>().UnregisterUIReloadCallback(Initialize);
     }
@@ -115,7 +113,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     private void Update()
     {
-        if (!musicPlayer.paused && !playbackSliderDragged)
+        if (!MusicPlayer.paused && !playbackSliderDragged)
             playbackSlider.value = MusicPlayer.playbackTime.Get();
 
         int currentSecond = Mathf.FloorToInt(MusicPlayer.playbackTime);
@@ -180,9 +178,9 @@ public class MusicPlayerUIController : MonoBehaviour
         playbackSlider = root.Q<Slider>("PlaybackSlider");
 
         //initialize song change event
-        musicPlayer.OnSongChange.AddListener(() =>
+        MusicPlayer.OnSongChange.AddListener(() =>
         {
-            SongInfo currentSong = musicPlayer.CurrentSong();
+            SongInfo currentSong = MusicPlayer.CurrentSong();
 
             Debug.Log(currentSong.Title);
 
@@ -205,7 +203,7 @@ public class MusicPlayerUIController : MonoBehaviour
                 currentSong.OnMetaDataLoaded += () =>
                 {
                     // Make sure this is still the active song
-                    if (musicPlayer.CurrentSong() != currentSong)
+                    if (MusicPlayer.CurrentSong() != currentSong)
                         return;
 
                     playbackAlbumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
@@ -227,7 +225,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songQueue.fixedItemHeight = 100;
 
-        queue = musicPlayer.musicQueue;
+        queue = MusicPlayer.musicQueue;
 
         songQueue.itemsSource = queue;
 
@@ -246,21 +244,21 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songQueue.itemIndexChanged += (oldIndex, newIndex) =>
         {
-            if (musicPlayer.currentSongIndex == oldIndex)
+            if (MusicPlayer.currentSongIndex == oldIndex)
             {
-                musicPlayer.currentSongIndex = newIndex;
+                MusicPlayer.currentSongIndex = newIndex;
             }
-            else if (oldIndex < musicPlayer.currentSongIndex && newIndex >= musicPlayer.currentSongIndex)
+            else if (oldIndex < MusicPlayer.currentSongIndex && newIndex >= MusicPlayer.currentSongIndex)
             {
                 // An item before the current song moved after it.
                 // Current song shifts left.
-                musicPlayer.currentSongIndex--;
+                MusicPlayer.currentSongIndex--;
             }
-            else if (oldIndex > musicPlayer.currentSongIndex && newIndex <= musicPlayer.currentSongIndex)
+            else if (oldIndex > MusicPlayer.currentSongIndex && newIndex <= MusicPlayer.currentSongIndex)
             {
                 // An item after the current song moved before it.
                 // Current song shifts right.
-                musicPlayer.currentSongIndex++;
+                MusicPlayer.currentSongIndex++;
             }
 
             RefreshSongQueue();
@@ -394,35 +392,35 @@ public class MusicPlayerUIController : MonoBehaviour
 
         shuffleButton.clicked += () =>
         {
-            musicPlayer.ShuffleQueue();
+            MusicPlayer.ShuffleQueue();
             RefreshSongQueue();
         };
         previousButton.clicked += PlayPrevious;
-        playButton.clicked += musicPlayer.TogglePause;
+        playButton.clicked += MusicPlayer.TogglePause;
         nextButton.clicked += PlayNext;
         loopButton.clicked += () =>
         {
-            musicPlayer.IncrementLoop();
-            switch (musicPlayer.Loop)
+            MusicPlayer.IncrementLoop();
+            switch (MusicPlayer.Loop)
             {
                 case MusicPlayer.LoopOptions.dontLoop:
                     loopButton.IconImage = new StyleBackground(DontLoopIcon);
                     break;
                 case MusicPlayer.LoopOptions.loop:
-                    loopButton.style.backgroundImage = new StyleBackground(LoopIcon);
+                    loopButton.IconImage = new StyleBackground(LoopIcon);
                     break;
                 case MusicPlayer.LoopOptions.loopSingle:
-                    loopButton.style.backgroundImage = new StyleBackground(LoopSingleIcon);
+                    loopButton.IconImage = new StyleBackground(LoopSingleIcon);
                     break;
             }
         };
 
-        volumeSlider.RegisterValueChangedCallback(evt => musicPlayer.UserVolume = evt.newValue);
+        volumeSlider.RegisterValueChangedCallback(evt => MusicPlayer.UserVolume = evt.newValue);
 
-        musicPlayer.OnSongShuffle.AddListener(RefreshSongQueue);
-        musicPlayer.OnSongChange.AddListener(RefreshSongQueue);
+        MusicPlayer.OnSongShuffle.AddListener(RefreshSongQueue);
+        MusicPlayer.OnSongChange.AddListener(RefreshSongQueue);
 
-        volumeSlider.value = musicPlayer.UserVolume; // change to saved value later
+        volumeSlider.value = MusicPlayer.UserVolume; // change to saved value later
 
         playbackSlider.RegisterCallback<MouseCaptureEvent>(OnPlaybackDrag);
         playbackSlider.RegisterCallback<MouseCaptureOutEvent>(OnPlaybackRelease);
@@ -459,7 +457,7 @@ public class MusicPlayerUIController : MonoBehaviour
             thumbnailPlayButton.userData = action;
             thumbnailPlayButton.clicked += action;
 
-            if (index == musicPlayer.currentSongIndex)
+            if (index == MusicPlayer.currentSongIndex)
                 element.AddToClassList("CurrentSong");
             else
                 element.RemoveFromClassList("CurrentSong");
@@ -513,7 +511,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
                 albumArt.style.backgroundImage = song.AlbumCover;
             }
-            
+
             element.userData = playlist;
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
@@ -586,7 +584,7 @@ public class MusicPlayerUIController : MonoBehaviour
             data.MetadataCallback = null;
         }
 
-        if (data.Song != null && data.Song != musicPlayer.CurrentSong())
+        if (data.Song != null && data.Song != MusicPlayer.CurrentSong())
         {
             data.Song.DisposeAlbumCover();
         }
@@ -606,7 +604,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         contextMenu.AddItem("Queue Next", () =>
         {
-            musicPlayer.AddNext(song);
+            MusicPlayer.AddNext(song);
             RefreshSongQueue();
         });
 
@@ -631,7 +629,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         contextMenu.AddItem("Queue Next", () =>
         {
-            musicPlayer.AddNext(song);
+            MusicPlayer.AddNext(song);
             RefreshSongQueue();
         });
 
@@ -642,7 +640,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         contextMenu.AddItem("Remove", () =>
         {
-            musicPlayer.musicQueue.Remove(song);
+            MusicPlayer.musicQueue.Remove(song);
             RefreshSongQueue();
         });
 
@@ -666,7 +664,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
                 contextMenu.AddItem("Queue Next", () =>
                 {
-                    musicPlayer.AddPlaylistNext(playlist);
+                    MusicPlayer.AddPlaylistNext(playlist);
                     RefreshSongQueue();
                 });
 
@@ -696,7 +694,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnPlaybackRelease(MouseCaptureOutEvent e)
     {
-        musicPlayer.SetSongTime(playbackSlider.value);
+        MusicPlayer.SetSongTime(playbackSlider.value);
         playbackSliderDragged = false;
     }
 
@@ -704,41 +702,41 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         Debug.Log($"Playing: {song.Title}");
 
-        musicPlayer.PlayNow(song);
+        MusicPlayer.PlayNow(song);
 
         RefreshSongQueue();
     }
 
     void PlaySongFromQueue(int index)
     {
-        Debug.Log($"Playing: {musicPlayer.musicQueue[index].Title}");
+        Debug.Log($"Playing: {MusicPlayer.musicQueue[index].Title}");
 
-        musicPlayer.PlayIndex(index);
+        MusicPlayer.PlayIndex(index);
 
         RefreshSongQueue();
     }
 
     void PlayPlaylist(Playlist playlist)
     {
-        musicPlayer.PlayPlaylist(playlist);
+        MusicPlayer.PlayPlaylist(playlist);
 
         RefreshPlaylistList();
     }
 
     void PlayNext()
     {
-        musicPlayer.PlayNext();
+        MusicPlayer.PlayNext();
     }
 
     void PlayPrevious()
     {
-        musicPlayer.PlayPrevious();
+        MusicPlayer.PlayPrevious();
     }
 
     void ShuffleAll()
     {
-        musicPlayer.PlayAll(true);
-        queue = musicPlayer.musicQueue;
+        MusicPlayer.PlayAll(true);
+        queue = MusicPlayer.musicQueue;
         songQueue.itemsSource = queue;
         songQueue.Rebuild();
     }
@@ -766,13 +764,13 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         if (popOutDisplayed)
         {
-            popOutButton.style.backgroundImage = new StyleBackground(PopOutViewInIcon);
+            popOutButton.IconImage = new StyleBackground(PopOutViewInIcon);
             popOutView.style.display = DisplayStyle.None;
             popOutDisplayed = false;
         }
         else
         {
-            popOutButton.style.backgroundImage = new StyleBackground(PopOutViewOutIcon);
+            popOutButton.IconImage = new StyleBackground(PopOutViewOutIcon);
             popOutView.style.display = DisplayStyle.Flex;
             popOutDisplayed = true;
         }

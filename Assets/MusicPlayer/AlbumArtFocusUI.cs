@@ -11,19 +11,17 @@ public class AlbumArtFocusUI : MonoBehaviour
     VisualElement Background;
 
     Image albumArt;
-    
+
+    AccentButton exitButton;
+
     AccentButton previousButton;
     AccentButton playButton;
     AccentButton nextButton;
 
     int uiVersion = 0;
 
-    MusicPlayer musicPlayer;
-
     void OnEnable()
     {
-        musicPlayer = MusicPlayer.instance;
-
         MusicPlayerUIController.OnAccentChange += UpdateAccents;
 
         document.RegisterUIReloadCallback(OnUIReload);
@@ -49,13 +47,15 @@ public class AlbumArtFocusUI : MonoBehaviour
 
         albumArt = root.Q<Image>("AlbumArt");
 
+        exitButton = root.Q<AccentButton>("Exit");
+
         previousButton = root.Q<AccentButton>("Previous");
         playButton = root.Q<AccentButton>("Play");
         nextButton = root.Q<AccentButton>("Next");
 
-        musicPlayer.OnSongChange.AddListener(() =>
+        MusicPlayer .OnSongChange.AddListener(() =>
         {
-            SongInfo currentSong = musicPlayer.CurrentSong();
+            SongInfo currentSong = MusicPlayer .CurrentSong();
 
             Debug.Log(currentSong.Title);
 
@@ -73,13 +73,15 @@ public class AlbumArtFocusUI : MonoBehaviour
                 currentSong.OnMetaDataLoaded += () =>
                 {
                     // Make sure this is still the active song
-                    if (musicPlayer.CurrentSong() != currentSong)
+                    if (MusicPlayer .CurrentSong() != currentSong)
                         return;
 
                     albumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
                 };
             }
         });
+
+        exitButton.clicked += ExitFocusMenu;
 
         previousButton.clicked += PlayPrevious;
         playButton.clicked += TogglePause;
@@ -91,17 +93,17 @@ public class AlbumArtFocusUI : MonoBehaviour
 
     void PlayNext()
     {
-        musicPlayer.PlayNext();
+        MusicPlayer .PlayNext();
     }
 
     void TogglePause()
     {
-        musicPlayer.TogglePause();
+        MusicPlayer .TogglePause();
     }
 
     void PlayPrevious()
     {
-        musicPlayer.PlayPrevious();
+        MusicPlayer .PlayPrevious();
     }
 
     public static void ExitFocusMenu()

@@ -1,57 +1,34 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine.Networking;
 using UnityEngine.Events;
-using System.Collections;
-using UnityEngine.Audio;
 using UnityEngine;
 using ManagedBass;
 using System.Linq;
 using System.IO;
 using R128Net;
 using System;
-using MyBox;
 using Tools;
+using MyBox;
 //using Kawazu;
 
-[RequireComponent(typeof(AudioSource))]
-public class MusicPlayer : MonoBehaviour
+public static class MusicPlayer
 {
-    public static MusicPlayer instance;
-
     //Saved data
     public static SaveFile saveData = new("MusicPlayerData");
 
     public enum LoopOptions { dontLoop, loop, loopSingle }
 
-    [ReadOnly]
-    [SerializeField]
-    private LoopOptions loop_;
-    public LoopOptions Loop
+    private static LoopOptions loop_;
+    public static LoopOptions Loop
     {
-        get
-        {
-            return loop_;
-        }
-        set
-        {
-            loop_ = value;
-
-            if (loop_ == LoopOptions.loopSingle)
-            {
-                audioSource.loop = true;
-            }
-            else
-            {
-                audioSource.loop = false;
-            }
-        }
+        get => loop_;
+        set => loop_ = value;
     }
 
     const float targetLUFS = -14f;
 
     private static SaveFloat userVolumeSave = new("userVolume", saveData);
-    public float UserVolume
+    public static float UserVolume
     {
         get => userVolumeSave;
         set
@@ -64,26 +41,22 @@ public class MusicPlayer : MonoBehaviour
 
     public static SaveFloat playbackTime = new SaveFloat("PlaybackTime", saveData);
 
-    [ReadOnly]
-    public float clipLength = 1;
+    public static float clipLength = 1;
 
-    [ReadOnly]
-    public bool paused = true;
+    public static bool paused = true;
 
-    [ReadOnly]
-    public bool shuffle = true;
+    public static bool shuffle = true;
 
     public static SaveBool AudioNormalisationEnabled = new SaveBool("AudioNormalisationEnabled", saveData, true);
 
-    public List<SongInfo> musicQueue = new();
+    public static List<SongInfo> musicQueue = new();
 
     public static SongInfo[] cachedSongs;
 
     public static SaveString currentSongPath = new SaveString("LastLoadedSongPath", saveData);
 
-    [ReadOnly]
-    public int currentSongIndex = 0;
-    public SongInfo CurrentSong()
+    public static int currentSongIndex = 0;
+    public static SongInfo CurrentSong()
     {
         if (musicQueue == null || musicQueue?.Count == 0)
             return null;
@@ -91,78 +64,113 @@ public class MusicPlayer : MonoBehaviour
             return musicQueue[currentSongIndex];
     }
 
-    [SerializeField] private AudioMixer audioMixer;
-
-    public AudioSource audioSource;
-
     [Space(10)]
 
-    public UnityEvent OnSongChange;
-    public UnityEvent OnSongEnd;
-    public UnityEvent OnPlay;
-    public UnityEvent OnPause;
-    public UnityEvent OnSongShuffle;
+    public static UnityEvent OnSongChange;
+    public static UnityEvent OnSongEnd;
+    public static UnityEvent OnPlay;
+    public static UnityEvent OnPause;
+    public static UnityEvent OnSongShuffle;
 
-    public bool useExternalSongs;
+    public static bool useExternalSongs;
 
-    private void Awake()
+    private static MusicPlayerRunner runner;
+    private static bool runtimeInitialized;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void Initialize()
     {
-        instance = this;
+        if (runner != null)
+            return;
 
-        OnSongChange.AddListener(() => currentSongPath.Set(CurrentSong().SongPath));
+        GameObject obj = new GameObject("MusicPlayer");
+        UnityEngine.Object.DontDestroyOnLoad(obj);
+        runner = obj.AddComponent<MusicPlayerRunner>();
+    }
+
+    // Called by MusicPlayerRunner.Awake because Unity cannot invoke Awake on a static class.
+    internal static void InitializeRuntime()
+    {
+        if (runtimeInitialized)
+            return;
+
+        runtimeInitialized = true;
+
+        OnSongChange ??= new UnityEvent();
+        OnSongEnd ??= new UnityEvent();
+        OnPlay ??= new UnityEvent();
+        OnPause ??= new UnityEvent();
+        OnSongShuffle ??= new UnityEvent();
+
+        OnSongChange.AddListener(() =>
+        {
+            SongInfo song = CurrentSong();
+            if (song != null)
+                currentSongPath.Set(song.SongPath);
+        });
 
         if (string.IsNullOrEmpty(currentSongPath))
             playbackTime.Set(0);
         else
         {
-            SongInfo lastSong;
-
-            if (GetCachedSong(currentSongPath, out lastSong))
+            if (GetCachedSong(currentSongPath, out SongInfo lastSong))
             {
                 lastSong.GetSongInfo();
-
                 PlayNow(lastSong, false);
             }
             else
+            {
                 playbackTime.Set(0);
+            }
         }
 
         PlaylistDirectoryNode = FileNode.BuildTree(Globals.PlaylistsPath);
-
-        audioSource = GetComponent<AudioSource>();
     }
 
-    bool songEnding = true;
-
-    // Update is called once per frame
-    void Update()
+    internal static void ShutdownRuntime()
     {
-        if (audioSource.clip)
-            playbackTime.Set(audioSource.time);
+        FreeCurrentStream();
+        runtimeInitialized = false;
+        runner = null;
+    }
 
-        if (!songEnding)
+    static bool songEnding = true;
+
+    public static void Update()
+    {
+        if (currentStream != 0)
         {
-            if (!audioSource.isPlaying && playbackTime == 0)
-            {
-                songEnding = true;
+            playbackTime.Set(GetSongTime());
 
-                OnSongEnd.Invoke();
-                Debug.Log("playing next song");
-                PlayNext();
+            if (streamEnded)
+            {
+                streamEnded = false;
+                HandleSongEnded();
             }
         }
     }
 
-    public void Pause()
+    private static SyncProcedure endSyncProcedure;
+
+    private static void SetupEndSync()
     {
-        paused = true;
-        audioSource.Pause();
+        if (currentStream == 0)
+            return;
+
+        // Keep the delegate alive for as long as Bass may call it.
+        endSyncProcedure = EndSyncCallback;
+        Bass.ChannelSetSync(currentStream, SyncFlags.End, 0, endSyncProcedure);
+    }
+
+    private static void EndSyncCallback(int handle, int channel, int data, IntPtr user)
+    {
+        streamEnded = true;
     }
 
     /// <summary>
     /// Starts playback. Plays the audioclip.
     /// </summary>
-    public void Play(bool startPlayback = true)
+    public static void Play(bool startPlayback = true)
     {
         if (currentSongIndex >= musicQueue.Count)
         {
@@ -173,90 +181,119 @@ public class MusicPlayer : MonoBehaviour
         SongInfo currentSong = CurrentSong();
 
         if (!currentSong.MetaDataLoaded)
-        {
             currentSong.GetSongInfo();
-        }
 
-        if (audioSource.clip == null)
+
+        if (currentStream == 0)
         {
-            StartCoroutine(GetClipFromFile(new FileInfo(currentSong.SongPath), clip =>
+            if (!LoadStream(currentSong.SongPath))
             {
-                if (clip == null)
-                {
-                    playbackTime.Set(0);
-                    return; // maybe log an error here?
-                }
-
-                if (clip != audioSource.clip)
-                {
-                    playbackTime.Set(0);
-                }
-
-                if (clip == null || clip != audioSource.clip)
-                {
-                    OnSongChange.Invoke();
-                }
-
-                audioSource.clip = clip;
-
-                if (AudioNormalisationEnabled)
-                {
-                    if (!currentSong.LUFSCalculated)
-                    {
-                        currentSong.LUFSCalculated = true;
-                        currentSong.LUFS = CalculateLUFS(currentSong.SongPath);
-                        Debug.Log("LUFS = " + currentSong.LUFS);
-                    }
-                }
-
-                UpdateVolume();
-
-                clipLength = clip.length;
-                audioSource.time = playbackTime;
-
-                if (!startPlayback)
-                    return;
-
-                paused = false;
-
-                audioSource.Play();
-
-                songEnding = false;
-            }));
-        }
-        else
-        {
-            if (!startPlayback)
+                playbackTime.Set(0);
                 return;
+            }
 
-            audioSource.UnPause();
-            paused = false;
+            playbackTime.Set(0);
+
+            OnSongChange?.Invoke();
+
+            if (AudioNormalisationEnabled)
+            {
+                if (!currentSong.LUFSCalculated)
+                {
+                    currentSong.LUFSCalculated = true;
+                    currentSong.LUFS = CalculateLUFS(currentSong.SongPath);
+
+                    Debug.Log("LUFS = " + currentSong.LUFS);
+                }
+            }
+
+            UpdateVolume();
+
+            clipLength = (float)Bass.ChannelBytes2Seconds(currentStream, Bass.ChannelGetLength(currentStream));
         }
+
+
+        // Restore saved position
+        SetSongTime(playbackTime);
+
+        if (!startPlayback)
+            return;
+
+        paused = false;
+        streamEnded = false;
+
+        Bass.ChannelPlay(currentStream);
+
+        OnPlay?.Invoke();
     }
 
-    [ButtonMethod]
-    public void Stop()
+    public static void Stop()
     {
-        audioSource.Stop();
-        audioSource.clip = null;
+        FreeCurrentStream();
+
+        paused = true;
+        streamEnded = false;
+        playbackTime.Set(0);
     }
 
+    public static void Pause()
+    {
+        if (currentStream == 0)
+            return;
 
-    [ButtonMethod]
+        paused = true;
+
+        Bass.ChannelPause(currentStream);
+
+        playbackTime.Set(GetSongTime());
+
+        OnPause?.Invoke();
+    }
+
+    private static void HandleSongEnded()
+    {
+        OnSongEnd?.Invoke();
+
+        if (Loop == LoopOptions.loopSingle)
+        {
+            SetSongTime(0);
+            Bass.ChannelPlay(currentStream);
+            return;
+        }
+
+        PlayNext();
+    }
+
+    public static float GetSongTime()
+    {
+        if (currentStream == 0)
+            return 0f;
+
+        long position = Bass.ChannelGetPosition(currentStream);
+
+        return (float)Bass.ChannelBytes2Seconds(currentStream, position);
+    }
+
     [Tooltip("If paused, unpause. If unpaused, pause.")]
-    public void TogglePause()
+    public static void TogglePause()
     {
-        if (audioSource.isPlaying)
-            Pause();
-        else
+        if (currentStream == 0)
+        {
             Play();
+            return;
+        }
+
+        if (paused)
+            Play();
+        else
+            Pause();
     }
 
     /// <summary>
     /// Play the next song in the queue.
     /// whole lot more but will EXPLAIN LATER
     /// </summary>
-    public void PlayNext(bool startPlayback = true)
+    public static void PlayNext(bool startPlayback = true)
     {
         if (currentSongIndex + 1 < musicQueue.Count)
         {
@@ -268,19 +305,22 @@ public class MusicPlayer : MonoBehaviour
         }
         else
         {
-            if (Loop != LoopOptions.dontLoop)
+            if (Loop != LoopOptions.dontLoop && musicQueue.Count > 0)
             {
                 RestartQueue(shuffle);
+                Play(startPlayback);
             }
             else
+            {
                 Pause();
+            }
         }
     }
 
     /// <summary>
     /// Play the previous song in the queue.
     /// </summary>
-    public void PlayPrevious(bool startPlayback = true)
+    public static void PlayPrevious(bool startPlayback = true)
     {
         Stop();
         currentSongIndex--;
@@ -296,7 +336,7 @@ public class MusicPlayer : MonoBehaviour
     /// <summary>
     /// Have this song play now, replacing the current song
     /// </summary>
-    public void PlayNow(SongInfo song, bool startPlayback = true)
+    public static void PlayNow(SongInfo song, bool startPlayback = true)
     {
         if (musicQueue.Count > 0)
             musicQueue.Insert(currentSongIndex, song);
@@ -311,7 +351,7 @@ public class MusicPlayer : MonoBehaviour
     /// <summary>
     /// Play a song from the Queue using it's index
     /// </summary>
-    public void PlayIndex(int index_, bool startPlayback = true)
+    public static void PlayIndex(int index_, bool startPlayback = true)
     {
         Stop();
         currentSongIndex = index_;
@@ -322,35 +362,44 @@ public class MusicPlayer : MonoBehaviour
     /// <summary>
     /// Have this song play next in the queue
     /// </summary>
-    public void AddNext(SongInfo song)
+    public static void AddNext(SongInfo song)
     {
         musicQueue.Insert(currentSongIndex + 1, song);
     }
 
-    public void AddEnd(SongInfo song)
+    public static void AddEnd(SongInfo song)
     {
         musicQueue.Add(song);
     }
 
-    public void AddStart(SongInfo song)
+    public static void AddStart(SongInfo song)
     {
         musicQueue.Insert(0, song);
     }
 
-    public void AddPrevious(SongInfo song)
+    public static void AddPrevious(SongInfo song)
     {
         musicQueue.Insert(currentSongIndex - 1, song);
     }
 
-    public void SetSongTime(float time)
+    public static void SetSongTime(float time)
     {
-        audioSource.time = Mathf.Clamp(time, 0, (float)CurrentSong().Duration);
+        if (currentStream == 0)
+            return;
+
+        time = Mathf.Clamp(time, 0f, clipLength);
+
+        long position = Bass.ChannelSeconds2Bytes(currentStream, time);
+
+        Bass.ChannelSetPosition(currentStream, position);
+
+        playbackTime.Set(time);
     }
 
     /// <summary>
     /// Restarts the queue.
     /// </summary>
-    public void RestartQueue(bool shuffle_ = false)
+    public static void RestartQueue(bool shuffle_ = false)
     {
         currentSongIndex = 0;
 
@@ -370,7 +419,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    public void PlayAll(bool shuffle_ = false)
+    public static void PlayAll(bool shuffle_ = false)
     {
         if (songsCached)
         {
@@ -403,7 +452,7 @@ public class MusicPlayer : MonoBehaviour
 
     public static FileNode PlaylistDirectoryNode;
 
-    public void PlayPlaylist(Playlist playlist)
+    public static void PlayPlaylist(Playlist playlist)
     {
         musicQueue.Clear();
 
@@ -418,7 +467,7 @@ public class MusicPlayer : MonoBehaviour
         Play();
     }
 
-    public void AddPlaylistNext(Playlist playlist)
+    public static void AddPlaylistNext(Playlist playlist)
     {
         foreach (SongInfo song in playlist.GetSongs())
         {
@@ -426,7 +475,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    public void IncrementLoop(bool direction = true)
+    public static void IncrementLoop(bool direction = true)
     {
         if (direction)
         {
@@ -444,7 +493,7 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    public void ShuffleQueue()
+    public static void ShuffleQueue()
     {
         if (musicQueue.Count > 0)
         {
@@ -539,64 +588,47 @@ public class MusicPlayer : MonoBehaviour
         return false;
     }
 
-    //get mybox to work with this later
-    public IEnumerator GetClipFromFile(FileInfo file, Action<AudioClip> callback)
+    private static int currentStream;
+
+    private static bool streamPlaying;
+    private static bool streamEnded;
+
+    private static bool LoadStream(string path)
     {
-        string extension = file.Extension.ToLower();
+        FreeCurrentStream();
 
-        AudioType audioType;
+        currentStream = Bass.CreateStream(
+            path,
+            0,
+            0,
+            BassFlags.Float
+        );
 
-        switch (extension)
+        if (currentStream == 0)
         {
-            case ".mp3":
-                audioType = AudioType.MPEG;
-                break;
-
-            case ".ogg":
-                audioType = AudioType.OGGVORBIS;
-                break;
-
-            case ".wav":
-                audioType = AudioType.WAV;
-                break;
-
-            default:
-                Debug.Log($"{file.Name} is not supported");
-                callback?.Invoke(null);
-                yield break;
-        }
-
-        Uri uri = new Uri(file.FullName);
-
-
-        using UnityWebRequest request =
-            UnityWebRequestMultimedia.GetAudioClip(
-                uri.AbsoluteUri,
-                audioType
+            Debug.LogError(
+                $"Failed to create Bass stream for '{path}': {Bass.LastError}"
             );
 
-
-
-        DownloadHandlerAudioClip handler =
-            (DownloadHandlerAudioClip)request.downloadHandler;
-
-        handler.streamAudio = true;
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            AudioClip clip = handler.audioClip;
-
-            clip.name = file.Name;
-
-            callback?.Invoke(clip);
+            return false;
         }
-        else
+
+        streamEnded = false;
+        SetupEndSync();
+        return true;
+    }
+
+    private static void FreeCurrentStream()
+    {
+        if (currentStream != 0)
         {
-            Debug.LogError($"Failed to get file {file.Name}: {request.error}");
-            callback?.Invoke(null);
+            Bass.ChannelStop(currentStream);
+            Bass.StreamFree(currentStream);
+            currentStream = 0;
         }
+
+        streamEnded = false;
+        endSyncProcedure = null;
     }
 
     public static readonly HashSet<string> supportedAudioExtensions = new()
@@ -613,21 +645,31 @@ public class MusicPlayer : MonoBehaviour
         ".m3u8",
     };
 
-    public void UpdateVolume()
+    public static void UpdateVolume()
     {
-        float gainDb = 1f;
+        if (currentStream == 0)
+            return;
 
-        if (AudioNormalisationEnabled)
+        Bass.ChannelSetAttribute(currentStream, ChannelAttribute.Volume, GetPlaybackGain());
+    }
+
+    private static float GetPlaybackGain()
+    {
+        float gain = UserVolume;
+
+        if (AudioNormalisationEnabled && musicQueue.Count > 0)
         {
-            if (musicQueue.Count > 0)
+            SongInfo song = CurrentSong();
+
+            if (song.LUFSCalculated)
             {
-                gainDb = targetLUFS / CurrentSong().LUFS;
+                float gainDb = targetLUFS - song.LUFS;
+
+                gain *= Mathf.Pow(10f, gainDb / 20f);
             }
         }
 
-        audioMixer.SetFloat("Volume", Mathf.Pow(10f, gainDb / 20f));
-
-        audioSource.volume = UserVolume;
+        return gain;
     }
 
     public static float CalculateLUFS(string path)

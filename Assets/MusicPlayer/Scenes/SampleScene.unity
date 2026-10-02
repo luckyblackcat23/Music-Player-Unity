@@ -435,7 +435,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1b36ffbb3295864f8f849735651c5df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MediaInputManager
-  musicPlayer: {fileID: 1767018686}
 --- !u!1 &1767018682
 GameObject:
   m_ObjectHideFlags: 0
@@ -447,7 +446,6 @@ GameObject:
   - component: {fileID: 1767018684}
   - component: {fileID: 1767018688}
   - component: {fileID: 1767018687}
-  - component: {fileID: 1767018686}
   - component: {fileID: 1767018685}
   m_Layer: 5
   m_Name: UIDocument
@@ -569,42 +567,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &1767018686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1767018682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bb6c9a9b02a9e845b13bfe15c26928a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MusicPlayer
-  loop_: 0
-  clipLength: 1
-  paused: 1
-  shuffle: 1
-  musicQueue: []
-  currentSongIndex: 0
-  audioMixer: {fileID: 24100000, guid: d48fb8f88f5304649af0e24e8fe56bf8, type: 2}
-  audioSource: {fileID: 1767018685}
-  OnSongChange:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSongEnd:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPlay:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPause:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSongShuffle:
-    m_PersistentCalls:
-      m_Calls: []
-  useExternalSongs: 0
 --- !u!114 &1767018687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,7 +579,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 929d3768fec48f54d9b9b4e38fdbb1db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicPlayerSongListController
-  musicPlayer: {fileID: 1767018686}
   playbackSliderDragged: 0
   document: {fileID: 1767018688}
   songItemTemplate: {fileID: 9197481963319205126, guid: 72e9263e7098df04da918014d2fdeb61, type: 3}
