@@ -6,10 +6,11 @@ public class MediaInputManager : MonoBehaviour
 
     void Start()
     {
+        //change later
         mediaPlatform = new WindowsMediaPlatform();
 
         // Windows -> MusicPlayer
-        mediaPlatform.PlayPauseRequested += MusicPlayer .TogglePause;
+        mediaPlatform.PlayPauseRequested += MusicPlayer.TogglePause;
         mediaPlatform.NextRequested += HandlePlayNext;
         mediaPlatform.PreviousRequested += HandlePlayPrevious;
         mediaPlatform.SeekRequested += HandleSeek;

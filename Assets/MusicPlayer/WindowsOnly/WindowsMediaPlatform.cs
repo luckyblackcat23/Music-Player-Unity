@@ -53,7 +53,7 @@ public class WindowsMediaPlatform : IMediaPlatform
 
     private void Initialize()
     {
-        IntPtr hwnd = GetUnityWindow();
+        IntPtr hwnd = Globals.GetUnityWindow();
 
         Debug.Log($"WindowsMediaPlatform HWND: {hwnd}");
 
@@ -76,11 +76,6 @@ public class WindowsMediaPlatform : IMediaPlatform
         }
 
         Debug.Log("Windows media controls initialized.");
-    }
-
-    private static IntPtr GetUnityWindow()
-    {
-        return System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
     }
 
     public void Poll()
@@ -194,3 +189,46 @@ public class WindowsMediaPlatform : IMediaPlatform
 }
 
 #endif
+
+
+/*
+#if UNITY_STANDALONE_WIN
+
+using System;
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+public class WindowsMediaPlatform : IMediaPlatform
+{
+    public const int KEYEVENTF_EXTENTEDKEY = 1;
+    public const int KEYEVENTF_KEYUP = 0;
+    public const int VK_MEDIA_NEXT_TRACK = 0xB0;
+    public const int VK_MEDIA_PLAY_PAUSE = 0xB3;
+    public const int VK_MEDIA_PREV_TRACK = 0xB1;
+
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENTEDKEY, IntPtr.Zero);
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        keybd_event(VK_MEDIA_PREV_TRACK, 0, KEYEVENTF_EXTENTEDKEY, IntPtr.Zero);
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        keybd_event(VK_MEDIA_NEXT_TRACK, 0, KEYEVENTF_EXTENTEDKEY, IntPtr.Zero);
+    }
+}
+
+#endif
+*/

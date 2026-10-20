@@ -12,7 +12,6 @@ public class MusicPlayerUIController : MonoBehaviour
     {
         public FileNode playlist;
         public SongInfo Song;
-        public Action MetadataCallback;
     }
 
     public bool playbackSliderDragged;
@@ -27,7 +26,7 @@ public class MusicPlayerUIController : MonoBehaviour
     ContextMenu contextMenu;
 
     [Header("Data")]
-    List<SongInfo> songs = new();
+    SongInfo[] songs;
     List<SongInfo> queue = new();
     FileNode playlistDirectory;
     FileNode currentPlaylistDirectory;
@@ -56,6 +55,8 @@ public class MusicPlayerUIController : MonoBehaviour
     VisualElement playbackAlbumArt;
     Label songTitle;
     Label songArtist;
+
+    AccentButton exitButton;
 
     AccentButton popOutButton;
     AccentButton settingsButton;
@@ -162,6 +163,8 @@ public class MusicPlayerUIController : MonoBehaviour
         playbackAlbumArt = root.Q<VisualElement>("AlbumArt");
         songTitle = root.Q<Label>("SongTitle");
         songArtist = root.Q<Label>("SongArtist");
+
+        exitButton = root.Q<AccentButton>("ExitButton");
 
         popOutButton = root.Q<AccentButton>("PopOutButton");
         settingsButton = root.Q<AccentButton>("SettingsButton");
@@ -302,7 +305,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songList.fixedItemHeight = 100;
 
-        songs = MusicPlayer.cachedSongs.ToList();
+        songs = MusicPlayer.cachedSongs;
 
         songList.itemsSource = songs;
 
@@ -338,7 +341,7 @@ public class MusicPlayerUIController : MonoBehaviour
             if (x.newValue == string.Empty)
                 songList.itemsSource = songs;
             else
-                songList.itemsSource = searchTempSongs;
+                songList.itemsSource = searchTempSongs.ToArray();
 
             RefreshSongList();
         });
@@ -386,6 +389,8 @@ public class MusicPlayerUIController : MonoBehaviour
         });
 
         playbackAlbumArt.RegisterCallback<MouseUpEvent>(evt => AlbumArtFocusUI.ShowFocusMenu());
+
+        exitButton.clicked += Application.Quit;
 
         popOutButton.clicked += TogglePopOutView;
         settingsButton.clicked += MusicPlayerOptionsMenu.ShowOptionsMenu;
@@ -527,7 +532,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void BindSongListItem(VisualElement element, int index)
     {
-        SongInfo song = ((List<SongInfo>)songList.itemsSource)[index];
+        SongInfo song = ((SongInfo[])songList.itemsSource)[index];
 
         ListItemData data = element.userData as ListItemData;
 
@@ -543,27 +548,27 @@ public class MusicPlayerUIController : MonoBehaviour
         {
             song.GetSongInfo();
 
+            /* was this ever even needed?
             data.MetadataCallback = () =>
             {
                 songList.RefreshItem(index);
+                Debug.Log("refreshed");
             };
 
             song.OnMetaDataLoaded += data.MetadataCallback;
+            */
         }
 
         element.Q<Label>("title").text = song.Title;
         element.Q<Label>("artist").text = song.Artist;
-        element.Q<Label>("duration").text =
-            song.SearchMetaDataLoaded ? song.Duration.ToString() : "--:--";
+        element.Q<Label>("duration").text = song.SearchMetaDataLoaded ? song.Duration.ToString() : "--:--";
 
         VisualElement albumArt = element.Q<VisualElement>("albumArt");
         albumArt.style.backgroundImage = song.AlbumCover;
 
-        Button thumbnailPlayButton =
-            element.Q<Button>("thumbnailPlayButton");
+        Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
-        thumbnailPlayButton.clicked -=
-            thumbnailPlayButton.userData as Action;
+        thumbnailPlayButton.clicked -= thumbnailPlayButton.userData as Action;
 
         Action action = () => PlaySong(song);
 
@@ -577,12 +582,6 @@ public class MusicPlayerUIController : MonoBehaviour
 
         if (data == null)
             return;
-
-        if (data.Song != null && data.MetadataCallback != null)
-        {
-            data.Song.OnMetaDataLoaded -= data.MetadataCallback;
-            data.MetadataCallback = null;
-        }
 
         if (data.Song != null && data.Song != MusicPlayer.CurrentSong())
         {

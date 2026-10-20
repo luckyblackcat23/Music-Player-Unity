@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-using UnityEngine;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System;
+using System.Runtime.InteropServices;
 
 public static class Globals
 {
@@ -20,5 +20,17 @@ public static class Globals
     public static void OpenSavePath()
     {
         Process.Start(SaveFolderPath);
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetActiveWindow();
+
+    public static IntPtr GetUnityWindow()
+    {
+#if UNITY_EDITOR
+        UnityEngine.Debug.LogWarning("Active window is the editor window");
+#endif
+
+        return Process.GetCurrentProcess().MainWindowHandle;
     }
 }

@@ -40,20 +40,22 @@
                     </ui:Tab>
                 </ui:TabView>
             </ui:VisualElement>
-            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.39);">
+            <ui:VisualElement name="Main2" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.39);">
                 <ui:VisualElement name="VisualElement" style="flex-grow: 0; flex-direction: row;">
                     <AccentButton name="ShuffleAll" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=970811466&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_2" text="" class="ButtonHover ButtonPressed" style="width: 210px; height: 50px; align-self: center; border-left-color: rgb(100, 100, 100); border-right-color: rgb(100, 100, 100); border-top-color: rgb(100, 100, 100); border-bottom-color: rgb(100, 100, 100); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; font-size: 21px; -unity-text-align: middle-right; flex-direction: column-reverse; overflow: visible;">
                         <ui:Label text="Shuffle &amp; play" style="flex-grow: 1; font-size: 21px; padding-left: 40px; flex-shrink: 1; display: flex; position: absolute; top: 0; left: 11px; bottom: 0;"/>
                     </AccentButton>
                     <ui:TextField placeholder-text="..." name="SearchBar" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1; align-self: stretch; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;"/>
                 </ui:VisualElement>
+                <ui:VisualElement name="PlaylistInfo" style="flex-grow: 0; flex-basis: 20%; display: none;"/>
                 <ui:ListView name="SongList" class="panel" style="flex-grow: 1;"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="TopBar" style="height: 40px; flex-shrink: 0; background-color: rgba(0, 0, 0, 0.549);">
-            <ui:VisualElement style="background-color: rgba(50, 50, 50, 0.392); height: 40px;">
-                <AccentButton name="SettingsButton" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=483678747&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_11" style="flex-shrink: 1; height: 36px; aspect-ratio: 1; right: 0; position: absolute; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(0, 0, 0, 0);"/>
-                <AccentButton name="PopOutButton" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=897902550&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_8" style="height: 36px; flex-shrink: 1; left: 0; position: absolute; aspect-ratio: 1; background-color: rgba(0, 0, 0, 0); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0;"/>
+            <ui:VisualElement style="background-color: rgba(0, 0, 0, 0.392); height: 40px;">
+                <AccentButton name="SettingsButton" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=483678747&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_11" style="flex-shrink: 1; height: 36px; aspect-ratio: 1; position: absolute; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(0, 0, 0, 0); margin-top: 2px; margin-right: 2px; margin-bottom: 2px; margin-left: 2px;"/>
+                <AccentButton name="PopOutButton" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=897902550&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_8" style="height: 36px; flex-shrink: 1; left: 40px; position: absolute; aspect-ratio: 1; background-color: rgba(0, 0, 0, 0); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; margin-top: 2px; margin-right: 2px; margin-bottom: 2px; margin-left: 2px;"/>
+                <AccentButton name="ExitButton" icon-image="project://database/Assets/MusicPlayer/Sprites/MusicPlayerUIAssets.png?fileID=315903273&amp;guid=dde93689df3044747a6adfd581d9ae89&amp;type=3#MusicPlayerUIAssets_9" style="flex-shrink: 1; height: 36px; aspect-ratio: 1; right: 0; position: absolute; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(0, 0, 0, 0); width: 36px; margin-top: 2px; margin-right: 2px; margin-bottom: 2px; margin-left: 2px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

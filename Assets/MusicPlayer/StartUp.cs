@@ -1,8 +1,13 @@
 using MyBox;
+using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+#if ENABLE_WINMD_SUPPORT
+using Windows.UI.ViewManagement;
+#endif
 
 public class StartUp : MonoBehaviour
 {
@@ -14,7 +19,7 @@ public class StartUp : MonoBehaviour
 
     VisualElement background;
     Image icon;
-
+    
     float timeElapsed;
 
     public static bool debug;
@@ -22,9 +27,7 @@ public class StartUp : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void Initialization()
     {
-#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
-        WindowsTitleBar.SetColour(SystemTheme.GetAccentColour());
-#endif
+
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -85,6 +88,8 @@ public class StartUp : MonoBehaviour
                 yield return null;
             }
         }
+
+        WindowsBorderlessWindow.RemoveBorder();
 
         // Load the main scene.
         SceneManager.LoadScene(1, LoadSceneMode.Additive);

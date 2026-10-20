@@ -636,7 +636,10 @@ public static class MusicPlayer
         ".mp3",
         ".ogg",
         ".wav",
-        ".m4a"
+        ".m4a",
+        ".flac",
+        ".ogg",
+        ".wav"
     };
 
     public static readonly HashSet<string> supportedPlaylistExtensions = new()

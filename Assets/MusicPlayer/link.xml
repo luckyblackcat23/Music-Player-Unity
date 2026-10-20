@@ -2,4 +2,5 @@
   <assembly fullname="TagLibSharp"/>
   <assembly fullname="ManagedBass"/>
   <assembly fullname="MusicPlayerWindowsMedia"/>
+  <assembly fullname="CustomWindowsTitleBar"/>
 </linker>
