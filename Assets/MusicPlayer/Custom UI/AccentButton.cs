@@ -55,6 +55,9 @@ partial class AccentButton : Button
         style.paddingRight = 0;
 
         color = new Color(1, 0.7490196f, 0);
+
+        if (MusicPlayerUIController.accentLight.a != 0)
+            color = MusicPlayerUIController.accentLight;
     }
 
     bool isHovered;

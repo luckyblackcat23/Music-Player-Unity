@@ -1,10 +1,8 @@
-using UnityEngine;
-using UnityEngine.UIElements;
 using System.Collections.Generic;
-using System.Linq;
-using MyBox;
-using Tools;
+using UnityEngine.UIElements;
+using UnityEngine;
 using System;
+using MyBox;
 
 public class MusicPlayerUIController : MonoBehaviour
 {
@@ -18,7 +16,13 @@ public class MusicPlayerUIController : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] PanelRenderer document;
+
+    private static SongInfoDisplayMode _prevSongInfoDisplayMode;
+    public static SongInfoDisplayMode songInfoDisplayMode;
+
     [SerializeField] VisualTreeAsset songItemTemplate;
+    [SerializeField] VisualTreeAsset songItemTemplateFlat;
+
     [SerializeField] VisualTreeAsset PlaylistItemTemplate;
 
     public static VisualElement root;
@@ -72,7 +76,7 @@ public class MusicPlayerUIController : MonoBehaviour
     Slider playbackSlider;
     Label playbackTime;
 
-    [Header("Resources")]
+    [Header("Sprites")]
     public Sprite PopOutViewOutIcon;
     public Sprite PopOutViewInIcon;
 
@@ -87,6 +91,8 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnEnable()
     {
+        _prevSongInfoDisplayMode = songInfoDisplayMode;
+
         GetComponent<PanelRenderer>().RegisterUIReloadCallback(Initialize);
     }
 
@@ -114,6 +120,13 @@ public class MusicPlayerUIController : MonoBehaviour
 
     private void Update()
     {
+        if(_prevSongInfoDisplayMode != songInfoDisplayMode)
+        {
+            RebuildSongList();
+            RebuildSongQueue();
+            _prevSongInfoDisplayMode = songInfoDisplayMode;
+        }
+
         if (!MusicPlayer.paused && !playbackSliderDragged)
             playbackSlider.value = MusicPlayer.playbackTime.Get();
 
@@ -234,7 +247,13 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songQueue.makeItem = () =>
         {
-            VisualElement item = songItemTemplate.Instantiate();
+            VisualElement item = null;
+
+            if (songInfoDisplayMode == SongInfoDisplayMode.ArtDisplay)
+                 item = songItemTemplate.Instantiate();
+
+            if (songInfoDisplayMode == SongInfoDisplayMode.FlatDisplay)
+                item = songItemTemplateFlat.Instantiate();
 
             item.RegisterCallback<PointerDownEvent>(OnQueueItemRightClick);
 
@@ -311,7 +330,13 @@ public class MusicPlayerUIController : MonoBehaviour
 
         songList.makeItem = () =>
         {
-            VisualElement item = songItemTemplate.Instantiate();
+            VisualElement item = null;
+
+            if (MusicPlayerOptionsMenu.SIDisplayMode.Get() == SongInfoDisplayMode.ArtDisplay)
+                item = songItemTemplate.Instantiate();
+
+            if (MusicPlayerOptionsMenu.SIDisplayMode.Get() == SongInfoDisplayMode.FlatDisplay)
+                item = songItemTemplateFlat.Instantiate();
 
             item.RegisterCallback<PointerDownEvent>(OnSongItemRightClick);
 
@@ -450,8 +475,11 @@ public class MusicPlayerUIController : MonoBehaviour
 
             element.userData = song;
 
-            VisualElement albumArt = element.Q<VisualElement>("albumArt");
-            albumArt.style.backgroundImage = song.AlbumCover;
+            if (songInfoDisplayMode == SongInfoDisplayMode.ArtDisplay)
+            {
+                VisualElement albumArt = element.Q<VisualElement>("albumArt");
+                albumArt.style.backgroundImage = song.AlbumCover;
+            }
 
             Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
@@ -563,8 +591,11 @@ public class MusicPlayerUIController : MonoBehaviour
         element.Q<Label>("artist").text = song.Artist;
         element.Q<Label>("duration").text = song.SearchMetaDataLoaded ? song.Duration.ToString() : "--:--";
 
-        VisualElement albumArt = element.Q<VisualElement>("albumArt");
-        albumArt.style.backgroundImage = song.AlbumCover;
+        if (songInfoDisplayMode == SongInfoDisplayMode.ArtDisplay)
+        {
+            VisualElement albumArt = element.Q<VisualElement>("albumArt");
+            albumArt.style.backgroundImage = song.AlbumCover;
+        }
 
         Button thumbnailPlayButton = element.Q<Button>("thumbnailPlayButton");
 
@@ -781,6 +812,12 @@ public class MusicPlayerUIController : MonoBehaviour
         songQueue.RefreshItems();
     }
 
+    [ButtonMethod]
+    void RebuildSongQueue()
+    {
+        songQueue.Rebuild();
+    }
+
     // Call this if you change the song list at runtime
     [ButtonMethod]
     void RefreshSongList()
@@ -789,12 +826,18 @@ public class MusicPlayerUIController : MonoBehaviour
     }
 
     [ButtonMethod]
+    void RebuildSongList()
+    {
+        songList.Rebuild();
+    }
+
+    [ButtonMethod]
     void RefreshPlaylistList()
     {
         playlistList.RefreshItems();
     }
 
-    public static SaveColor accent = new SaveColor("accentColour", MusicPlayer.saveData, SystemTheme.GetAccentColour());
+    public static SaveColor accent = new SaveColor("accentColour", defaultValue: SystemTheme.GetAccentColour());
     public static Color accentDark;
     public static Color accentLight;
 

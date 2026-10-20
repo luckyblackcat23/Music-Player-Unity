@@ -13,9 +13,6 @@ using MyBox;
 
 public static class MusicPlayer
 {
-    //Saved data
-    public static SaveFile saveData = new("MusicPlayerData");
-
     public enum LoopOptions { dontLoop, loop, loopSingle }
 
     private static LoopOptions loop_;
@@ -27,7 +24,7 @@ public static class MusicPlayer
 
     const float targetLUFS = -14f;
 
-    private static SaveFloat userVolumeSave = new("userVolume", saveData);
+    private static SaveFloat userVolumeSave = new("userVolume");
     public static float UserVolume
     {
         get => userVolumeSave;
@@ -39,7 +36,7 @@ public static class MusicPlayer
         }
     }
 
-    public static SaveFloat playbackTime = new SaveFloat("PlaybackTime", saveData);
+    public static SaveFloat playbackTime = new SaveFloat("PlaybackTime");
 
     public static float clipLength = 1;
 
@@ -47,13 +44,13 @@ public static class MusicPlayer
 
     public static bool shuffle = true;
 
-    public static SaveBool AudioNormalisationEnabled = new SaveBool("AudioNormalisationEnabled", saveData, true);
+    public static SaveBool AudioNormalisationEnabled = new SaveBool("AudioNormalisationEnabled", defaultValue: true);
 
     public static List<SongInfo> musicQueue = new();
 
     public static SongInfo[] cachedSongs;
 
-    public static SaveString currentSongPath = new SaveString("LastLoadedSongPath", saveData);
+    public static SaveString currentSongPath = new SaveString("LastLoadedSongPath");
 
     public static int currentSongIndex = 0;
     public static SongInfo CurrentSong()

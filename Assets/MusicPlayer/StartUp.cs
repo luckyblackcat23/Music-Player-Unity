@@ -27,7 +27,7 @@ public class StartUp : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void Initialization()
     {
-
+        Application.quitting += SaveManager.SaveAll;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

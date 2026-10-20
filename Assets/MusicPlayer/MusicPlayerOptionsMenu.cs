@@ -22,9 +22,16 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
     //screen scale mode
     EnumField screenScaleMode;
 
+    public static SaveEnum<PanelScaleMode> screenScaleModeSave = new SaveEnum<PanelScaleMode>("ScreenScaleMode");
+
     //audio normalisation
     Toggle audioNormalisation;
-    
+
+    //song info display mode
+    EnumField songInfoDisplayMode;
+
+    public static SaveEnum<SongInfoDisplayMode> SIDisplayMode = new SaveEnum<SongInfoDisplayMode>("SongInfoDisplayMode", defaultValue: SongInfoDisplayMode.ArtDisplay);
+
     int uiVersion = 0;
 
     void Awake()
@@ -61,6 +68,8 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
 
         audioNormalisation = Root.Q<Toggle>("AudioNormalisation");
 
+        songInfoDisplayMode = Root.Q<EnumField>("SongInfoDisplayMode");
+
         exitButton.clicked += ExitOptionsMenu;
 
         themeRed.value = MusicPlayerUIController.accent.Get().r;
@@ -77,11 +86,25 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
 
         resetAccent.clicked += () => MusicPlayerUIController.accent.Set(SystemTheme.GetAccentColour());
 
-        screenScaleMode.RegisterValueChangedCallback((evt) => panelSettings.scaleMode = (PanelScaleMode)evt.newValue);
+        screenScaleMode.value = screenScaleModeSave.Get();
+
+        screenScaleMode.RegisterValueChangedCallback((evt) =>
+        {
+            screenScaleModeSave.Set((PanelScaleMode)evt.newValue);
+            panelSettings.scaleMode = (PanelScaleMode)evt.newValue;
+        });
 
         audioNormalisation.value = MusicPlayer.AudioNormalisationEnabled;
 
         audioNormalisation.RegisterValueChangedCallback((evt) => MusicPlayer.AudioNormalisationEnabled.Set(evt.newValue));
+
+        songInfoDisplayMode.value = SIDisplayMode.Get();
+
+        songInfoDisplayMode.RegisterValueChangedCallback((evt) =>
+        {
+            SIDisplayMode.Set((SongInfoDisplayMode)evt.newValue);
+            MusicPlayerUIController.songInfoDisplayMode = (SongInfoDisplayMode)evt.newValue;
+        });
 
         //hide on start
         Root.style.display = DisplayStyle.None;
@@ -89,6 +112,7 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
 
     public static void ExitOptionsMenu()
     {
+        SaveManager.MainSave().Save();
         Root.style.display = DisplayStyle.None;
         visible = false;
     }
@@ -98,4 +122,12 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         Root.style.display = DisplayStyle.Flex;
         visible = true;
     }
+}
+
+public enum SongInfoDisplayMode
+{
+    [Tooltip("much MUCH faster for loading entries")]
+    FlatDisplay,
+    [Tooltip("Slower, due to loading album art being expensive")]
+    ArtDisplay
 }

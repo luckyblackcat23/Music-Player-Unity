@@ -25,7 +25,7 @@ public static class SaveManager
     private static List<SaveFile> saveFiles = new();
 
     //the main, and default, save file
-    private static SaveFile mainFile;
+    private static SaveFile mainFile = new("MusicPlayerData");
 
     //other save files should probably be manually added here.
 
@@ -361,8 +361,13 @@ public abstract class SaveVariable
     {
         SavedName = savedName ?? throw new ArgumentNullException(nameof(savedName));
 
-        SaveFile = saveFile
-            ?? throw new ArgumentNullException(nameof(saveFile));
+        if(saveFile == null)
+        {
+            //Debug.LogError(new ArgumentNullException(nameof(saveFile)));
+            SaveFile = SaveManager.MainSave();
+        }
+        else
+            SaveFile = saveFile;
     }
 
     public abstract object GetAsObject();
@@ -485,7 +490,11 @@ public class SaveEnum<T> : SaveVariable where T : struct, Enum
 {
     public static implicit operator T(SaveEnum<T> obj) => obj.Get();
 
-    public SaveEnum(string savedName, SaveFile saveFile = null, T defaultValue = default) : base(savedName, saveFile ?? SaveManager.MainSave()) { }
+    public SaveEnum(string savedName, SaveFile saveFile = null, T defaultValue = default) : base(savedName, saveFile ?? SaveManager.MainSave()) 
+    { 
+        if(!SaveFile.HasValue(savedName))
+            SaveFile.SetEnum<T>(savedName, defaultValue);
+    }
 
     public T Get() => SaveFile.GetEnum<T>(SavedName);
 
@@ -509,7 +518,11 @@ public class SaveColor : SaveVariable
 {
     public static implicit operator Color(SaveColor obj) => obj.Get();
 
-    public SaveColor(string savedName, SaveFile saveFile = null, Color defaultValue = default) : base(savedName, saveFile) { }
+    public SaveColor(string savedName, SaveFile saveFile = null, Color defaultValue = default) : base(savedName, saveFile) 
+    {
+        if (!SaveFile.HasValue(savedName))
+            SaveFile.SetColor(savedName, defaultValue);
+    }
 
     public Color Get(Color defaultValue = default) => SaveFile.GetColor(SavedName, defaultValue);
 
