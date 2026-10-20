@@ -103,7 +103,6 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         songInfoDisplayMode.RegisterValueChangedCallback((evt) =>
         {
             SIDisplayMode.Set((SongInfoDisplayMode)evt.newValue);
-            MusicPlayerUIController.songInfoDisplayMode = (SongInfoDisplayMode)evt.newValue;
         });
 
         //hide on start

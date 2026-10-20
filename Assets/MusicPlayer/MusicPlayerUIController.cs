@@ -17,8 +17,7 @@ public class MusicPlayerUIController : MonoBehaviour
     [Header("UI")]
     [SerializeField] PanelRenderer document;
 
-    private static SongInfoDisplayMode _prevSongInfoDisplayMode;
-    public static SongInfoDisplayMode songInfoDisplayMode;
+    public static SongInfoDisplayMode songInfoDisplayMode = SongInfoDisplayMode.ArtDisplay;
 
     [SerializeField] VisualTreeAsset songItemTemplate;
     [SerializeField] VisualTreeAsset songItemTemplateFlat;
@@ -91,8 +90,6 @@ public class MusicPlayerUIController : MonoBehaviour
 
     void OnEnable()
     {
-        _prevSongInfoDisplayMode = songInfoDisplayMode;
-
         GetComponent<PanelRenderer>().RegisterUIReloadCallback(Initialize);
     }
 
@@ -120,11 +117,11 @@ public class MusicPlayerUIController : MonoBehaviour
 
     private void Update()
     {
-        if(_prevSongInfoDisplayMode != songInfoDisplayMode)
+        if (songInfoDisplayMode != MusicPlayerOptionsMenu.SIDisplayMode.Get())
         {
+            songInfoDisplayMode = MusicPlayerOptionsMenu.SIDisplayMode.Get();
             RebuildSongList();
             RebuildSongQueue();
-            _prevSongInfoDisplayMode = songInfoDisplayMode;
         }
 
         if (!MusicPlayer.paused && !playbackSliderDragged)
@@ -332,10 +329,10 @@ public class MusicPlayerUIController : MonoBehaviour
         {
             VisualElement item = null;
 
-            if (MusicPlayerOptionsMenu.SIDisplayMode.Get() == SongInfoDisplayMode.ArtDisplay)
+            if (songInfoDisplayMode == SongInfoDisplayMode.ArtDisplay)
                 item = songItemTemplate.Instantiate();
 
-            if (MusicPlayerOptionsMenu.SIDisplayMode.Get() == SongInfoDisplayMode.FlatDisplay)
+            if (songInfoDisplayMode == SongInfoDisplayMode.FlatDisplay)
                 item = songItemTemplateFlat.Instantiate();
 
             item.RegisterCallback<PointerDownEvent>(OnSongItemRightClick);
@@ -815,10 +812,10 @@ public class MusicPlayerUIController : MonoBehaviour
     [ButtonMethod]
     void RebuildSongQueue()
     {
-        songQueue.Rebuild();
+        if (songQueue != null)
+            songQueue.Rebuild();
     }
 
-    // Call this if you change the song list at runtime
     [ButtonMethod]
     void RefreshSongList()
     {
@@ -828,7 +825,8 @@ public class MusicPlayerUIController : MonoBehaviour
     [ButtonMethod]
     void RebuildSongList()
     {
-        songList.Rebuild();
+        if (songList != null)
+            songList.Rebuild();
     }
 
     [ButtonMethod]

@@ -18,6 +18,10 @@ public class AlbumArtFocusUI : MonoBehaviour
     AccentButton playButton;
     AccentButton nextButton;
 
+    Label songArtist;
+    Label songTitle;
+    Label songAlbum;
+
     int uiVersion = 0;
 
     void OnEnable()
@@ -53,9 +57,13 @@ public class AlbumArtFocusUI : MonoBehaviour
         playButton = root.Q<AccentButton>("Play");
         nextButton = root.Q<AccentButton>("Next");
 
-        MusicPlayer .OnSongChange.AddListener(() =>
+        songArtist = root.Q<Label>("Artist");
+        songTitle = root.Q<Label>("Title");
+        songAlbum = root.Q<Label>("Album");
+
+        MusicPlayer.OnSongChange.AddListener(() =>
         {
-            SongInfo currentSong = MusicPlayer .CurrentSong();
+            SongInfo currentSong = MusicPlayer.CurrentSong();
 
             Debug.Log(currentSong.Title);
 
@@ -79,6 +87,10 @@ public class AlbumArtFocusUI : MonoBehaviour
                     albumArt.style.backgroundImage = new StyleBackground(currentSong.AlbumCover);
                 };
             }
+
+            songArtist.text = currentSong.Artist;
+            songTitle.text = currentSong.Title;
+            songAlbum.text = currentSong.Album;
         });
 
         exitButton.clicked += ExitFocusMenu;
