@@ -442,12 +442,11 @@ public class MusicPlayerUIController : MonoBehaviour
             }
         };
 
+        volumeSlider.value = MusicPlayer.UserVolume;
         volumeSlider.RegisterValueChangedCallback(evt => MusicPlayer.UserVolume = evt.newValue);
 
         MusicPlayer.OnSongShuffle.AddListener(RefreshSongQueue);
         MusicPlayer.OnSongChange.AddListener(RefreshSongQueue);
-
-        volumeSlider.value = MusicPlayer.UserVolume; // change to saved value later
 
         playbackSlider.RegisterCallback<MouseCaptureEvent>(OnPlaybackDrag);
         playbackSlider.RegisterCallback<MouseCaptureOutEvent>(OnPlaybackRelease);

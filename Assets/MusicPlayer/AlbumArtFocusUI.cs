@@ -18,6 +18,8 @@ public class AlbumArtFocusUI : MonoBehaviour
     AccentButton playButton;
     AccentButton nextButton;
 
+    Slider volumeSlider;
+
     Label songArtist;
     Label songTitle;
     Label songAlbum;
@@ -56,6 +58,8 @@ public class AlbumArtFocusUI : MonoBehaviour
         previousButton = root.Q<AccentButton>("Previous");
         playButton = root.Q<AccentButton>("Play");
         nextButton = root.Q<AccentButton>("Next");
+
+        volumeSlider = root.Q<Slider>("VolumeSlider");
 
         songArtist = root.Q<Label>("Artist");
         songTitle = root.Q<Label>("Title");
@@ -98,6 +102,9 @@ public class AlbumArtFocusUI : MonoBehaviour
         previousButton.clicked += PlayPrevious;
         playButton.clicked += TogglePause;
         nextButton.clicked += PlayNext;
+
+        volumeSlider.value = MusicPlayer.UserVolume;
+        volumeSlider.RegisterValueChangedCallback(evt => MusicPlayer.UserVolume = evt.newValue);
 
         //hide on start
         Root.style.display = DisplayStyle.None;
