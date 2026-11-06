@@ -22,7 +22,7 @@ public static class MusicPlayer
         set => loop_ = value;
     }
 
-    const float targetLUFS = -14f;
+    public const float targetLUFS = -14f;
 
     private static SaveFloat userVolumeSave = new("userVolume");
     public static float UserVolume

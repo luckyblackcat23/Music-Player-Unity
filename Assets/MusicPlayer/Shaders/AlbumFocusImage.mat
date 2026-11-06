@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Shader Graphs_AlbumArtFocusNoise
-  m_Shader: {fileID: -6465566751694194690, guid: 022ddc06c558bc94dac303d04b65435c, type: 3}
+  m_Name: AlbumFocusImage
+  m_Shader: {fileID: -6465566751694194690, guid: 2e95f9b12ebbd714b82496092fe263bf, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -23,7 +23,11 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _MainTex:
+    - _GatherTexture2D_d60ed289e50a428aab9d8ed84abdd4de_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 28582260aa047af4daaf49c6706be7f5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Image:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -41,34 +45,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ColorMask: 15
-    - _DarkBoost: 0.015
-    - _Invert: 1
-    - _Scale: 5
-    - _Speed: 2
-    - _Stencil: 0
-    - _StencilComp: 8
-    - _StencilOp: 0
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _Transparent: 0
-    - _UIMaskSoftnessX: 1
-    - _UIMaskSoftnessY: 1
-    m_Colors:
-    - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.124445, g: 0.4528302, b: 0, a: 1}
+    - _BlurAmount: 0
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &558155714930281540
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 639247ca83abc874e893eb93af2b5e44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.ShaderGraph.Editor::UnityEditor.Rendering.BuiltIn.AssetVersion
-  version: 0

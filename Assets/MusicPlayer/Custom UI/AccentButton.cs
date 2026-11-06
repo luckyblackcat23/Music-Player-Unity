@@ -56,8 +56,8 @@ partial class AccentButton : Button
 
         color = new Color(1, 0.7490196f, 0);
 
-        if (MusicPlayerUIController.accentLight.a != 0)
-            color = MusicPlayerUIController.accentLight;
+        if (UIController.accentLight.a != 0)
+            color = UIController.accentLight;
     }
 
     bool isHovered;

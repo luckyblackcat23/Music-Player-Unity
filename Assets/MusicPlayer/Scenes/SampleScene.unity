@@ -491,7 +491,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1767018684}
   - component: {fileID: 1767018688}
-  - component: {fileID: 1767018687}
+  - component: {fileID: 1767018689}
   - component: {fileID: 1767018685}
   m_Layer: 5
   m_Name: UIDocument
@@ -612,31 +612,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &1767018687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1767018682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 929d3768fec48f54d9b9b4e38fdbb1db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MusicPlayerSongListController
-  playbackSliderDragged: 0
-  document: {fileID: 1767018688}
-  songItemTemplate: {fileID: 9197481963319205126, guid: 72e9263e7098df04da918014d2fdeb61, type: 3}
-  songItemTemplateFlat: {fileID: 9197481963319205126, guid: e3597666a27c3ff48b8e83a7423fb873, type: 3}
-  PlaylistItemTemplate: {fileID: 9197481963319205126, guid: 37951097c4edb5b4a8c1011633abe5f1, type: 3}
-  PopOutViewOutIcon: {fileID: 897902550, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  PopOutViewInIcon: {fileID: 935154823, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  ShuffleIcon: {fileID: 970811466, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  DontShuffleIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  DontLoopIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  LoopIcon: {fileID: 1985624535, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  LoopSingleIcon: {fileID: 1431608731, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
-  FolderIcon: {fileID: -366740783, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
 --- !u!1931382934 &1767018688
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -695,6 +670,31 @@ PanelRenderer:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_Position: 0
+--- !u!114 &1767018689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767018682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c40f0b63815aff44af4091fa2fc32c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIController
+  playbackSliderDragged: 0
+  document: {fileID: 1767018688}
+  songItemTemplate: {fileID: 9197481963319205126, guid: 72e9263e7098df04da918014d2fdeb61, type: 3}
+  songItemTemplateFlat: {fileID: 9197481963319205126, guid: e3597666a27c3ff48b8e83a7423fb873, type: 3}
+  PlaylistItemTemplate: {fileID: 9197481963319205126, guid: 37951097c4edb5b4a8c1011633abe5f1, type: 3}
+  PopOutViewOutIcon: {fileID: 897902550, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  PopOutViewInIcon: {fileID: 935154823, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  ShuffleIcon: {fileID: 970811466, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  DontShuffleIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  DontLoopIcon: {fileID: 935751669, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  LoopIcon: {fileID: 1985624535, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  LoopSingleIcon: {fileID: 1431608731, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
+  FolderIcon: {fileID: -366740783, guid: dde93689df3044747a6adfd581d9ae89, type: 3}
 --- !u!1 &2071200952
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,7 +705,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2071200955}
   - component: {fileID: 2071200954}
-  - component: {fileID: 2071200953}
+  - component: {fileID: 2071200956}
   m_Layer: 5
   m_Name: OptionsMenu
   m_TagString: Untagged
@@ -713,20 +713,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2071200953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2071200952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 261a36fc3df47384d8fc887905bc21c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MusicPlayerOptionsMenu
-  document: {fileID: 2071200954}
-  panelSettings: {fileID: 11400000, guid: 76e3c6ee300b8c24280bb64db42066d4, type: 2}
 --- !u!1931382934 &2071200954
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -800,6 +786,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2071200956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071200952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93f16e934e5dc13479a36cf02fd6d72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OptionsMenu
+  document: {fileID: 2071200954}
+  panelSettings: {fileID: 11400000, guid: 76e3c6ee300b8c24280bb64db42066d4, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

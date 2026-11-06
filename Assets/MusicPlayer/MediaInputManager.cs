@@ -6,9 +6,13 @@ public class MediaInputManager : MonoBehaviour
 
     void Start()
     {
-        //change later
+#if UNITY_STANDALONE_WIN 
         mediaPlatform = new WindowsMediaPlatform();
-
+#elif UNITY_STANDALONE_LINUX
+        return;
+#else
+        return;
+#endif
         // Windows -> MusicPlayer
         mediaPlatform.PlayPauseRequested += MusicPlayer.TogglePause;
         mediaPlatform.NextRequested += HandlePlayNext;
@@ -37,7 +41,7 @@ public class MediaInputManager : MonoBehaviour
 
     private void HandleSongChange()
     {
-        SongInfo song = MusicPlayer .CurrentSong();
+        SongInfo song = MusicPlayer.CurrentSong();
 
         if (song == null)
             return;
@@ -53,7 +57,7 @@ public class MediaInputManager : MonoBehaviour
     private void HandleSeek(float seconds)
     {
         // Replace this with your actual MusicPlayer seek method.
-        MusicPlayer .SetSongTime(seconds);
+        MusicPlayer.SetSongTime(seconds);
 
         // Immediately update Windows' timeline.
         mediaPlatform?.UpdatePosition(seconds);
@@ -61,12 +65,12 @@ public class MediaInputManager : MonoBehaviour
 
     private void HandlePlayNext()
     {
-        MusicPlayer .PlayNext();
+        MusicPlayer.PlayNext();
     }
 
     private void HandlePlayPrevious()
     {
-        MusicPlayer .PlayPrevious();
+        MusicPlayer.PlayPrevious();
     }
 
     void Update()

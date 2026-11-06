@@ -49,6 +49,14 @@
                         <ui:EnumField label="" value="ArtDisplay" type="SongInfoDisplayMode, Assembly-CSharp" name="SongInfoDisplayMode"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="OptionsMenuOption" style="flex-shrink: 0; flex-direction: row;">
+                    <ui:VisualElement name="Left" class="OptionsMenuLeft" style="flex-shrink: 0; flex-basis: 30%;">
+                        <ui:Label text="Focus Shader Dark Boost"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Right" class="OptionsMenuRight" style="flex-shrink: 0; flex-grow: 1;">
+                        <ui:Slider value="0" high-value="2" name="FocusDarkBoost" low-value="-1"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:VisualElement name="TEMPLATE" class="OptionsMenuOption" style="flex-shrink: 0; flex-direction: row;">
                     <ui:VisualElement name="Left" class="OptionsMenuLeft" style="flex-shrink: 0; flex-basis: 30%;">
                         <ui:Label text=""/>

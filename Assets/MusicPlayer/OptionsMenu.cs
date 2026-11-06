@@ -1,7 +1,7 @@
 using UnityEngine.UIElements;
 using UnityEngine;
 
-public class MusicPlayerOptionsMenu : MonoBehaviour
+public class OptionsMenu : MonoBehaviour
 {
     [SerializeField] PanelRenderer document;
     [SerializeField] PanelSettings panelSettings;
@@ -31,6 +31,11 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
     EnumField songInfoDisplayMode;
 
     public static SaveEnum<SongInfoDisplayMode> SIDisplayMode = new SaveEnum<SongInfoDisplayMode>("SongInfoDisplayMode", defaultValue: SongInfoDisplayMode.ArtDisplay);
+
+    //Dark Boost
+    Slider focusDarkBoost;
+
+    public static SaveFloat FocusDarkBoostSave = new SaveFloat("FocusDarkBoost");
 
     int uiVersion = 0;
 
@@ -70,21 +75,23 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
 
         songInfoDisplayMode = Root.Q<EnumField>("SongInfoDisplayMode");
 
+        focusDarkBoost = Root.Q<Slider>("FocusDarkBoost");
+
         exitButton.clicked += ExitOptionsMenu;
 
-        themeRed.value = MusicPlayerUIController.accent.Get().r;
-        themeGreen.value = MusicPlayerUIController.accent.Get().g;
-        themeBlue.value = MusicPlayerUIController.accent.Get().b;
+        themeRed.value = UIController.accent.Get().r;
+        themeGreen.value = UIController.accent.Get().g;
+        themeBlue.value = UIController.accent.Get().b;
 
-        themeRed.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetRed(evt.newValue));
-        themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetGreen(evt.newValue));
-        themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.accent.SetBlue(evt.newValue));
+        themeRed.RegisterValueChangedCallback((evt) => UIController.accent.SetRed(evt.newValue));
+        themeGreen.RegisterValueChangedCallback((evt) => UIController.accent.SetGreen(evt.newValue));
+        themeBlue.RegisterValueChangedCallback((evt) => UIController.accent.SetBlue(evt.newValue));
 
-        themeRed.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccent());
-        themeGreen.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccent());
-        themeBlue.RegisterValueChangedCallback((evt) => MusicPlayerUIController.ApplyAccent());
+        themeRed.RegisterValueChangedCallback((evt) => UIController.ApplyAccent());
+        themeGreen.RegisterValueChangedCallback((evt) => UIController.ApplyAccent());
+        themeBlue.RegisterValueChangedCallback((evt) => UIController.ApplyAccent());
 
-        resetAccent.clicked += () => MusicPlayerUIController.accent.Set(SystemTheme.GetAccentColour());
+        resetAccent.clicked += () => UIController.accent.Set(SystemTheme.GetAccentColour());
 
         screenScaleMode.value = screenScaleModeSave.Get();
 
@@ -103,6 +110,16 @@ public class MusicPlayerOptionsMenu : MonoBehaviour
         songInfoDisplayMode.RegisterValueChangedCallback((evt) =>
         {
             SIDisplayMode.Set((SongInfoDisplayMode)evt.newValue);
+        });
+
+        focusDarkBoost.value = FocusDarkBoostSave.Get();
+
+        focusDarkBoost.RegisterValueChangedCallback((evt) =>
+        {
+            FocusDarkBoostSave.Set(evt.newValue);
+
+            MaterialDefinition mat = AlbumArtFocusUI.Background.resolvedStyle.unityMaterial;
+            mat.SetFloat("_DarkBoost", evt.newValue);
         });
 
         //hide on start

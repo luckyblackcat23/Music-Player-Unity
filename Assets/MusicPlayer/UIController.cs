@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using MyBox;
 
-public class MusicPlayerUIController : MonoBehaviour
+public class UIController : MonoBehaviour
 {
     class ListItemData
     {
@@ -117,9 +117,9 @@ public class MusicPlayerUIController : MonoBehaviour
 
     private void Update()
     {
-        if (songInfoDisplayMode != MusicPlayerOptionsMenu.SIDisplayMode.Get())
+        if (songInfoDisplayMode != OptionsMenu.SIDisplayMode.Get())
         {
-            songInfoDisplayMode = MusicPlayerOptionsMenu.SIDisplayMode.Get();
+            songInfoDisplayMode = OptionsMenu.SIDisplayMode.Get();
             RebuildSongList();
             RebuildSongQueue();
         }
@@ -415,7 +415,7 @@ public class MusicPlayerUIController : MonoBehaviour
         exitButton.clicked += Application.Quit;
 
         popOutButton.clicked += TogglePopOutView;
-        settingsButton.clicked += MusicPlayerOptionsMenu.ShowOptionsMenu;
+        settingsButton.clicked += OptionsMenu.ShowOptionsMenu;
 
         shuffleButton.clicked += () =>
         {
@@ -466,8 +466,7 @@ public class MusicPlayerUIController : MonoBehaviour
 
             element.Q<Label>("title").text = song.Title;
             element.Q<Label>("artist").text = song.Artist;
-            element.Q<Label>("duration").text =
-                song.MetaDataLoaded ? song.Duration.ToString() : "--:--";
+            element.Q<Label>("duration").text = song.MetaDataLoaded ? song.Duration.ToString() : "--:--";
 
             element.userData = song;
 

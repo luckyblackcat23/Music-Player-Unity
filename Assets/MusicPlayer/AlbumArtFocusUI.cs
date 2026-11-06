@@ -8,7 +8,7 @@ public class AlbumArtFocusUI : MonoBehaviour
     public static bool visible;
     static VisualElement Root;
 
-    VisualElement Background;
+    public static VisualElement Background;
 
     Image albumArt;
 
@@ -28,7 +28,7 @@ public class AlbumArtFocusUI : MonoBehaviour
 
     void OnEnable()
     {
-        MusicPlayerUIController.OnAccentChange += UpdateAccents;
+        UIController.OnAccentChange += UpdateAccents;
 
         document.RegisterUIReloadCallback(OnUIReload);
     }
@@ -140,28 +140,29 @@ public class AlbumArtFocusUI : MonoBehaviour
     public void UpdateAccents()
     {
         MaterialDefinition mat = Background.resolvedStyle.unityMaterial;
-        mat.SetColor("_Color", MusicPlayerUIController.accent.Get());
+        mat.SetColor("_Color", UIController.accent);
+
         Background.style.unityMaterial = mat;
 
         foreach (AccentButton button in Root.Query<AccentButton>().ToList())
         {
-            button.color = MusicPlayerUIController.accentLight;
+            button.color = UIController.accentLight;
         }
 
         foreach (VisualElement element in Root.Query(className: "accentImageTint").ToList())
         {
             if (!element.ClassListContains("ButtonHover"))
-                element.style.unityBackgroundImageTintColor = MusicPlayerUIController.accentLight;
+                element.style.unityBackgroundImageTintColor = UIController.accentLight;
         }
 
         foreach (VisualElement element in Root.Query(className: "accentBackgroundColor").ToList())
         {
-            element.style.backgroundColor = MusicPlayerUIController.accent.Get();
+            element.style.backgroundColor = UIController.accent.Get();
         }
 
         foreach (VisualElement element in Root.Query(className: "accentColor").ToList())
         {
-            element.style.color = MusicPlayerUIController.accent.Get();
+            element.style.color = UIController.accent.Get();
         }
     }
 }
