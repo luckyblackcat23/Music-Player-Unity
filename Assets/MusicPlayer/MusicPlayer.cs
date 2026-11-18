@@ -513,6 +513,9 @@ public static class MusicPlayer
 
     public static bool songsCached;
 
+    /// <summary>
+    /// ensures required directories exists and importnat data has been loaded
+    /// </summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     public static async void InitializeLoadingFiles()
     {
@@ -550,6 +553,14 @@ public static class MusicPlayer
         songsCached = true;
 
         Debug.Log($"Finished caching {tasks.Count} songs");
+
+        //run after the simple data is loaded. the simple data is what's required to actually start the program without issues. this can wait a few seconds.
+        await Task.Run(() =>
+        {
+            Parallel.ForEach(cachedSongs, new ParallelOptions { MaxDegreeOfParallelism = 4 }, song => song.GetComplexMetaData());
+        });
+
+        Debug.Log($"Finished loading complex data");
     }
 
     /// <summary>
