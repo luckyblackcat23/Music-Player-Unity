@@ -116,20 +116,39 @@ public class ContextMenuItem
         Enabled = enabled;
     }
 
+    /// <summary>
+    /// creates and empty seperator.
+    /// </summary>
     public ContextMenuItem()
     {
         isSeperator = true;
     }
-
-    /* 
-    finish implementing later
- 
-    public static ContextMenuItem Separator()
-    {
-        return new ContextMenuItem
-        {
-            isSeperator = true
-        };
-    }
-    */
 }
+
+/* example usage
+    void OnSongItemRightClick(PointerDownEvent evt)
+    {
+        if (evt.button != 1)
+            return;
+
+        ListItemData songData = (ListItemData)((VisualElement)evt.currentTarget).userData;
+        SongInfo song = songData.Song;
+
+        contextMenu.AddItem("Play", () => PlaySong(song));
+
+        contextMenu.AddItem("Queue Next", () =>
+        {
+            MusicPlayer.AddNext(song);
+            RefreshSongQueue();
+        });
+
+        contextMenu.AddItem("Add To Playlist", () =>
+        {
+            Debug.Log("Open playlist picker");
+        });
+
+        contextMenu.Show(evt.position);
+
+        evt.StopPropagation();
+    }
+*/

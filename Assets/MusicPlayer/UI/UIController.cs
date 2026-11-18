@@ -27,6 +27,7 @@ public class UIController : MonoBehaviour
     public static VisualElement root;
 
     ContextMenu contextMenu;
+    PlaylistSelector playlistSelector;
 
     [Header("Data")]
     SongInfo[] songs;
@@ -155,6 +156,8 @@ public class UIController : MonoBehaviour
 
         contextMenu = new ContextMenu(root);
 
+        playlistSelector = new PlaylistSelector(root);
+
         popOutView = root.Q<VisualElement>("PopOutView");
 
         songQueue = root.Q<ListView>("SongQueue");
@@ -282,6 +285,8 @@ public class UIController : MonoBehaviour
 
             RefreshSongQueue();
         };
+
+        songQueue.Rebuild();
         #endregion
 
         #region playlistList
@@ -310,6 +315,8 @@ public class UIController : MonoBehaviour
         playlistList.bindItem = BindPlaylistListItem;
 
         playlistList.selectionType = SelectionType.Single;
+
+        playlistList.Rebuild();
         #endregion
 
         #region songList
@@ -345,8 +352,10 @@ public class UIController : MonoBehaviour
 
         songList.selectionType = SelectionType.Single;
 
-        playlistListBackButton.clicked += () => ChangeDisplayedPlaylistDirectory(currentPlaylistDirectory.Parent);
+        songList.Rebuild();
         #endregion
+
+        playlistListBackButton.clicked += () => ChangeDisplayedPlaylistDirectory(currentPlaylistDirectory.Parent);
 
         searchBar.RegisterCallback<ChangeEvent<string>>((x) =>
         {
@@ -570,16 +579,6 @@ public class UIController : MonoBehaviour
         if (!song.MetaDataLoaded)
         {
             song.GetSongInfo();
-
-            /* was this ever even needed?
-            data.MetadataCallback = () =>
-            {
-                songList.RefreshItem(index);
-                Debug.Log("refreshed");
-            };
-
-            song.OnMetaDataLoaded += data.MetadataCallback;
-            */
         }
 
         element.Q<Label>("title").text = song.Title;
@@ -633,9 +632,19 @@ public class UIController : MonoBehaviour
             RefreshSongQueue();
         });
 
-        contextMenu.AddItem("Add To Playlist", () =>
+        contextMenu.AddItem("Add To Playlist", async () =>
         {
-            Debug.Log("Open playlist picker");
+            Playlist playlist = await playlistSelector.ShowAndWaitForSelect();
+
+            if (playlist == null) return;
+
+            if (playlist.Contains(song.SongPath))
+            {
+                //add confirmation window
+            }
+
+            playlist.AddSong(song);
+
         });
 
         contextMenu.Show(evt.position);
@@ -658,9 +667,13 @@ public class UIController : MonoBehaviour
             RefreshSongQueue();
         });
 
-        contextMenu.AddItem("Add To Playlist", () =>
+        contextMenu.AddItem("Add To Playlist", async () =>
         {
-            Debug.Log("Open playlist picker");
+            Playlist playlist = await playlistSelector.ShowAndWaitForSelect();
+
+            if (playlist == null) return;
+
+            playlist.AddSong(song);
         });
 
         contextMenu.AddItem("Remove", () =>
@@ -693,9 +706,13 @@ public class UIController : MonoBehaviour
                     RefreshSongQueue();
                 });
 
-                contextMenu.AddItem("Add To Playlist", () =>
+                contextMenu.AddItem("Add To Playlist", async () =>
                 {
-                    Debug.Log("Open playlist picker");
+                    Playlist playlist = await playlistSelector.ShowAndWaitForSelect();
+
+                    if(playlist == null) return;
+
+                    playlist.AddSongs(playlist.GetSongs());
                 });
 
                 break;

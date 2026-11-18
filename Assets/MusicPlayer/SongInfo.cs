@@ -46,6 +46,7 @@ public class SongInfo
 
     public double Duration;
 
+    //song path is the only thing that actually matters
     public SongInfo(string songPath, Texture2D albumCover = null, string title = "Unknown", string romanisedTitle = "Unknown", string artist = "Unknown", string romanisedArtist = "Unknown", string album = "Unknown", string romanisedAlbum = "Unknown", uint year = 0, string genre = "Unknown genre", double duration = 0)
     {
         SongPath = songPath;
@@ -79,10 +80,10 @@ public class SongInfo
     }
 
     /// <summary>
-    /// gets the lightweight fileinfo. quicker to retrieve and can be loaded without causing many performance issues
+    /// gets the lightweight fileinfo, such as title, artist, album, etc. quicker to retrieve and can be loaded without causing any performance issues
     /// </summary>
     /// <param name="overwrite">overwrite existing values, if there are any</param>
-    public void GetSongSearchInfo(bool overwrite = false)
+    public void GetSimpleMetaData(bool overwrite = false)
     {
         if (!SearchMetaDataLoaded || overwrite)
         {

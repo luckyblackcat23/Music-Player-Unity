@@ -32,11 +32,6 @@ public class OptionsMenu : MonoBehaviour
 
     public static SaveEnum<SongInfoDisplayMode> SIDisplayMode = new SaveEnum<SongInfoDisplayMode>("SongInfoDisplayMode", defaultValue: SongInfoDisplayMode.ArtDisplay);
 
-    //Dark Boost
-    Slider focusDarkBoost;
-
-    public static SaveFloat FocusDarkBoostSave = new SaveFloat("FocusDarkBoost");
-
     int uiVersion = 0;
 
     void Awake()
@@ -75,8 +70,6 @@ public class OptionsMenu : MonoBehaviour
 
         songInfoDisplayMode = Root.Q<EnumField>("SongInfoDisplayMode");
 
-        focusDarkBoost = Root.Q<Slider>("FocusDarkBoost");
-
         exitButton.clicked += ExitOptionsMenu;
 
         themeRed.value = UIController.accent.Get().r;
@@ -110,16 +103,6 @@ public class OptionsMenu : MonoBehaviour
         songInfoDisplayMode.RegisterValueChangedCallback((evt) =>
         {
             SIDisplayMode.Set((SongInfoDisplayMode)evt.newValue);
-        });
-
-        focusDarkBoost.value = FocusDarkBoostSave.Get();
-
-        focusDarkBoost.RegisterValueChangedCallback((evt) =>
-        {
-            FocusDarkBoostSave.Set(evt.newValue);
-
-            MaterialDefinition mat = AlbumArtFocusUI.Background.resolvedStyle.unityMaterial;
-            mat.SetFloat("_DarkBoost", evt.newValue);
         });
 
         //hide on start

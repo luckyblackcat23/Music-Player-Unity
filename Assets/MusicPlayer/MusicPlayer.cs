@@ -361,7 +361,10 @@ public static class MusicPlayer
     /// </summary>
     public static void AddNext(SongInfo song)
     {
-        musicQueue.Insert(currentSongIndex + 1, song);
+        if(currentSongIndex <= 0)
+            AddStart(song);
+        else
+            musicQueue.Insert(currentSongIndex + 1, song);
     }
 
     public static void AddEnd(SongInfo song)
@@ -538,7 +541,7 @@ public static class MusicPlayer
 
             tasks.Add(Task.Run(() =>
             {
-                song.GetSongSearchInfo();
+                song.GetSimpleMetaData();
             }));
         }
 

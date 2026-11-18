@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/MusicPlayer/UI/MusicPlayerStyling.uss?fileID=7433441132597879392&amp;guid=e31be3d781b4572418858f823860acfb&amp;type=3#MusicPlayerStyling"/>
+    <ui:VisualElement name="PlaylistSelector" picking-mode="Ignore" style="flex-grow: 1; position: absolute; right: 0; top: -3px; left: 0; bottom: 4px; justify-content: center; display: none;">
+        <ui:VisualElement style="background-color: rgba(0, 0, 0, 0.949); border-top-left-radius: 17.35px; border-top-right-radius: 17.35px; border-bottom-right-radius: 17.35px; border-bottom-left-radius: 17.35px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-left-color: rgba(0, 0, 0, 0.275); border-right-color: rgba(0, 0, 0, 0.275); border-top-color: rgba(0, 0, 0, 0.275); border-bottom-color: rgba(0, 0, 0, 0.275); width: 20%; height: 40%; position: relative; align-self: center;">
+            <ui:VisualElement style="padding-top: 0; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                <ui:Label text="Select Playlist"/>
+                <ui:TextField label="" placeholder-text="..." name="SearchBarPlaylistSelector"/>
+            </ui:VisualElement>
+            <ui:ListView name="PlaylistSelectorList" style="border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 16px; border-top-right-radius: 16px; border-bottom-right-radius: 16px; border-bottom-left-radius: 16px; border-left-color: rgba(0, 0, 0, 0.463); border-right-color: rgba(0, 0, 0, 0.463); border-top-color: rgba(0, 0, 0, 0.463); border-bottom-color: rgba(0, 0, 0, 0.463); flex-grow: 1;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

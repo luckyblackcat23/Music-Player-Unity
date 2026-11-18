@@ -46,6 +46,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlurAmount: 0
+    - _BlurDown: 1
+    - _BlurLeft: 1
+    - _BlurRight: 1
+    - _BlurUp: 1
+    - _TextureOrSolid: 0
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
