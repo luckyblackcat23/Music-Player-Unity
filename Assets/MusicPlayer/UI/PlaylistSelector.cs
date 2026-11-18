@@ -110,7 +110,7 @@ public class PlaylistSelector
     {
         menu.style.display = DisplayStyle.None;
     }
-
+    
     public async Awaitable<Playlist> ShowAndWaitForSelect()
     {
         Show();
