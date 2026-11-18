@@ -106,7 +106,33 @@ public class SongInfo
             }
         }
         else
-            Debug.LogWarning("Search MetaData has already been loaded");
+            Debug.LogWarning("Search Metadata has already been loaded");
+    }
+
+    public void GetComplexMetaData(bool overwrite = false)
+    {
+        if (!SearchMetaDataLoaded || overwrite)
+        {
+            try
+            {
+                using var tfile = TagLib.File.Create(SongPath);
+
+                Title = tfile.Tag.Title;
+                Artist = tfile.Tag.FirstPerformer;
+                Album = tfile.Tag.Album;
+                Year = tfile.Tag.Year;
+                Genre = tfile.Tag.JoinedGenres;
+                Duration = tfile.Properties.Duration.TotalSeconds;
+
+                SearchMetaDataLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error processing {SongPath}: {ex.Message}");
+            }
+        }
+        else
+            Debug.LogWarning("Complex Metadata has already been loaded");
     }
 
     /// <summary>
