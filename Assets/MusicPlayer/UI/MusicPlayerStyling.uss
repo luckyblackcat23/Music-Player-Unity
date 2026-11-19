@@ -79,8 +79,20 @@
     color: rgb(255, 191, 0);
 }
 
-.unity-list-view__item--selected {
-    background-color: rgba(255, 255, 255, 0.56);
+.unity-list-view__item {
+    background-color: red;
+}
+
+.unity-list-view__item:hover {
+    background-color: blue;
+}
+
+.unity-list-view__item:selected {
+    background-color: yellow;
+}
+
+.unity-list-view__item:selected:hover {
+    background-color: green;
 }
 
 .unity-base-slider__dragger {
@@ -147,5 +159,3 @@
 .ButtonPressed:active {
     background-color: rgba(0, 0, 0, 0.51);
 }
-
-

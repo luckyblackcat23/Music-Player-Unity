@@ -5,9 +5,6 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-#if ENABLE_WINMD_SUPPORT
-using Windows.UI.ViewManagement;
-#endif
 
 public class StartUp : MonoBehaviour
 {
@@ -35,7 +32,7 @@ public class StartUp : MonoBehaviour
     {
         document.RegisterUIReloadCallback(OnUIReload);
 
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = 25;
 
         StartCoroutine(StartUpWait());
 
