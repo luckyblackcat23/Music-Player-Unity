@@ -23,6 +23,7 @@ public class UIController : MonoBehaviour
     [SerializeField] VisualTreeAsset songItemTemplateFlat;
 
     [SerializeField] VisualTreeAsset PlaylistItemTemplate;
+    [SerializeField] VisualTreeAsset PlaylistSelectorTemplate;
 
     public static VisualElement root;
 
@@ -156,7 +157,7 @@ public class UIController : MonoBehaviour
 
         contextMenu = new ContextMenu(root);
 
-        playlistSelector = new PlaylistSelector(root);
+        playlistSelector = new PlaylistSelector(root, PlaylistSelectorTemplate, PlaylistItemTemplate, FolderIcon);
 
         popOutView = root.Q<VisualElement>("PopOutView");
 

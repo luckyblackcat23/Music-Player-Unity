@@ -1,16 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class PlaylistSelector
 {
-    VisualTreeAsset PlaylistSelectorTemplate = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/MusicPlayer/UI/PlaylistSelector.uxml");
-    VisualTreeAsset PlaylistItemTemplate = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/MusicPlayer/UI/PlaylistItem.uxml");
+    VisualTreeAsset PlaylistSelectorTemplate;
+    VisualTreeAsset PlaylistItemTemplate;
 
-    public Sprite FolderIcon;
+    Sprite FolderIcon;
 
     TextField searchBarPlaylistSelector;
 
@@ -26,7 +24,7 @@ public class PlaylistSelector
     Playlist selection;
 
     //this is not correct
-    public PlaylistSelector(VisualElement root)
+    public PlaylistSelector(VisualElement root, VisualTreeAsset playlistSelectorTemplate, VisualTreeAsset playlistItemTemplate, Sprite FolderIcon)
     {
         PlaylistSelectorTemplate.CloneTree(root);
         menu = root.Q<VisualElement>("PlaylistSelector");
